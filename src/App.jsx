@@ -71,18 +71,16 @@ function AppShell() {
   const { session, logout, canInstallApp, installApp, isLocalMode } = useApp();
   const [route, navigate] = useHashRoute(session);
 
-  useEffect(() => {
-    if (!session && route !== '/login') {
-      navigate('/login');
-    }
-  }, [navigate, route, session]);
-
   const currentRoute = useMemo(() => {
-    if (!session && route !== '/login') {
+    if (!session) {
       return '/login';
     }
 
-    return ROUTE_TITLES[route] ? route : session ? '/operador' : '/login';
+    if (route === '/login') {
+      return '/operador';
+    }
+
+    return ROUTE_TITLES[route] ? route : '/operador';
   }, [route, session]);
   const title = ROUTE_TITLES[currentRoute] || 'Sistema de Tempos e Movimentos';
 
