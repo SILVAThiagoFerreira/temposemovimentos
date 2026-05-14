@@ -9,7 +9,7 @@
 5. Ler `localStorage`, `IndexedDB` e snapshot do Firestore.
 6. Escolher o snapshot mais recente.
 7. Restaurar sessão local, se existir e ainda for válida.
-8. Renderizar login ou painel conforme papel do usuário.
+8. Renderizar login ou painel conforme papel do usuário, com cliente em dashboard-only.
 9. Ao iniciar uma nova atividade, encerrar automaticamente o apontamento anterior do mesmo operador.
 10. Persistir qualquer alteração no cache local e sincronizar com o documento do Firestore.
 11. Permitir exportação/importação JSON e exportação CSV.

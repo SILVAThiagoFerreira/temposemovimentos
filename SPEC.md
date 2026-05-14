@@ -7,11 +7,13 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 ## Atores
 
 - Operador: acessa apenas o painel de apontamento.
+- Cliente: acessa apenas o dashboard de supervisão.
 - Gerente: acessa todas as telas e administra usuários.
 
 ## Regras de Negócio
 
 - Usuário operacional somente visualiza/aponta atividades.
+- Cliente somente visualiza o dashboard e não administra usuários.
 - Gerente pode criar, editar, ativar, desativar e excluir usuários.
 - Senhas continuam validadas pelo aplicativo sobre o snapshot persistido.
 - Cada usuário pode ter no máximo um apontamento aberto.

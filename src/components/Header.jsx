@@ -1,4 +1,5 @@
 import { StatusChip } from './StatusChip';
+import { getRoleLabel } from '../utils/roles';
 
 const enaexLogo = new URL('../assets/enaex-brasil.png', import.meta.url).href;
 
@@ -29,7 +30,7 @@ export function Header({
         {session ? (
           <div className="header-session card__inline">
             <strong>{session.operatorName}</strong>
-            <span>{session.role === 'GERENTE' ? 'Gerente' : session.shiftName || 'Turno não informado'}</span>
+            <span>{getRoleLabel(session.role) || session.shiftName || 'Turno não informado'}</span>
           </div>
         ) : null}
         {canInstallApp ? (

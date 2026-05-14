@@ -10,6 +10,7 @@
     "storageMode": "LOCAL",
     "defaultShiftId": null,
     "userCatalogSeeded": true,
+    "catalogVersion": 3,
     "updatedAt": "YYYY-MM-DDTHH:mm:ss.sssZ"
   }
 }

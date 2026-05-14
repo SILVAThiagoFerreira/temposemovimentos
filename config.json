@@ -2,7 +2,7 @@
   "meta": {
     "name": "Sistema de Tempos e Movimentos - UMB / Caminhões",
     "shortName": "Tempos UMB",
-    "version": "2.1.0",
+    "version": "2.3.0",
     "entrypoint": "src/main.jsx"
   },
   "storage": {
@@ -38,10 +38,12 @@
     "sessionTtlHours": 24,
     "roles": {
       "operational": "OPERADOR",
+      "client": "CLIENTE",
       "manager": "GERENTE"
     }
   },
   "seed": {
+    "catalogVersion": 3,
     "users": [
       {
         "id": "usr-paulo",
@@ -92,6 +94,16 @@
         "shiftId": null,
         "shiftName": "",
         "active": true
+      },
+      {
+        "id": "usr-felipe-dantas",
+        "name": "Mineração Vale Verde",
+        "registration": "",
+        "role": "CLIENTE",
+        "password": "1234",
+        "shiftId": null,
+        "shiftName": "",
+        "active": true
       }
     ],
     "equipments": [
@@ -103,13 +115,6 @@
         "active": true
       },
       {
-        "id": "eq-rhn-3f59",
-        "plate": "RHN-3F59",
-        "code": "UMR-1084",
-        "description": "Caminhão UMB 1084",
-        "active": true
-      },
-      {
         "id": "eq-sfo6d18",
         "plate": "SFO6D18",
         "code": "UMR-1123",
@@ -118,18 +123,19 @@
       }
     ],
     "activityTypes": [
-      { "id": "act-01", "code": "01", "name": "Recarregando emulsão", "classification": "OPERAÇÃO", "defaultLocation": "UNIDADE", "active": true },
+      { "id": "act-01", "code": "01", "name": "Checklist", "classification": "OPERAÇÃO", "defaultLocation": "CHASSI", "active": true },
       { "id": "act-02", "code": "02", "name": "Deslocamento", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true },
-      { "id": "act-03", "code": "03", "name": "Abastecimento", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
-      { "id": "act-04", "code": "04", "name": "Falta de Operador", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-05", "code": "05", "name": "Falha Operacional", "classification": "MANUTENÇÃO", "defaultLocation": null, "active": true },
-      { "id": "act-06", "code": "06", "name": "Aguardando Término da Perfuração", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-07", "code": "07", "name": "Condições Climáticas Adversas", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-08", "code": "08", "name": "Check List", "classification": "OPERAÇÃO", "defaultLocation": "CHASSI", "active": true },
-      { "id": "act-09", "code": "09", "name": "Aguardando frente / horas ociosas", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-10", "code": "10", "name": "Refeição", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-11", "code": "11", "name": "Manutenção", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
-      { "id": "act-12", "code": "12", "name": "Outros", "classification": "OUTROS", "defaultLocation": null, "active": true }
+      { "id": "act-03", "code": "03", "name": "Carregamento", "classification": "OPERAÇÃO", "defaultLocation": "UNIDADE", "active": true },
+      { "id": "act-04", "code": "04", "name": "Recarregamento de Emulsão", "classification": "OPERAÇÃO", "defaultLocation": "UNIDADE", "active": true },
+      { "id": "act-05", "code": "05", "name": "Refeição", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-06", "code": "06", "name": "Abastecimento de Diesel", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
+      { "id": "act-07", "code": "07", "name": "Aguardando Frente / Horas Ociosas", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-08", "code": "08", "name": "Aguardando Término da Perfuração", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-09", "code": "09", "name": "Aguardando Liberação de Acesso", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-10", "code": "10", "name": "Falta de Operador", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-11", "code": "11", "name": "Condições Climáticas Adversas", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-12", "code": "12", "name": "Manutenção", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
+      { "id": "act-13", "code": "13", "name": "Outros", "classification": "OUTROS", "defaultLocation": null, "active": true }
     ],
     "shifts": [
       { "id": "shift-1", "name": "1º TURNO", "startTime": "07:00", "endTime": "15:00", "availableMinutes": 480, "active": true },

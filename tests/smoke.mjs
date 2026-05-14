@@ -45,6 +45,8 @@ const requiredFiles = [
 requiredFiles.forEach(fileExistsAndNonEmpty);
 
 const config = readJson(resolve(root, 'config.json'));
+const seedUsers = Array.isArray(config?.seed?.users) ? config.seed.users : [];
+const seedActivityTypes = Array.isArray(config?.seed?.activityTypes) ? config.seed.activityTypes : [];
 
 assert(config?.meta?.name, 'config.json sem meta.name');
 assert(config?.storage?.keys?.database, 'config.json sem storage.keys.database');
@@ -52,9 +54,18 @@ assert(config?.storage?.keys?.session, 'config.json sem storage.keys.session');
 assert(config?.firebase?.webConfig?.apiKey, 'config.json sem firebase.webConfig.apiKey');
 assert(config?.firebase?.stateCollection, 'config.json sem firebase.stateCollection');
 assert(config?.firebase?.stateDocument, 'config.json sem firebase.stateDocument');
-assert(Array.isArray(config?.seed?.users) && config.seed.users.length >= 5, 'config.json sem usuários iniciais');
-assert(Array.isArray(config?.seed?.equipments) && config.seed.equipments.length >= 3, 'config.json sem equipamentos iniciais');
-assert(Array.isArray(config?.seed?.activityTypes) && config.seed.activityTypes.length >= 12, 'config.json sem códigos iniciais');
+assert(config?.auth?.roles?.client === 'CLIENTE', 'config.json sem auth.roles.client');
+assert(Number(config?.seed?.catalogVersion) >= 3, 'config.json sem seed.catalogVersion');
+assert(seedUsers.length === 6, 'config.json com quantidade incorreta de usuários iniciais');
+assert(seedUsers.filter((user) => user.role === 'OPERADOR').length === 4, 'config.json com quantidade incorreta de operadores');
+assert(seedUsers.filter((user) => user.role === 'CLIENTE').length === 1, 'config.json com quantidade incorreta de clientes');
+assert(seedUsers.some((user) => user.role === 'GERENTE'), 'config.json sem gerente inicial');
+assert(seedUsers.some((user) => user.name === 'Mineração Vale Verde'), 'config.json sem cliente Mineração Vale Verde');
+assert(Array.isArray(config?.seed?.equipments) && config.seed.equipments.length === 2, 'config.json com quantidade incorreta de equipamentos iniciais');
+assert(config.seed.equipments.some((equipment) => equipment.code === 'UMR-1072'), 'config.json sem UMR-1072');
+assert(config.seed.equipments.some((equipment) => equipment.code === 'UMR-1123'), 'config.json sem UMR-1123');
+assert(seedActivityTypes.length >= 13, 'config.json sem códigos iniciais');
+assert(seedActivityTypes.some((activity) => activity.id === 'act-13'), 'config.json sem atividade act-13');
 assert(Array.isArray(config?.seed?.shifts) && config.seed.shifts.length >= 3, 'config.json sem turnos iniciais');
 
 console.log('SMOKE_OK');

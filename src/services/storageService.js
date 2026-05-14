@@ -2,9 +2,10 @@ import { initialActivityTypes } from '../data/initialActivityTypes';
 import { initialEquipments } from '../data/initialEquipments';
 import { initialShifts } from '../data/initialShifts';
 import { initialUsers } from '../data/initialUsers';
-import { authConfig, storageConfig } from '../config/runtimeConfig';
+import { authConfig, seedConfig, storageConfig } from '../config/runtimeConfig';
 import { ensureFirebaseClient, isFirebaseConfigured, readRemoteDatabase, subscribeRemoteDatabase, writeRemoteDatabase } from './firebaseClient';
 import { createId } from '../utils/id';
+import { normalizeUserRole } from '../utils/roles';
 import { differenceMinutes, minutesToHours, nowIso } from './timeService';
 
 const DB_KEY = storageConfig.keys.database;
@@ -323,10 +324,79 @@ async function attachRemoteListener() {
   });
 }
 
-function mergeMissingSeedUsers(users) {
-  const existingIds = new Set(users.map((user) => user.id));
-  const missingUsers = initialUsers.filter((user) => !existingIds.has(user.id));
-  return [...cloneItems(missingUsers), ...users];
+function mergeSeedUsers(users) {
+  const next = cloneItems(users);
+  const indexById = new Map(next.map((item, index) => [item.id, index]));
+  const seedClientIds = new Set(initialUsers.filter((user) => normalizeUserRole(user.role) === 'CLIENTE').map((user) => user.id));
+
+  for (const seedUser of initialUsers) {
+    const index = indexById.get(seedUser.id);
+
+    if (index != null) {
+      const current = next[index] || {};
+      next[index] = {
+        ...current,
+        ...cloneItems([seedUser])[0],
+        password: current.password || seedUser.password || '',
+        active: seedUser.active !== false ? true : current.active !== false,
+        createdAt: current.createdAt || seedUser.createdAt || nowIso(),
+        updatedAt: nowIso(),
+      };
+    } else {
+      next.push(cloneItems([seedUser])[0]);
+    }
+  }
+
+  return next.filter((user) => normalizeUserRole(user.role) !== 'CLIENTE' || seedClientIds.has(user.id));
+}
+
+function mergeSeedActivityTypes(activityTypes) {
+  const next = cloneItems(activityTypes);
+  const indexById = new Map(next.map((item, index) => [item.id, index]));
+
+  for (const seedActivityType of initialActivityTypes) {
+    const index = indexById.get(seedActivityType.id);
+
+    if (index != null) {
+      const current = next[index] || {};
+      next[index] = {
+        ...current,
+        ...cloneItems([seedActivityType])[0],
+        createdAt: current.createdAt || seedActivityType.createdAt || nowIso(),
+        updatedAt: nowIso(),
+      };
+    } else {
+      next.push(cloneItems([seedActivityType])[0]);
+    }
+  }
+
+  return next;
+}
+
+function mergeSeedEquipments(equipments, movementRecords = []) {
+  const next = cloneItems(equipments);
+  const indexById = new Map(next.map((item, index) => [item.id, index]));
+
+  for (const seedEquipment of initialEquipments) {
+    const index = indexById.get(seedEquipment.id);
+
+    if (index != null) {
+      const current = next[index] || {};
+      next[index] = {
+        ...current,
+        ...cloneItems([seedEquipment])[0],
+        createdAt: current.createdAt || seedEquipment.createdAt || nowIso(),
+        updatedAt: nowIso(),
+      };
+    } else {
+      next.push(cloneItems([seedEquipment])[0]);
+    }
+  }
+
+  const seedEquipmentIds = new Set(initialEquipments.map((equipment) => equipment.id));
+  const referencedEquipmentIds = new Set(movementRecords.map((record) => record?.equipmentId).filter(Boolean));
+
+  return next.filter((equipment) => seedEquipmentIds.has(equipment.id) || referencedEquipmentIds.has(equipment.id));
 }
 
 function createInitialDatabase() {
@@ -341,6 +411,7 @@ function createInitialDatabase() {
       storageMode: storageConfig.defaultMode,
       defaultShiftId: initialShifts[0]?.id ?? null,
       userCatalogSeeded: true,
+      catalogVersion: Number(seedConfig.catalogVersion || 1),
       updatedAt: nowIso(),
     },
     createdAt: nowIso(),
@@ -383,12 +454,13 @@ function normalizeOperator(operator = {}) {
     initialShifts.find((shift) => shift.id === operator.shiftId)?.name ||
     '';
   const hasPasswordField = Object.prototype.hasOwnProperty.call(operator, 'password');
+  const role = normalizeUserRole(operator.role || authConfig.roles.operational);
 
   return {
     id: operator.id || createId('op'),
     name: String(operator.name || '').trim(),
     registration: String(operator.registration || '').trim(),
-    role: String(operator.role || authConfig.roles.operational).trim().toUpperCase(),
+    role,
     password: hasPasswordField ? String(operator.password ?? '').trim() : '',
     shiftId: operator.shiftId || null,
     shiftName,
@@ -447,6 +519,7 @@ function normalizeSettings(settings = {}) {
     storageMode: String(settings.storageMode || storageConfig.defaultMode).toUpperCase(),
     defaultShiftId: settings.defaultShiftId || initialShifts[0]?.id || null,
     userCatalogSeeded: settings.userCatalogSeeded === true,
+    catalogVersion: Number.isFinite(Number(settings.catalogVersion)) ? Number(settings.catalogVersion) : 0,
     updatedAt: settings.updatedAt || nowIso(),
   };
 }
@@ -512,7 +585,7 @@ function normalizeDatabase(raw) {
     const normalizedOperators = raw.operators.map(normalizeOperator);
     database.operators = database.settings.userCatalogSeeded
       ? normalizedOperators
-      : mergeMissingSeedUsers(normalizedOperators);
+      : mergeSeedUsers(normalizedOperators);
     database.settings.userCatalogSeeded = true;
   } else if (database.settings.userCatalogSeeded) {
     database.operators = [];
@@ -530,6 +603,17 @@ function normalizeDatabase(raw) {
   database.shifts = Array.isArray(raw.shifts)
     ? raw.shifts.map(normalizeShift)
     : cloneItems(initialShifts);
+
+  const currentCatalogVersion = Number(seedConfig.catalogVersion || 1);
+  if (database.settings.catalogVersion < currentCatalogVersion) {
+    database.operators = mergeSeedUsers(database.operators);
+    database.equipments = mergeSeedEquipments(database.equipments, Array.isArray(raw.movementRecords) ? raw.movementRecords : []);
+    database.activityTypes = mergeSeedActivityTypes(database.activityTypes);
+    database.settings.catalogVersion = currentCatalogVersion;
+    database.settings.updatedAt = nowIso();
+    database.updatedAt = nowIso();
+  }
+
   database.movementRecords = Array.isArray(raw.movementRecords)
     ? raw.movementRecords.map(normalizeRecord)
     : [];

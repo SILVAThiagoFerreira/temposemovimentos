@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { StatusChip } from '../components/StatusChip';
+import { getRoleLabel, getRoleOrder } from '../utils/roles';
 
 const integrationRoadmap = ['Firebase Firestore', 'Supabase', 'API própria', 'Power BI', 'Google Sheets', 'Banco SQL'];
 
@@ -14,10 +15,6 @@ function createEmptyUserForm(defaultShiftId) {
     shiftId: defaultShiftId || '',
     active: true,
   };
-}
-
-function roleLabel(role) {
-  return role === 'GERENTE' ? 'Gerente' : 'Operador';
 }
 
 export function Settings() {
@@ -71,9 +68,7 @@ export function Settings() {
   const visibleUsers = useMemo(
     () =>
       [...operators].sort((left, right) => {
-        const leftRole = left.role === 'GERENTE' ? 1 : 0;
-        const rightRole = right.role === 'GERENTE' ? 1 : 0;
-        return rightRole - leftRole || left.name.localeCompare(right.name, 'pt-BR');
+        return getRoleOrder(left.role) - getRoleOrder(right.role) || left.name.localeCompare(right.name, 'pt-BR');
       }),
     [operators],
   );
@@ -85,7 +80,7 @@ export function Settings() {
       registration: user.registration || '',
       role: user.role || 'OPERADOR',
       password: '',
-      shiftId: user.shiftId || defaultShiftId,
+      shiftId: user.role === 'OPERADOR' ? user.shiftId || defaultShiftId : '',
       active: user.active !== false,
     });
     setNotice('');
@@ -226,15 +221,17 @@ export function Settings() {
                 <span>Classe</span>
                 <select
                   value={userForm.role}
-                  onChange={(event) =>
+                  onChange={(event) => {
+                    const nextRole = event.target.value;
                     setUserForm({
                       ...userForm,
-                      role: event.target.value,
-                      shiftId: event.target.value === 'OPERADOR' ? userForm.shiftId || defaultShiftId : '',
-                    })
-                  }
+                      role: nextRole,
+                      shiftId: nextRole === 'OPERADOR' ? userForm.shiftId || defaultShiftId : '',
+                    });
+                  }}
                 >
                   <option value="OPERADOR">Operador</option>
+                  <option value="CLIENTE">Cliente</option>
                   <option value="GERENTE">Gerente</option>
                 </select>
               </label>
@@ -254,7 +251,7 @@ export function Settings() {
                 <select
                   value={userForm.shiftId}
                   onChange={(event) => setUserForm({ ...userForm, shiftId: event.target.value })}
-                  disabled={userForm.role === 'GERENTE'}
+                  disabled={userForm.role !== 'OPERADOR'}
                 >
                   <option value="">Sem turno</option>
                   {shifts.map((shift) => (
@@ -297,7 +294,7 @@ export function Settings() {
                   <div>
                     <strong>{user.name}</strong>
                     <small>
-                      {roleLabel(user.role)} • {user.shiftName || 'Sem turno'} • {user.active === false ? 'Inativo' : 'Ativo'}
+                      {getRoleLabel(user.role)} • {user.shiftName || 'Sem turno'} • {user.active === false ? 'Inativo' : 'Ativo'}
                     </small>
                   </div>
 

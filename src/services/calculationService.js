@@ -1,5 +1,8 @@
 import { formatDuration, isSameDay, minutesToHours } from './timeService';
 
+const MEAL_ACTIVITY_CODE = '05';
+const CRITICAL_GAP_CODES = new Set(['07', '08', '09']);
+
 function normalizeClassification(value) {
   return String(value || 'OUTROS').toUpperCase();
 }
@@ -7,6 +10,14 @@ function normalizeClassification(value) {
 function calculateRecordMinutes(record, referenceDate = new Date()) {
   if (!record) {
     return 0;
+  }
+
+  if (record.status === 'ENCERRADO' && record.durationMinutes != null) {
+    return Number(record.durationMinutes || 0);
+  }
+
+  if (record.status !== 'ABERTO' && record.durationMinutes != null) {
+    return Number(record.durationMinutes || 0);
   }
 
   const start = new Date(record.startDateTime);
@@ -55,6 +66,8 @@ export function summarizeDashboard({
   const byCause = new Map();
   const availableMinutes = new Map();
   const latestByEquipment = new Map();
+  const maintenanceByActivity = new Map();
+  const criticalGapActivities = new Map();
 
   let totalMinutes = 0;
   let operationMinutes = 0;
@@ -95,19 +108,25 @@ export function summarizeDashboard({
       code: equipment?.code || record.equipmentCode || '-',
       description: equipment?.description || 'Equipamento',
       minutes: 0,
+      totalMinutes: 0,
       operationMinutes: 0,
       maintenanceMinutes: 0,
+      mealMinutes: 0,
+      criticalGapMinutes: 0,
       idleMinutes: 0,
+      otherIdleMinutes: 0,
       otherMinutes: 0,
       count: 0,
       openCount: 0,
       availableMinutes: 0,
       utilizationPercent: 0,
-      currentActivityName: '-'
+      currentActivityName: '-',
+      gapStats: new Map(),
     }));
 
     const equipmentStat = byEquipment.get(record.equipmentId);
     equipmentStat.minutes += minutes;
+    equipmentStat.totalMinutes += minutes;
     equipmentStat.count += 1;
     if (classification === 'OPERAÇÃO') {
       equipmentStat.operationMinutes += minutes;
@@ -117,6 +136,25 @@ export function summarizeDashboard({
       equipmentStat.idleMinutes += minutes;
     } else {
       equipmentStat.otherMinutes += minutes;
+    }
+
+    if (record.activityCode === MEAL_ACTIVITY_CODE) {
+      equipmentStat.mealMinutes += minutes;
+    }
+
+    if (CRITICAL_GAP_CODES.has(record.activityCode)) {
+      equipmentStat.criticalGapMinutes += minutes;
+      ensureStat(equipmentStat.gapStats, activityKey, () => ({
+        key: activityKey,
+        code: record.activityCode || '-',
+        name: activityByCode.get(record.activityCode)?.name || record.activityName || '-',
+        minutes: 0,
+        count: 0,
+      }));
+      equipmentStat.gapStats.get(activityKey).minutes += minutes;
+      equipmentStat.gapStats.get(activityKey).count += 1;
+    } else if (classification === 'OCIOSIDADE' && record.activityCode !== MEAL_ACTIVITY_CODE) {
+      equipmentStat.otherIdleMinutes += minutes;
     }
 
     if (record.status === 'ABERTO') {
@@ -132,6 +170,32 @@ export function summarizeDashboard({
     }));
     byActivity.get(activityKey).minutes += minutes;
     byActivity.get(activityKey).count += 1;
+
+    if (classification === 'MANUTENÇÃO') {
+      ensureStat(maintenanceByActivity, activityKey, () => ({
+        key: activityKey,
+        code: record.activityCode || '-',
+        label: `${record.activityCode || '-'} - ${activityByCode.get(record.activityCode)?.name || record.activityName || '-'}`,
+        subtitle: 'Manutenção',
+        minutes: 0,
+        count: 0,
+      }));
+      maintenanceByActivity.get(activityKey).minutes += minutes;
+      maintenanceByActivity.get(activityKey).count += 1;
+    }
+
+    if (CRITICAL_GAP_CODES.has(record.activityCode)) {
+      ensureStat(criticalGapActivities, activityKey, () => ({
+        key: activityKey,
+        code: record.activityCode || '-',
+        label: `${record.activityCode || '-'} - ${activityByCode.get(record.activityCode)?.name || record.activityName || '-'}`,
+        subtitle: 'Gaps críticos',
+        minutes: 0,
+        count: 0,
+      }));
+      criticalGapActivities.get(activityKey).minutes += minutes;
+      criticalGapActivities.get(activityKey).count += 1;
+    }
 
     const causeKey = record.failureDescription?.trim() || record.activityName || 'Sem descrição';
     ensureStat(byCause, causeKey, () => ({
@@ -165,15 +229,20 @@ export function summarizeDashboard({
       code: equipment.code,
       description: equipment.description,
       minutes: 0,
+      totalMinutes: 0,
       operationMinutes: 0,
       maintenanceMinutes: 0,
+      mealMinutes: 0,
+      criticalGapMinutes: 0,
       idleMinutes: 0,
+      otherIdleMinutes: 0,
       otherMinutes: 0,
       count: 0,
       openCount: 0,
       availableMinutes: 0,
       utilizationPercent: 0,
       currentActivityName: '-',
+      gapStats: new Map(),
     };
 
     const recordsForEquipment = relevantRecords.filter((record) => record.equipmentId === equipment.id);
@@ -197,6 +266,79 @@ export function summarizeDashboard({
       lastRecord: latestRecord,
     };
   });
+
+  const equipmentBreakdowns = equipmentMetrics.map((equipment) => {
+    const stat = byEquipment.get(equipment.equipmentId) || equipment;
+    const gapItems = [...(stat.gapStats?.values() || [])].sort((left, right) => right.minutes - left.minutes);
+    const mainGap = gapItems[0] || null;
+    const totalMinutes = Number(stat.totalMinutes ?? stat.minutes ?? 0);
+
+    return {
+      key: equipment.equipmentId,
+      label: equipment.code,
+      subtitle: equipment.plate,
+      totalMinutes,
+      totalHours: minutesToHours(totalMinutes),
+      operationMinutes: stat.operationMinutes || 0,
+      maintenanceMinutes: stat.maintenanceMinutes || 0,
+      mealMinutes: stat.mealMinutes || 0,
+      criticalGapMinutes: stat.criticalGapMinutes || 0,
+      otherIdleMinutes: stat.otherIdleMinutes || 0,
+      otherMinutes: stat.otherMinutes || 0,
+      segments: [
+        { key: 'operation', label: 'Operação', minutes: stat.operationMinutes || 0 },
+        { key: 'maintenance', label: 'Manutenção', minutes: stat.maintenanceMinutes || 0 },
+        { key: 'meal', label: 'Refeição', minutes: stat.mealMinutes || 0 },
+        { key: 'gaps', label: 'Gaps críticos', minutes: stat.criticalGapMinutes || 0 },
+        { key: 'idle', label: 'Horas ociosas', minutes: stat.otherIdleMinutes || 0 },
+        { key: 'other', label: 'Outros', minutes: stat.otherMinutes || 0 },
+      ].filter((segment) => segment.minutes > 0),
+      mainGapLabel: mainGap?.name || 'Sem gaps críticos',
+      mainGapCode: mainGap?.code || '-',
+      mainGapMinutes: mainGap?.minutes || 0,
+      mainGapCount: mainGap?.count || 0,
+      mainGapHours: minutesToHours(mainGap?.minutes || 0),
+    };
+  });
+
+  const maintenanceByEquipment = equipmentBreakdowns
+    .filter((item) => item.maintenanceMinutes > 0)
+    .sort((left, right) => right.maintenanceMinutes - left.maintenanceMinutes)
+    .map((item) => ({
+      key: item.key,
+      label: item.label,
+      subtitle: item.subtitle,
+      minutes: item.maintenanceMinutes,
+      hours: minutesToHours(item.maintenanceMinutes),
+    }));
+
+  const mealAdherenceByEquipment = equipmentBreakdowns
+    .map((item) => {
+      const targetMinutes = 60;
+      const adherencePercent = Number(((item.mealMinutes / targetMinutes) * 100).toFixed(1));
+
+      return {
+        key: item.key,
+        label: item.label,
+        subtitle: item.subtitle,
+        minutes: item.mealMinutes,
+        hours: minutesToHours(item.mealMinutes),
+        targetMinutes,
+        adherencePercent,
+        tone: item.mealMinutes >= targetMinutes ? 'success' : item.mealMinutes >= targetMinutes * 0.8 ? 'warning' : 'danger',
+      };
+    })
+    .sort((left, right) => left.adherencePercent - right.adherencePercent || right.minutes - left.minutes);
+
+  const maintenanceByActivityItems = sortByMinutesDesc([...maintenanceByActivity.values()]).map((item) => ({
+    ...item,
+    subtitle: `${item.count} eventos`,
+  }));
+
+  const criticalGapItems = sortByMinutesDesc([...criticalGapActivities.values()]).map((item) => ({
+    ...item,
+    subtitle: `${item.count} eventos`,
+  }));
 
   const openRecords = relevantRecords.filter((record) => record.status === 'ABERTO');
   const closedTodayRecords = relevantRecords.filter((record) => record.status === 'ENCERRADO');
@@ -229,6 +371,11 @@ export function summarizeDashboard({
     byClassification: sortByMinutesDesc([...byClassification.values()]),
     byActivity: sortByMinutesDesc([...byActivity.values()]),
     topCauses: sortByMinutesDesc([...byCause.values()]).slice(0, 6),
+    equipmentBreakdowns,
+    maintenanceByEquipment,
+    maintenanceByActivity: maintenanceByActivityItems,
+    mealAdherenceByEquipment,
+    criticalGapActivities: criticalGapItems,
     equipmentMetrics,
     openRecords,
     latestByEquipment,

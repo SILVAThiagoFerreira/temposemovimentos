@@ -1,4 +1,5 @@
 import { StatusChip } from './StatusChip';
+import { formatDuration } from '../services/timeService';
 
 function formatHours(value) {
   return `${Number(value || 0).toFixed(2)} h`;
@@ -34,6 +35,111 @@ function BarList({ title, items, emptyMessage }) {
                 <strong>{formatHours(item.hours ?? (item.minutes || 0) / 60)}</strong>
                 <small>{item.count ? `${item.count} eventos` : `${item.minutes || 0} min`}</small>
               </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function StackedBarList({ title, items, emptyMessage }) {
+  const max = Math.max(...items.map((item) => item.totalMinutes || 0), 0);
+
+  return (
+    <section className="card dashboard-block dashboard-block--wide">
+      <div className="card__head">
+        <div>
+          <p className="eyebrow">{title}</p>
+          <h2>Tempos e gaps por UMR</h2>
+        </div>
+      </div>
+
+      {!items.length ? <p className="empty-state">{emptyMessage}</p> : null}
+
+      <div className="stacked-list">
+        {items.map((item) => {
+          const totalMinutes = Number(item.totalMinutes || 0);
+          const width = max > 0 ? Math.max(10, Math.round((totalMinutes / max) * 100)) : 10;
+
+          return (
+            <article key={item.key || item.label} className="stacked-list__item">
+              <div className="stacked-list__head">
+                <div>
+                  <strong>{item.label || 'Sem código'}</strong>
+                  <small>{item.subtitle || 'Sem placa'}</small>
+                </div>
+                <div className="stacked-list__value">
+                  <strong>{formatHours(item.totalHours || totalMinutes / 60)}</strong>
+                  <small>Gap principal: {item.mainGapLabel || '-'}</small>
+                </div>
+              </div>
+
+              <div className="stacked-list__track" style={{ width: `${width}%` }}>
+                {item.segments.map((segment) => {
+                  const segmentWidth = totalMinutes > 0 ? Math.max(6, (segment.minutes / totalMinutes) * 100) : 0;
+
+                  return segmentWidth > 0 ? (
+                    <span
+                      key={segment.key}
+                      className={`stacked-list__segment stacked-list__segment--${segment.key}`}
+                      style={{ width: `${segmentWidth}%` }}
+                      title={`${segment.label}: ${formatDuration(segment.minutes)}`}
+                    />
+                  ) : null;
+                })}
+              </div>
+
+              <div className="stacked-list__meta">
+                {item.segments.map((segment) => (
+                  <span key={segment.key}>
+                    <strong>{segment.label}</strong>
+                    <small>{formatDuration(segment.minutes)}</small>
+                  </span>
+                ))}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function TargetBarList({ title, items, emptyMessage, targetLabel = 'Meta' }) {
+  const max = Math.max(...items.map((item) => item.targetMinutes || 60), 60);
+
+  return (
+    <section className="card dashboard-block">
+      <div className="card__head">
+        <div>
+          <p className="eyebrow">{title}</p>
+          <h2>Aderência à refeição</h2>
+        </div>
+      </div>
+
+      {!items.length ? <p className="empty-state">{emptyMessage}</p> : null}
+
+      <div className="target-list">
+        {items.map((item) => {
+          const targetMinutes = Number(item.targetMinutes || 60);
+          const width = max > 0 ? Math.max(8, Math.round(((item.minutes || 0) / max) * 100)) : 8;
+          const tone = item.tone || (item.adherencePercent >= 100 ? 'success' : item.adherencePercent >= 80 ? 'warning' : 'danger');
+
+          return (
+            <div key={item.key || item.label} className="target-list__item">
+              <div className="target-list__label">
+                <strong>{item.label || 'Sem título'}</strong>
+                <small>{item.subtitle || `${targetLabel} ${formatDuration(targetMinutes)}`}</small>
+              </div>
+              <div className="target-list__track">
+                <span style={{ width: `${Math.min(100, width)}%` }} />
+              </div>
+              <div className="target-list__value">
+                <strong>{formatDuration(item.minutes || 0)}</strong>
+                <small>{targetLabel} {formatDuration(targetMinutes)}</small>
+              </div>
+              <StatusChip tone={tone}>{Number(item.adherencePercent || 0).toFixed(1)}%</StatusChip>
             </div>
           );
         })}
@@ -87,50 +193,75 @@ export function DashboardCards({ summary }) {
         </article>
       </section>
 
+      <section className="card dashboard-block">
+        <div className="card__head">
+          <div>
+            <p className="eyebrow">Equipamentos e atividade atual</p>
+            <h2>Status ao vivo</h2>
+          </div>
+        </div>
+
+        {!summary.equipmentMetrics.length ? <p className="empty-state">Sem dados disponíveis.</p> : null}
+
+        <div className="equipment-status-list">
+          {summary.equipmentMetrics.map((item) => (
+            <article key={item.equipmentId} className="equipment-status-item">
+              <div>
+                <strong>{item.code}</strong>
+                <p>{item.plate}</p>
+              </div>
+              <div>
+                <small>Atividade atual</small>
+                <p>{item.currentActivityName || '-'}</p>
+              </div>
+              <div>
+                <small>Horas</small>
+                <p>{formatHours(item.hours ?? item.minutes / 60)}</p>
+              </div>
+              <div>
+                <small>IU</small>
+                <StatusChip tone={item.utilizationPercent >= 75 ? 'success' : item.utilizationPercent >= 50 ? 'warning' : 'danger'}>
+                  {item.utilizationPercent.toFixed(1)}%
+                </StatusChip>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <StackedBarList
+        title="Distribuição por UMR"
+        items={summary.equipmentBreakdowns}
+        emptyMessage="Nenhum apontamento para o período."
+      />
+
       <div className="dashboard-columns">
-        <BarList title="Horas por equipamento" items={summary.hoursByEquipment} emptyMessage="Nenhum apontamento para o período." />
+        <BarList
+          title="Manutenção por UMR"
+          items={summary.maintenanceByEquipment}
+          emptyMessage="Sem manutenção registrada."
+        />
 
-        <section className="card dashboard-block">
-          <div className="card__head">
-            <div>
-              <p className="eyebrow">Equipamentos e atividade atual</p>
-              <h2>Status ao vivo</h2>
-            </div>
-          </div>
-
-          {!summary.equipmentMetrics.length ? <p className="empty-state">Sem dados disponíveis.</p> : null}
-
-          <div className="equipment-status-list">
-            {summary.equipmentMetrics.map((item) => (
-              <article key={item.equipmentId} className="equipment-status-item">
-                <div>
-                  <strong>{item.code}</strong>
-                  <p>{item.plate}</p>
-                </div>
-                <div>
-                  <small>Atividade atual</small>
-                  <p>{item.currentActivityName || '-'}</p>
-                </div>
-                <div>
-                  <small>Horas</small>
-                  <p>{formatHours(item.hours ?? item.minutes / 60)}</p>
-                </div>
-                <div>
-                  <small>IU</small>
-                  <StatusChip tone={item.utilizationPercent >= 75 ? 'success' : item.utilizationPercent >= 50 ? 'warning' : 'danger'}>
-                    {item.utilizationPercent.toFixed(1)}%
-                  </StatusChip>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
+        <BarList
+          title="Manutenção por atividade"
+          items={summary.maintenanceByActivity}
+          emptyMessage="Sem manutenção registrada."
+        />
       </div>
 
-      <div className="dashboard-columns dashboard-columns--three">
-        <BarList title="Tempo por classificação" items={summary.byClassification} emptyMessage="Sem classificações registradas." />
-        <BarList title="Tempo por atividade/parada" items={summary.byActivity} emptyMessage="Sem atividades registradas." />
-        <BarList title="Ranking de causas" items={summary.topCauses} emptyMessage="Sem causas de parada no período." />
+      <div className="dashboard-columns">
+        <TargetBarList
+          title="Refeição diária (1h)"
+          items={summary.mealAdherenceByEquipment}
+          emptyMessage="Sem refeição registrada no período."
+          targetLabel="Meta"
+        />
+
+        <BarList
+          title="Gaps críticos"
+          items={summary.criticalGapActivities}
+          emptyMessage="Sem gaps críticos no período."
+        />
       </div>
     </div>
   );

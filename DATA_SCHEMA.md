@@ -4,11 +4,31 @@
 
 ```json
 {
-  "meta": {},
+  "meta": {
+    "name": "",
+    "shortName": "",
+    "version": "",
+    "entrypoint": "src/main.jsx"
+  },
   "storage": {},
   "firebase": {},
-  "auth": {},
-  "seed": {},
+  "auth": {
+    "defaultPassword": "1234",
+    "passwordSaltRounds": 10,
+    "sessionTtlHours": 24,
+    "roles": {
+      "operational": "OPERADOR",
+      "client": "CLIENTE",
+      "manager": "GERENTE"
+    }
+  },
+  "seed": {
+    "catalogVersion": 3,
+    "users": [],
+    "equipments": [],
+    "activityTypes": [],
+    "shifts": []
+  },
   "validation": {},
   "exports": {}
 }
@@ -31,6 +51,8 @@
 }
 ```
 
+- `role` aceita `OPERADOR`, `CLIENTE` e `GERENTE`.
+
 ## Session
 
 ```json
@@ -44,6 +66,8 @@
   "loggedAt": "ISO-8601"
 }
 ```
+
+- `role` aceita `OPERADOR`, `CLIENTE` e `GERENTE`.
 
 ## MovementRecord
 
@@ -61,7 +85,7 @@
   "location": "CHASSI",
   "activityTypeId": "act-01",
   "activityCode": "01",
-  "activityName": "Recarregando emulsão",
+  "activityName": "Checklist",
   "classification": "OPERAÇÃO",
   "failureDescription": "",
   "correctiveAction": "",
@@ -111,7 +135,13 @@
   "activityTypes": [],
   "shifts": [],
   "movementRecords": [],
-  "settings": {}
+  "settings": {
+    "storageMode": "ONLINE",
+    "defaultShiftId": "shift-1",
+    "userCatalogSeeded": true,
+    "catalogVersion": 3,
+    "updatedAt": "ISO-8601"
+  }
 }
 ```
 
@@ -140,6 +170,12 @@
   "activityTypes": [],
   "shifts": [],
   "movementRecords": [],
-  "settings": {}
+  "settings": {
+    "storageMode": "ONLINE",
+    "defaultShiftId": "shift-1",
+    "userCatalogSeeded": true,
+    "catalogVersion": 3,
+    "updatedAt": "ISO-8601"
+  }
 }
 ```

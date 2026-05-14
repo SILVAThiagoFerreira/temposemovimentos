@@ -8,13 +8,14 @@ import { Dashboard } from './pages/Dashboard';
 import { Registrations } from './pages/Registrations';
 import { DataExport } from './pages/DataExport';
 import { Settings } from './pages/Settings';
+import { getHomeRouteForRole, isClientRole, isManagerRole, isOperatorRole } from './utils/roles';
 
 const ROUTES = [
-  { path: '/operador', label: 'Operador', helper: 'Apontamento rápido' },
-  { path: '/dashboard', label: 'Dashboard', helper: 'Supervisão' },
-  { path: '/cadastros', label: 'Cadastros', helper: 'Base sincronizada' },
-  { path: '/dados', label: 'Dados', helper: 'Exportação' },
-  { path: '/configuracoes', label: 'Configurações', helper: 'PWA e fase 2' },
+  { path: '/operador', label: 'Operador', helper: 'Apontamento rápido', roles: ['OPERADOR', 'GERENTE'] },
+  { path: '/dashboard', label: 'Dashboard', helper: 'Supervisão', roles: ['CLIENTE', 'GERENTE'] },
+  { path: '/cadastros', label: 'Cadastros', helper: 'Base sincronizada', roles: ['GERENTE'] },
+  { path: '/dados', label: 'Dados', helper: 'Exportação', roles: ['GERENTE'] },
+  { path: '/configuracoes', label: 'Configurações', helper: 'PWA e fase 2', roles: ['GERENTE'] },
 ];
 
 const ROUTE_TITLES = {
@@ -41,7 +42,12 @@ function defaultRouteForSession(session) {
     return '/login';
   }
 
-  return session.role === 'GERENTE' ? '/dashboard' : '/operador';
+  return getHomeRouteForRole(session.role);
+}
+
+function getAccessibleRoutes(role) {
+  const normalizedRole = String(role || '').trim().toUpperCase();
+  return ROUTES.filter((route) => route.roles.includes(normalizedRole));
 }
 
 function useHashRoute(session) {
@@ -78,13 +84,15 @@ function useHashRoute(session) {
 function AppShell() {
   const { session, logout, canInstallApp, installApp, isLocalMode } = useApp();
   const [route, navigate] = useHashRoute(session);
-  const isManager = session?.role === 'GERENTE';
+  const isManager = isManagerRole(session?.role);
+  const isOperator = isOperatorRole(session?.role);
+  const isClient = isClientRole(session?.role);
 
   if (!session) {
     return <Login navigate={navigate} />;
   }
 
-  if (!isManager) {
+  if (isOperator) {
     return (
       <div className="app-frame app-frame--operator">
         <OperatorPanel
@@ -98,7 +106,33 @@ function AppShell() {
     );
   }
 
-  const currentRoute = route === '/login' ? '/dashboard' : ROUTE_TITLES[route] ? route : '/dashboard';
+  if (isClient) {
+    return (
+      <div className="app-frame">
+        <Header
+          title="Dashboard de supervisão"
+          subtitle="Apontamento operacional sincronizado para UMBs"
+          session={session}
+          canInstallApp={canInstallApp}
+          onInstall={installApp}
+          onLogout={() => {
+            logout();
+            navigate('/login');
+          }}
+          currentStateLabel={isLocalMode ? 'LOCAL / OFFLINE' : 'ONLINE'}
+        />
+
+        <div className="app-body app-body--client">
+          <main className="app-main">
+            <Dashboard />
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  const accessibleRoutes = getAccessibleRoutes(session.role);
+  const currentRoute = route === '/login' ? '/dashboard' : accessibleRoutes.some((item) => item.path === route) ? route : '/dashboard';
   const title = ROUTE_TITLES[currentRoute] || 'Sistema de Tempos e Movimentos';
 
   const page = (() => {
@@ -124,7 +158,7 @@ function AppShell() {
     <div className="app-frame">
       <Header
         title={title}
-        subtitle="Apontamento operacional sincronizado para UMBs e caminhões"
+        subtitle="Apontamento operacional sincronizado para UMBs"
         session={session}
         canInstallApp={canInstallApp}
         onInstall={installApp}
@@ -136,7 +170,7 @@ function AppShell() {
       />
 
       <div className="app-body">
-        <Navigation items={ROUTES} currentPath={currentRoute} onNavigate={navigate} session={session} />
+        <Navigation items={accessibleRoutes} currentPath={currentRoute} onNavigate={navigate} session={session} />
         <main className="app-main">{page}</main>
       </div>
     </div>

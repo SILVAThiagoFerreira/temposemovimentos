@@ -4,7 +4,7 @@ Sistema web PWA para apontamento operacional em tablets, com frontend no GitHub 
 
 ## Objetivo
 
-Registrar atividades, paradas e duração por equipamento em campo, com acesso por perfil e histórico auditável.
+Registrar atividades, paradas e duração por equipamento em campo, com acesso por perfil, dashboard para clientes e histórico auditável.
 
 ## Entradas
 
@@ -18,14 +18,14 @@ Registrar atividades, paradas e duração por equipamento em campo, com acesso p
 - `src/main.jsx` inicia o bootstrap do armazenamento.
 - `src/services/storageService.js` restaura o snapshot local, sincroniza com o Firestore, encerra automaticamente o apontamento anterior quando uma nova atividade inicia e mantém o espelho em `localStorage` e `IndexedDB`.
 - `src/services/firebaseClient.js` inicializa o Firebase web SDK sem exigir sessão anônima.
-- `src/pages/Login.jsx` autentica por usuário e recupera a sessão.
+- `src/pages/Login.jsx` autentica por usuário e recupera a sessão, roteando clientes para o dashboard.
 - `src/pages/OperatorPanel.jsx` executa o fluxo operacional.
 - `src/pages/Settings.jsx` administra usuários somente para gerente.
 
 ## Saídas
 
 - Tela operacional.
-- Dashboard de supervisão.
+- Dashboard de supervisão para clientes e gerentes.
 - Exportação CSV.
 - Backup JSON.
 - Dados persistidos entre reinícios de navegador, troca de dispositivo e reabertura da aba.

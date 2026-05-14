@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { StatusChip } from '../components/StatusChip';
+import { getHomeRouteForRole, getRoleLabel, getRoleOrder } from '../utils/roles';
 
 const enaexLogo = new URL('../assets/enaex-brasil.png', import.meta.url).href;
 
-function roleLabel(role) {
-  return role === 'GERENTE' ? 'Gerente' : 'Operacional';
+function roleTone(role) {
+  return role === 'OPERADOR' ? 'success' : 'info';
 }
 
 export function Login({ navigate }) {
@@ -19,9 +20,7 @@ export function Login({ navigate }) {
       [...operators]
         .filter((user) => user.active !== false)
         .sort((left, right) => {
-          const leftRole = left.role === 'GERENTE' ? 1 : 0;
-          const rightRole = right.role === 'GERENTE' ? 1 : 0;
-          return leftRole - rightRole || left.name.localeCompare(right.name, 'pt-BR');
+          return getRoleOrder(left.role) - getRoleOrder(right.role) || left.name.localeCompare(right.name, 'pt-BR');
         }),
     [operators],
   );
@@ -62,7 +61,7 @@ export function Login({ navigate }) {
         sessionId: user.sessionId || null,
       });
 
-      navigate(user.role === 'GERENTE' ? '/dashboard' : '/operador');
+      navigate(getHomeRouteForRole(user.role));
     } catch (authError) {
       setError(authError.message || 'Falha ao entrar.');
     }
@@ -75,20 +74,24 @@ export function Login({ navigate }) {
         <p className="eyebrow">Acesso sincronizado</p>
         <h1>SISTEMA DE TEMPOS E MOVIMENTOS</h1>
         <p className="login-copy">
-          Selecione um usuário cadastrado e informe a senha para entrar. O acesso consulta o Firestore e mantém o cache local;
-          os operadores acessam só o apontamento, e o gerente acessa o sistema completo.
+          Selecione um usuário cadastrado e informe a senha para entrar. Operadores lançam apontamentos, clientes acompanham o
+          dashboard e o gerente administra a base.
         </p>
 
         <div className="login-points">
-          <StatusChip tone="success">Usuários fixos</StatusChip>
-          <StatusChip tone="info">Operação / Gerência</StatusChip>
-          <StatusChip tone="warning">Senha inicial 1234</StatusChip>
+          <StatusChip tone="success">Perfis fixos</StatusChip>
+          <StatusChip tone="info">Operação / Dashboard</StatusChip>
+          <StatusChip tone="warning">Acesso por senha</StatusChip>
         </div>
 
         <div className="login-stats">
           <article>
             <strong>{activeUsers.filter((user) => user.role === 'OPERADOR').length}</strong>
             <span>operacionais</span>
+          </article>
+          <article>
+            <strong>{activeUsers.filter((user) => user.role === 'CLIENTE').length}</strong>
+            <span>clientes</span>
           </article>
           <article>
             <strong>{activeUsers.filter((user) => user.role === 'GERENTE').length}</strong>
@@ -128,9 +131,9 @@ export function Login({ navigate }) {
                   <strong>{user.name}</strong>
                   <small>{user.shiftName || 'Sem turno'}</small>
                 </div>
-                <StatusChip tone={user.role === 'GERENTE' ? 'info' : 'success'}>{roleLabel(user.role)}</StatusChip>
-              </button>
-            ))
+                  <StatusChip tone={roleTone(user.role)}>{getRoleLabel(user.role)}</StatusChip>
+                </button>
+              ))
           ) : (
             <p className="empty-state">Nenhum usuário ativo disponível.</p>
           )}
@@ -150,8 +153,6 @@ export function Login({ navigate }) {
         <button className="button button--primary button--full" type="submit" disabled={!activeUsers.length}>
           Entrar
         </button>
-
-        <p className="login-footnote">Usuários iniciais e perfil de acesso são carregados do `config.json`.</p>
       </form>
     </section>
   );
