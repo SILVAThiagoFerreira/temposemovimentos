@@ -1,8 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { metaConfig } from './config/runtimeConfig';
 import { bootstrapStorage } from './services/storageService';
 import './styles.css';
+
+document.title = metaConfig.name;
 
 const redirectHash = sessionStorage.getItem('tm-redirect');
 if (redirectHash) {

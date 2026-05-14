@@ -1,0 +1,136 @@
+{
+  "meta": {
+    "name": "Sistema de Tempos e Movimentos - UMB / Caminhões",
+    "shortName": "Tempos UMB",
+    "version": "2.1.0",
+    "entrypoint": "src/main.jsx"
+  },
+  "storage": {
+    "keys": {
+      "database": "temposemovimentos-db",
+      "session": "temposemovimentos-session"
+    },
+    "persistence": {
+      "dbName": "temposemovimentos-persistence",
+      "storeName": "kv",
+      "version": 1
+    },
+    "defaultMode": "LOCAL",
+    "requestPersistentStorage": true
+  },
+  "auth": {
+    "defaultPassword": "1234",
+    "roles": {
+      "operational": "OPERADOR",
+      "manager": "GERENTE"
+    }
+  },
+  "seed": {
+    "users": [
+      {
+        "id": "usr-paulo",
+        "name": "Paulo",
+        "registration": "",
+        "role": "OPERADOR",
+        "password": "1234",
+        "shiftId": "shift-1",
+        "shiftName": "1º TURNO",
+        "active": true
+      },
+      {
+        "id": "usr-deyvis",
+        "name": "Deyvis",
+        "registration": "",
+        "role": "OPERADOR",
+        "password": "1234",
+        "shiftId": "shift-1",
+        "shiftName": "1º TURNO",
+        "active": true
+      },
+      {
+        "id": "usr-gilmar",
+        "name": "Gilmar",
+        "registration": "",
+        "role": "OPERADOR",
+        "password": "1234",
+        "shiftId": "shift-1",
+        "shiftName": "1º TURNO",
+        "active": true
+      },
+      {
+        "id": "usr-thiago-gama",
+        "name": "Thiago Gama",
+        "registration": "",
+        "role": "OPERADOR",
+        "password": "1234",
+        "shiftId": "shift-1",
+        "shiftName": "1º TURNO",
+        "active": true
+      },
+      {
+        "id": "usr-jose-wilkinson",
+        "name": "Jose Wilkinson",
+        "registration": "",
+        "role": "GERENTE",
+        "password": "1234",
+        "shiftId": null,
+        "shiftName": "",
+        "active": true
+      }
+    ],
+    "equipments": [
+      {
+        "id": "eq-beg-8a40",
+        "plate": "BEG-8A40",
+        "code": "UMR-1072",
+        "description": "Caminhão UMB 1072",
+        "active": true
+      },
+      {
+        "id": "eq-rhn-3f59",
+        "plate": "RHN-3F59",
+        "code": "UMR-1084",
+        "description": "Caminhão UMB 1084",
+        "active": true
+      },
+      {
+        "id": "eq-sfo6d18",
+        "plate": "SFO6D18",
+        "code": "UMR-1123",
+        "description": "Caminhão UMB 1123",
+        "active": true
+      }
+    ],
+    "activityTypes": [
+      { "id": "act-01", "code": "01", "name": "Recarregando emulsão", "classification": "OPERAÇÃO", "defaultLocation": "UNIDADE", "active": true },
+      { "id": "act-02", "code": "02", "name": "Deslocamento", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true },
+      { "id": "act-03", "code": "03", "name": "Abastecimento", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
+      { "id": "act-04", "code": "04", "name": "Falta de Operador", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-05", "code": "05", "name": "Falha Operacional", "classification": "MANUTENÇÃO", "defaultLocation": null, "active": true },
+      { "id": "act-06", "code": "06", "name": "Aguardando Término da Perfuração", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-07", "code": "07", "name": "Condições Climáticas Adversas", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-08", "code": "08", "name": "Check List", "classification": "OPERAÇÃO", "defaultLocation": "CHASSI", "active": true },
+      { "id": "act-09", "code": "09", "name": "Aguardando frente / horas ociosas", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-10", "code": "10", "name": "Refeição", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-11", "code": "11", "name": "Manutenção", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
+      { "id": "act-12", "code": "12", "name": "Outros", "classification": "OUTROS", "defaultLocation": null, "active": true }
+    ],
+    "shifts": [
+      { "id": "shift-1", "name": "1º TURNO", "startTime": "07:00", "endTime": "15:00", "availableMinutes": 480, "active": true },
+      { "id": "shift-2", "name": "2º TURNO", "startTime": "15:00", "endTime": "23:00", "availableMinutes": 480, "active": true },
+      { "id": "shift-3", "name": "3º TURNO", "startTime": "23:00", "endTime": "07:00", "availableMinutes": 480, "active": true }
+    ]
+  },
+  "validation": {
+    "oneOpenRecordPerOperator": true,
+    "oneOpenRecordPerEquipment": true,
+    "requireEndAfterStart": true,
+    "allowManualEntry": true,
+    "managerRequiredForUserAdmin": true
+  },
+  "exports": {
+    "csvDelimiter": ",",
+    "backupFilenamePrefix": "temposemovimentos-backup",
+    "recordsFilenamePrefix": "temposemovimentos-registros"
+  }
+}

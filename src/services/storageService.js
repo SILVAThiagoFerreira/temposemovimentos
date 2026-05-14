@@ -2,15 +2,16 @@ import { initialActivityTypes } from '../data/initialActivityTypes';
 import { initialEquipments } from '../data/initialEquipments';
 import { initialShifts } from '../data/initialShifts';
 import { initialUsers } from '../data/initialUsers';
+import { authConfig, storageConfig } from '../config/runtimeConfig';
 import { createId } from '../utils/id';
 import { differenceMinutes, minutesToHours, nowIso } from './timeService';
 
-const DB_KEY = 'temposemovimentos-db';
-const SESSION_KEY = 'temposemovimentos-session';
+const DB_KEY = storageConfig.keys.database;
+const SESSION_KEY = storageConfig.keys.session;
 const DB_VERSION = 1;
-const PERSISTENCE_DB_NAME = 'temposemovimentos-persistence';
-const PERSISTENCE_DB_VERSION = 1;
-const PERSISTENCE_STORE = 'kv';
+const PERSISTENCE_DB_NAME = storageConfig.persistence.dbName;
+const PERSISTENCE_DB_VERSION = storageConfig.persistence.version;
+const PERSISTENCE_STORE = storageConfig.persistence.storeName;
 
 let persistenceDbPromise = null;
 let persistenceQueue = Promise.resolve();
@@ -196,7 +197,7 @@ function createInitialDatabase() {
     shifts: cloneItems(initialShifts),
     movementRecords: [],
     settings: {
-      storageMode: 'LOCAL',
+      storageMode: storageConfig.defaultMode,
       defaultShiftId: initialShifts[0]?.id ?? null,
       userCatalogSeeded: true,
       updatedAt: nowIso(),
@@ -245,8 +246,8 @@ function normalizeOperator(operator = {}) {
     id: operator.id || createId('op'),
     name: String(operator.name || '').trim(),
     registration: String(operator.registration || '').trim(),
-    role: String(operator.role || 'OPERADOR').trim().toUpperCase(),
-    password: String(operator.password ?? '1234').trim(),
+    role: String(operator.role || authConfig.roles.operational).trim().toUpperCase(),
+    password: String(operator.password ?? authConfig.defaultPassword).trim(),
     shiftId: operator.shiftId || null,
     shiftName,
     active: operator.active !== false,
@@ -301,7 +302,7 @@ function normalizeShift(shift = {}) {
 
 function normalizeSettings(settings = {}) {
   return {
-    storageMode: String(settings.storageMode || 'LOCAL').toUpperCase(),
+    storageMode: String(settings.storageMode || storageConfig.defaultMode).toUpperCase(),
     defaultShiftId: settings.defaultShiftId || initialShifts[0]?.id || null,
     userCatalogSeeded: settings.userCatalogSeeded === true,
     updatedAt: settings.updatedAt || nowIso(),
@@ -398,7 +399,9 @@ function normalizeDatabase(raw) {
 
 export async function bootstrapStorage() {
   storageMeta.bootstrappedAt = nowIso();
-  storageMeta.persistentStorageGranted = await requestPersistentStoragePermission();
+  storageMeta.persistentStorageGranted = storageConfig.requestPersistentStorage
+    ? await requestPersistentStoragePermission()
+    : false;
 
   try {
     const [localDatabase, localSession, indexedDatabase, indexedSession] = await Promise.all([

@@ -148,7 +148,7 @@ export function Login({ navigate }) {
           Entrar
         </button>
 
-        <p className="login-footnote">Usuários operacionais: Paulo, Deyvis, Gilmar e Thiago Gama. Gerente: Jose Wilkinson.</p>
+        <p className="login-footnote">Usuários iniciais e perfil de acesso são carregados do `config.json`.</p>
       </form>
     </section>
   );
