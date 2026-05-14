@@ -536,8 +536,9 @@ export async function bootstrapStorage() {
     const freshDatabase = createInitialDatabase();
     const localSnapshot = localDatabase ? normalizeDatabase(localDatabase) : null;
     const indexedSnapshot = indexedDatabase ? normalizeDatabase(indexedDatabase) : null;
+    const hasLocalSnapshot = Boolean(localSnapshot || indexedSnapshot);
 
-    let resolvedDatabase = chooseNewestSnapshot(localSnapshot, indexedSnapshot, freshDatabase, 'updatedAt');
+    let resolvedDatabase = chooseNewestSnapshot(localSnapshot, indexedSnapshot, null, 'updatedAt');
 
     let resolvedSession = chooseNewestSnapshot(localSession, indexedSession, null, 'loggedAt');
 
@@ -551,15 +552,12 @@ export async function bootstrapStorage() {
 
       if (remoteSnapshot) {
         const normalizedRemote = normalizeDatabase(remoteSnapshot);
-        const chosenDatabase = chooseNewestSnapshot(
-          resolvedDatabase,
-          normalizedRemote,
-          freshDatabase,
-          'updatedAt',
-        );
+        const chosenDatabase = hasLocalSnapshot
+          ? chooseNewestSnapshot(resolvedDatabase, normalizedRemote, null, 'updatedAt')
+          : normalizedRemote;
         resolvedDatabase = setDatabaseSettingsMode(chosenDatabase, 'ONLINE');
         storageMeta.backendAvailable = true;
-        if (readTimeStamp(chosenDatabase, 'updatedAt') > readTimeStamp(normalizedRemote, 'updatedAt')) {
+        if (hasLocalSnapshot && readTimeStamp(chosenDatabase, 'updatedAt') > readTimeStamp(normalizedRemote, 'updatedAt')) {
           await writeRemoteDatabase(resolvedDatabase);
         }
         await attachRemoteListener();
