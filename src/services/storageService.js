@@ -8,9 +8,177 @@ import { differenceMinutes, minutesToHours, nowIso } from './timeService';
 const DB_KEY = 'temposemovimentos-db';
 const SESSION_KEY = 'temposemovimentos-session';
 const DB_VERSION = 1;
+const PERSISTENCE_DB_NAME = 'temposemovimentos-persistence';
+const PERSISTENCE_DB_VERSION = 1;
+const PERSISTENCE_STORE = 'kv';
+
+let persistenceDbPromise = null;
+let persistenceQueue = Promise.resolve();
+let memoryDatabaseSnapshot = null;
+let memorySessionSnapshot = null;
+const storageMeta = {
+  persistentStorageGranted: false,
+  indexedDbAvailable: false,
+  bootstrappedAt: null,
+};
 
 function cloneItems(items) {
   return items.map((item) => ({ ...item }));
+}
+
+function cloneSnapshot(value) {
+  return value ? JSON.parse(JSON.stringify(value)) : value;
+}
+
+function enqueuePersistence(task) {
+  persistenceQueue = persistenceQueue.then(task, task).catch(() => undefined);
+  return persistenceQueue;
+}
+
+function readTimeStamp(value, fallbackField = 'updatedAt') {
+  const stamp = new Date(value?.[fallbackField] || value?.createdAt || value?.startDateTime || value?.loggedAt || 0).getTime();
+  return Number.isNaN(stamp) ? 0 : stamp;
+}
+
+function chooseNewestSnapshot(localSnapshot, remoteSnapshot, fallbackSnapshot, comparatorField = 'updatedAt') {
+  const localStamp = localSnapshot ? readTimeStamp(localSnapshot, comparatorField) : 0;
+  const remoteStamp = remoteSnapshot ? readTimeStamp(remoteSnapshot, comparatorField) : 0;
+
+  if (!localSnapshot && !remoteSnapshot) {
+    return fallbackSnapshot;
+  }
+
+  if (!localSnapshot) {
+    return remoteSnapshot;
+  }
+
+  if (!remoteSnapshot) {
+    return localSnapshot;
+  }
+
+  return remoteStamp > localStamp ? remoteSnapshot : localSnapshot;
+}
+
+function setLocalSnapshot(key, value) {
+  if (value == null) {
+    window.localStorage.removeItem(key);
+    return;
+  }
+
+  safeWriteJson(key, value);
+}
+
+function requestPersistentStoragePermission() {
+  if (!navigator?.storage?.persist) {
+    return Promise.resolve(false);
+  }
+
+  return navigator.storage.persist().catch(() => false);
+}
+
+function persistenceDbReady() {
+  if (typeof indexedDB === 'undefined') {
+    storageMeta.indexedDbAvailable = false;
+    return Promise.resolve(null);
+  }
+
+  if (!persistenceDbPromise) {
+    persistenceDbPromise = new Promise((resolve, reject) => {
+      const request = indexedDB.open(PERSISTENCE_DB_NAME, PERSISTENCE_DB_VERSION);
+
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(PERSISTENCE_STORE)) {
+          db.createObjectStore(PERSISTENCE_STORE);
+        }
+      };
+
+      request.onsuccess = () => {
+        storageMeta.indexedDbAvailable = true;
+        resolve(request.result);
+      };
+
+      request.onerror = () => {
+        storageMeta.indexedDbAvailable = false;
+        reject(request.error);
+      };
+    });
+  }
+
+  return persistenceDbPromise;
+}
+
+async function idbGet(key) {
+  const db = await persistenceDbReady();
+
+  if (!db) {
+    return null;
+  }
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(PERSISTENCE_STORE, 'readonly');
+    const store = transaction.objectStore(PERSISTENCE_STORE);
+    const request = store.get(key);
+
+    request.onsuccess = () => resolve(request.result ?? null);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function idbSet(key, value) {
+  const db = await persistenceDbReady();
+
+  if (!db) {
+    return false;
+  }
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(PERSISTENCE_STORE, 'readwrite');
+    const store = transaction.objectStore(PERSISTENCE_STORE);
+    const request = store.put(value, key);
+
+    request.onsuccess = () => resolve(true);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function idbDelete(key) {
+  const db = await persistenceDbReady();
+
+  if (!db) {
+    return false;
+  }
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(PERSISTENCE_STORE, 'readwrite');
+    const store = transaction.objectStore(PERSISTENCE_STORE);
+    const request = store.delete(key);
+
+    request.onsuccess = () => resolve(true);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function persistSnapshot(key, value) {
+  void enqueuePersistence(async () => {
+    try {
+      if (value == null) {
+        await idbDelete(key);
+      } else {
+        await idbSet(key, value);
+      }
+    } catch {
+      return undefined;
+    }
+  });
+}
+
+function mirrorDatabaseSnapshot(database) {
+  persistSnapshot(DB_KEY, database);
+}
+
+function mirrorSessionSnapshot(session) {
+  persistSnapshot(SESSION_KEY, session);
 }
 
 function mergeMissingSeedUsers(users) {
@@ -48,7 +216,12 @@ function safeReadJson(key) {
 }
 
 function safeWriteJson(key, value) {
-  window.localStorage.setItem(key, JSON.stringify(value));
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function emitChange(detail = {}) {
@@ -218,12 +391,67 @@ function normalizeDatabase(raw) {
     ? raw.movementRecords.map(normalizeRecord)
     : [];
   database.version = DB_VERSION;
-  database.updatedAt = nowIso();
+  database.updatedAt = raw.updatedAt || nowIso();
 
   return database;
 }
 
+export async function bootstrapStorage() {
+  storageMeta.bootstrappedAt = nowIso();
+  storageMeta.persistentStorageGranted = await requestPersistentStoragePermission();
+
+  try {
+    const [localDatabase, localSession, indexedDatabase, indexedSession] = await Promise.all([
+      Promise.resolve(safeReadJson(DB_KEY)),
+      Promise.resolve(safeReadJson(SESSION_KEY)),
+      idbGet(DB_KEY).catch(() => null),
+      idbGet(SESSION_KEY).catch(() => null),
+    ]);
+
+    const resolvedDatabase = chooseNewestSnapshot(
+      localDatabase ? normalizeDatabase(localDatabase) : null,
+      indexedDatabase ? normalizeDatabase(indexedDatabase) : null,
+      createInitialDatabase(),
+      'updatedAt',
+    );
+
+    const resolvedSession = chooseNewestSnapshot(localSession, indexedSession, null, 'loggedAt');
+
+    memoryDatabaseSnapshot = resolvedDatabase ? cloneSnapshot(resolvedDatabase) : createInitialDatabase();
+    memorySessionSnapshot = resolvedSession ? { ...resolvedSession } : null;
+
+    if (resolvedDatabase) {
+      setLocalSnapshot(DB_KEY, resolvedDatabase);
+      persistSnapshot(DB_KEY, resolvedDatabase);
+    }
+
+    if (resolvedSession) {
+      setLocalSnapshot(SESSION_KEY, resolvedSession);
+      persistSnapshot(SESSION_KEY, resolvedSession);
+    } else {
+      window.localStorage.removeItem(SESSION_KEY);
+      persistSnapshot(SESSION_KEY, null);
+    }
+
+    if (!resolvedDatabase) {
+      const fresh = createInitialDatabase();
+      setLocalSnapshot(DB_KEY, fresh);
+      persistSnapshot(DB_KEY, fresh);
+    }
+  } catch {
+    const fallback = normalizeDatabase(safeReadJson(DB_KEY));
+    memoryDatabaseSnapshot = fallback;
+    setLocalSnapshot(DB_KEY, fallback);
+  }
+
+  return getStorageMeta();
+}
+
 function readDatabase() {
+  if (memoryDatabaseSnapshot) {
+    return cloneSnapshot(memoryDatabaseSnapshot);
+  }
+
   const raw = safeReadJson(DB_KEY);
   const normalized = normalizeDatabase(raw);
 
@@ -231,24 +459,33 @@ function readDatabase() {
     safeWriteJson(DB_KEY, normalized);
   }
 
+  memoryDatabaseSnapshot = normalized;
+
   return normalized;
 }
 
 function writeDatabase(database, reason = 'database-write') {
   const normalized = normalizeDatabase(database);
+  normalized.updatedAt = nowIso();
+  memoryDatabaseSnapshot = normalized;
   safeWriteJson(DB_KEY, normalized);
+  mirrorDatabaseSnapshot(normalized);
   emitChange({ reason, scope: 'database' });
   return normalized;
 }
 
 function readSession() {
+  if (memorySessionSnapshot) {
+    return { ...memorySessionSnapshot };
+  }
+
   const raw = safeReadJson(SESSION_KEY);
 
   if (!raw) {
     return null;
   }
 
-  return {
+  memorySessionSnapshot = {
     operatorId: raw.operatorId || null,
     operatorName: String(raw.operatorName || '').trim(),
     registration: String(raw.registration || '').trim(),
@@ -257,11 +494,15 @@ function readSession() {
     shiftName: String(raw.shiftName || '').trim(),
     loggedAt: raw.loggedAt || nowIso(),
   };
+
+  return { ...memorySessionSnapshot };
 }
 
 function writeSession(session) {
   if (!session) {
+    memorySessionSnapshot = null;
     window.localStorage.removeItem(SESSION_KEY);
+    mirrorSessionSnapshot(null);
     emitChange({ reason: 'session-clear', scope: 'session' });
     return null;
   }
@@ -276,7 +517,9 @@ function writeSession(session) {
     loggedAt: session.loggedAt || nowIso(),
   };
 
+  memorySessionSnapshot = normalized;
   safeWriteJson(SESSION_KEY, normalized);
+  mirrorSessionSnapshot(normalized);
   emitChange({ reason: 'session-save', scope: 'session' });
   return normalized;
 }
@@ -339,7 +582,17 @@ export function loadAppState() {
   return {
     ...readDatabase(),
     session: readSession(),
+    storageMeta: getStorageMeta(),
   };
+}
+
+export function getStorageMeta() {
+  return { ...storageMeta };
+}
+
+export async function requestPersistentStorage() {
+  storageMeta.persistentStorageGranted = await requestPersistentStoragePermission();
+  return storageMeta.persistentStorageGranted;
 }
 
 export function getDatabase() {

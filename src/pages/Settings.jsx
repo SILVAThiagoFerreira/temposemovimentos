@@ -25,11 +25,13 @@ export function Settings() {
     session,
     operators,
     settings,
+    storageMeta,
     shifts,
     updateSettings,
     saveOperator,
     updateOperator,
     deleteOperator,
+    requestPersistentStorage,
     canInstallApp,
     installApp,
     isLocalMode,
@@ -55,6 +57,11 @@ export function Settings() {
     }),
     [isLocalMode, storageLabel],
   );
+
+  async function handleEnablePersistence() {
+    const granted = await requestPersistentStorage();
+    setNotice(granted ? 'Armazenamento persistente ativado.' : 'O navegador não concedeu persistência total, mas o backup em IndexedDB continua ativo.');
+  }
 
   const activeManagers = useMemo(
     () => operators.filter((user) => user.role === 'GERENTE' && user.active !== false).length,
@@ -344,11 +351,19 @@ export function Settings() {
               <h2>Base local</h2>
             </div>
           </div>
-          <p>Hoje tudo fica no `localStorage` do tablet. Na fase online, o motor de persistência poderá ser trocado.</p>
+          <p>Os dados são gravados em `localStorage` e espelhados em `IndexedDB`. O navegador também é solicitado a manter esse armazenamento como persistente.</p>
           <div className="settings-rows">
             <div>
               <span>Status atual</span>
               <strong>{storageState.label}</strong>
+            </div>
+            <div>
+              <span>Persistência do navegador</span>
+              <strong>{storageMeta?.persistentStorageGranted ? 'Ativa' : 'Não confirmada'}</strong>
+            </div>
+            <div>
+              <span>Backup secundário</span>
+              <strong>{storageMeta?.indexedDbAvailable ? 'IndexedDB ativo' : 'Indisponível'}</strong>
             </div>
             <div>
               <span>Turno padrão</span>
@@ -363,6 +378,11 @@ export function Settings() {
                 ))}
               </select>
             </div>
+          </div>
+          <div className="form-actions">
+            <button className="button button--secondary" type="button" onClick={handleEnablePersistence}>
+              Ativar armazenamento persistente
+            </button>
           </div>
         </article>
 

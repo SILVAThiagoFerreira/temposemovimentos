@@ -12,6 +12,8 @@ Aplicação web 100% front-end para tablets, com foco em apontamento operacional
 - Backup e restore JSON.
 - PWA instalável.
 - Cache básico para uso offline.
+- Persistência reforçada com `IndexedDB` + `localStorage` espelhado.
+- Solicitação automática de armazenamento persistente do navegador.
 
 ### Usuários iniciais
 
@@ -72,7 +74,7 @@ O projeto já vem com:
 
 ## Observação importante
 
-Os dados ficam no navegador do tablet. Para supervisão em tempo real em outra tela, será necessário migrar para Firebase, Supabase ou outra base centralizada.
+Os dados ficam no navegador do tablet, com espelho em `IndexedDB` e persistência solicitada ao navegador. Para supervisão em tempo real em outra tela, será necessário migrar para Firebase, Supabase ou outra base centralizada.
 
 ## Rotas
 

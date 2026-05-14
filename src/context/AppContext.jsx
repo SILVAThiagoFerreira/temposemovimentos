@@ -21,6 +21,7 @@ import {
   importData,
   loadAppState,
   resetDatabase,
+  requestPersistentStorage,
   saveActivityType,
   saveEquipment,
   saveOperator,
@@ -105,6 +106,11 @@ export function AppProvider({ children }) {
       exportData: () => exportData(),
       resetDatabase: () => run(() => resetDatabase()),
       updateSettings: (patch) => run(() => updateSettings(patch)),
+      requestPersistentStorage: async () => {
+        const result = await requestPersistentStorage();
+        refresh();
+        return result;
+      },
       installApp: async () => {
         if (!installPromptEvent) {
           return false;

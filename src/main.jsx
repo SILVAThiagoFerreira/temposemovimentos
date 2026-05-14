@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { bootstrapStorage } from './services/storageService';
 import './styles.css';
 
 const redirectHash = sessionStorage.getItem('tm-redirect');
@@ -15,8 +16,14 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-);
+async function start() {
+  await bootstrapStorage().catch(() => undefined);
+
+  createRoot(document.getElementById('root')).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  );
+}
+
+start();
