@@ -79,6 +79,13 @@
 }
 ```
 
+## Encerramento
+
+- Quando uma nova atividade é iniciada para o mesmo operador, o apontamento anterior aberto é encerrado automaticamente.
+- O encerramento preenche `endDateTime`, `durationMinutes`, `durationHours`, `editedAt` e `editedBy`.
+- As durações são calculadas em precisão de minuto; fechamentos automáticos registram ao menos 1 minuto quando a troca ocorre no mesmo instante.
+- O botão `Encerrar a atividade` finaliza o apontamento em aberto no fim do expediente.
+
 ## AuditEvent
 
 ```json

@@ -16,7 +16,7 @@ Registrar atividades, paradas e duração por equipamento em campo, com acesso p
 ## Processamento
 
 - `src/main.jsx` inicia o bootstrap do armazenamento.
-- `src/services/storageService.js` restaura o snapshot local, sincroniza com o Firestore e mantém o espelho em `localStorage` e `IndexedDB`.
+- `src/services/storageService.js` restaura o snapshot local, sincroniza com o Firestore, encerra automaticamente o apontamento anterior quando uma nova atividade inicia e mantém o espelho em `localStorage` e `IndexedDB`.
 - `src/services/firebaseClient.js` inicializa o Firebase web SDK sem exigir sessão anônima.
 - `src/pages/Login.jsx` autentica por usuário e recupera a sessão.
 - `src/pages/OperatorPanel.jsx` executa o fluxo operacional.

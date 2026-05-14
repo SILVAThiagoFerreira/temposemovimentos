@@ -61,7 +61,7 @@ export function OperatorPanel({ standalone = false, onLogout }) {
       return;
     }
 
-    if (!window.confirm('Encerrar o apontamento ativo agora?')) {
+    if (!window.confirm('Encerrar a atividade e finalizar o expediente?')) {
       return;
     }
 
@@ -140,9 +140,6 @@ export function OperatorPanel({ standalone = false, onLogout }) {
               <p className="eyebrow">Atividade aberta</p>
               <h2>{operatorActiveRecord.activityName}</h2>
             </div>
-            <button className="button button--secondary" type="button" onClick={handleCloseActive}>
-              Encerrar atividade
-            </button>
           </div>
 
           <div className="active-record-grid">
@@ -165,6 +162,12 @@ export function OperatorPanel({ standalone = false, onLogout }) {
         </section>
       ) : null}
 
+      {operatorActiveRecord ? (
+        <div className="alert alert--info operator-flow-note">
+          Ao iniciar a próxima atividade, a anterior será encerrada automaticamente.
+        </div>
+      ) : null}
+
       {selectedEquipmentOpenRecord && selectedEquipmentOpenRecord.operatorId !== session.operatorId ? (
         <section className="alert alert--warning">
           O equipamento selecionado já possui um apontamento aberto por {selectedEquipmentOpenRecord.operatorName}.
@@ -173,7 +176,6 @@ export function OperatorPanel({ standalone = false, onLogout }) {
 
       <MovementForm
         title="Novo apontamento"
-        submitLabel="Iniciar atividade"
         operators={operators}
         equipments={equipments}
         activityTypes={activityTypes}
@@ -184,6 +186,7 @@ export function OperatorPanel({ standalone = false, onLogout }) {
         hideOperatorSelect
         hideEquipmentSelect
         hideShiftSelect
+        submitLabel="Iniciar atividade"
         onSubmit={handleStart}
       />
 
@@ -197,6 +200,12 @@ export function OperatorPanel({ standalone = false, onLogout }) {
 
         <RecordsTable records={todayRecords} emptyMessage="Nenhum registro lançado hoje." />
       </section>
+
+      {operatorActiveRecord ? (
+        <button className="button button--primary operator-finish-button" type="button" onClick={handleCloseActive}>
+          Encerrar a atividade
+        </button>
+      ) : null}
     </div>
   );
 }

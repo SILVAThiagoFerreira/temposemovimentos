@@ -16,6 +16,8 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - Senhas continuam validadas pelo aplicativo sobre o snapshot persistido.
 - Cada usuário pode ter no máximo um apontamento aberto.
 - Cada equipamento pode ter no máximo um apontamento aberto.
+- Ao iniciar uma nova atividade, o sistema encerra automaticamente o apontamento aberto anterior do mesmo operador.
+- O operador encerra manualmente o apontamento em aberto no fim do expediente pelo botão `Encerrar a atividade`.
 - Hora final deve ser maior que hora inicial.
 - Lançamento manual é permitido, mas deve ser identificado.
 

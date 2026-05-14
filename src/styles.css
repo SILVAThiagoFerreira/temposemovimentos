@@ -1077,6 +1077,20 @@ label > span {
   margin-top: 4px;
 }
 
+.operator-finish-button {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 30;
+  min-width: min(320px, calc(100vw - 48px));
+  justify-content: center;
+  box-shadow: var(--shadow-strong);
+}
+
+.operator-flow-note {
+  margin-top: -4px;
+}
+
 .settings-rows {
   display: grid;
   gap: 12px;
@@ -1243,6 +1257,12 @@ label > span {
     justify-content: flex-start;
   }
 
+  .operator-finish-button {
+    right: 14px;
+    bottom: 104px;
+    min-width: min(280px, calc(100vw - 28px));
+  }
+
   .brand-lockup {
     align-items: flex-start;
   }
@@ -1294,6 +1314,14 @@ label > span {
 
   .button {
     min-height: 46px;
+  }
+
+  .operator-finish-button {
+    right: 12px;
+    left: 12px;
+    bottom: 104px;
+    width: auto;
+    min-width: 0;
   }
 
   .records-table {

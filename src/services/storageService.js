@@ -68,6 +68,29 @@ function chooseNewestSnapshot(localSnapshot, remoteSnapshot, fallbackSnapshot, c
   return remoteStamp > localStamp ? remoteSnapshot : localSnapshot;
 }
 
+function calculateStoredDurationMinutes(startDateTime, endDateTime) {
+  const startDate = new Date(startDateTime);
+  const endDate = new Date(endDateTime);
+
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+    return 0;
+  }
+
+  const elapsedMs = endDate.getTime() - startDate.getTime();
+
+  if (elapsedMs < 0) {
+    return 0;
+  }
+
+  if (elapsedMs === 0) {
+    return 1;
+  }
+
+  const elapsedMinutes = differenceMinutes(startDate, endDate);
+
+  return Math.max(1, elapsedMinutes);
+}
+
 function setLocalSnapshot(key, value) {
   if (value == null) {
     window.localStorage.removeItem(key);
@@ -733,7 +756,7 @@ function updateRecordTimestamps(record, patch = {}) {
 
   if (patch.startDateTime || patch.endDateTime || patch.status) {
     if (next.status === 'ENCERRADO' && next.endDateTime) {
-      next.durationMinutes = differenceMinutes(next.startDateTime, next.endDateTime);
+      next.durationMinutes = calculateStoredDurationMinutes(next.startDateTime, next.endDateTime);
       next.durationHours = Number(minutesToHours(next.durationMinutes).toFixed(2));
     } else if (next.status === 'ABERTO') {
       next.endDateTime = null;
@@ -978,7 +1001,7 @@ export function deleteRecord(id) {
 }
 
 export function createMovementRecord(payload) {
-  const database = readDatabase();
+  let database = readDatabase();
   const operator = findEntityById(database.operators, payload.operatorId);
   const equipment = findEntityById(database.equipments, payload.equipmentId);
   const activityType = findEntityById(database.activityTypes, payload.activityTypeId);
@@ -997,20 +1020,35 @@ export function createMovementRecord(payload) {
   }
 
   const openRecords = database.movementRecords.filter((record) => record.status === 'ABERTO');
-  if (openRecords.some((record) => record.operatorId === operator.id)) {
-    throw new Error('Este operador já possui apontamento em aberto');
-  }
 
-  if (openRecords.some((record) => record.equipmentId === equipment.id)) {
+  if (openRecords.some((record) => record.equipmentId === equipment.id && record.operatorId !== operator.id)) {
     throw new Error('Este equipamento já possui apontamento em aberto');
   }
 
+  const startDateTime = payload.startDateTime || nowIso();
   const endDateTime = payload.manualEntry ? payload.endDateTime || null : null;
   const status = endDateTime ? 'ENCERRADO' : 'ABERTO';
-  const durationMinutes = endDateTime ? differenceMinutes(payload.startDateTime, endDateTime) : null;
+  const durationMinutes = endDateTime ? calculateStoredDurationMinutes(startDateTime, endDateTime) : null;
 
   if (endDateTime && durationMinutes <= 0) {
     throw new Error('Hora final deve ser maior que a inicial');
+  }
+
+  const operatorOpenRecord = openRecords.find((record) => record.operatorId === operator.id) || null;
+
+  if (operatorOpenRecord) {
+    const closedOperatorRecord = updateRecordTimestamps(operatorOpenRecord, {
+      endDateTime: startDateTime,
+      status: 'ENCERRADO',
+      editedAt: nowIso(),
+      editedBy: payload.operatorName || operator.name,
+    });
+
+    database = {
+      ...database,
+      movementRecords: database.movementRecords.map((record) => (record.id === operatorOpenRecord.id ? closedOperatorRecord : record)),
+      updatedAt: nowIso(),
+    };
   }
 
   const record = normalizeRecord({
@@ -1025,7 +1063,7 @@ export function createMovementRecord(payload) {
     activityName: payload.activityName || activityType.name,
     classification: payload.classification || activityType.classification,
     location: payload.location || activityType.defaultLocation || null,
-    startDateTime: payload.startDateTime || nowIso(),
+    startDateTime,
     endDateTime,
     durationMinutes,
     durationHours: durationMinutes == null ? null : Number(minutesToHours(durationMinutes).toFixed(2)),
@@ -1034,7 +1072,7 @@ export function createMovementRecord(payload) {
     updatedAt: nowIso(),
   });
 
-  const next = [record, ...database.movementRecords];
+  const next = [record, ...database.movementRecords.filter((item) => item.id !== record.id)];
   saveSection('movementRecords', next);
   return record;
 }
@@ -1052,7 +1090,7 @@ export function closeMovementRecord(recordId, payload = {}) {
   }
 
   const endDateTime = payload.endDateTime || nowIso();
-  const durationMinutes = differenceMinutes(existing.startDateTime, endDateTime);
+  const durationMinutes = calculateStoredDurationMinutes(existing.startDateTime, endDateTime);
 
   if (durationMinutes <= 0) {
     throw new Error('Hora final deve ser maior que a inicial');
