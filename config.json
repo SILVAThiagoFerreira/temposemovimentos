@@ -43,7 +43,7 @@
     }
   },
   "seed": {
-    "catalogVersion": 3,
+    "catalogVersion": 4,
     "users": [
       {
         "id": "usr-paulo",
@@ -51,8 +51,8 @@
         "registration": "",
         "role": "OPERADOR",
         "password": "1234",
-        "shiftId": "shift-1",
-        "shiftName": "1º TURNO",
+        "shiftId": null,
+        "shiftName": "",
         "active": true
       },
       {
@@ -61,8 +61,8 @@
         "registration": "",
         "role": "OPERADOR",
         "password": "1234",
-        "shiftId": "shift-1",
-        "shiftName": "1º TURNO",
+        "shiftId": null,
+        "shiftName": "",
         "active": true
       },
       {
@@ -71,8 +71,8 @@
         "registration": "",
         "role": "OPERADOR",
         "password": "1234",
-        "shiftId": "shift-1",
-        "shiftName": "1º TURNO",
+        "shiftId": null,
+        "shiftName": "",
         "active": true
       },
       {
@@ -81,8 +81,8 @@
         "registration": "",
         "role": "OPERADOR",
         "password": "1234",
-        "shiftId": "shift-1",
-        "shiftName": "1º TURNO",
+        "shiftId": null,
+        "shiftName": "",
         "active": true
       },
       {
@@ -126,7 +126,7 @@
       { "id": "act-01", "code": "01", "name": "Checklist", "classification": "OPERAÇÃO", "defaultLocation": "CHASSI", "active": true },
       { "id": "act-02", "code": "02", "name": "Deslocamento", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true },
       { "id": "act-03", "code": "03", "name": "Carregamento", "classification": "OPERAÇÃO", "defaultLocation": "UNIDADE", "active": true },
-      { "id": "act-04", "code": "04", "name": "Recarregamento de Emulsão", "classification": "OPERAÇÃO", "defaultLocation": "UNIDADE", "active": true },
+      { "id": "act-04", "code": "04", "name": "Reabastecimento de Emulsão", "classification": "OPERAÇÃO", "defaultLocation": "UNIDADE", "active": true },
       { "id": "act-05", "code": "05", "name": "Refeição", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
       { "id": "act-06", "code": "06", "name": "Abastecimento de Diesel", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
       { "id": "act-07", "code": "07", "name": "Aguardando Frente / Horas Ociosas", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
@@ -138,9 +138,7 @@
       { "id": "act-13", "code": "13", "name": "Outros", "classification": "OUTROS", "defaultLocation": null, "active": true }
     ],
     "shifts": [
-      { "id": "shift-1", "name": "1º TURNO", "startTime": "07:00", "endTime": "15:00", "availableMinutes": 480, "active": true },
-      { "id": "shift-2", "name": "2º TURNO", "startTime": "15:00", "endTime": "23:00", "availableMinutes": 480, "active": true },
-      { "id": "shift-3", "name": "3º TURNO", "startTime": "23:00", "endTime": "07:00", "availableMinutes": 480, "active": true }
+      { "id": "shift-1", "name": "Turno único", "startTime": "07:00", "endTime": "15:00", "availableMinutes": 480, "active": true }
     ]
   },
   "validation": {

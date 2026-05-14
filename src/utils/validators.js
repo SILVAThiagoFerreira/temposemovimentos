@@ -42,7 +42,6 @@ export function validateRecordPayload(payload) {
     'activityTypeId',
     'activityCode',
     'activityName',
-    'classification',
     'startDateTime',
   ]);
 

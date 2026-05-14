@@ -1089,7 +1089,7 @@ export function createMovementRecord(payload) {
   const operator = findEntityById(database.operators, payload.operatorId);
   const equipment = findEntityById(database.equipments, payload.equipmentId);
   const activityType = findEntityById(database.activityTypes, payload.activityTypeId);
-  const shift = findEntityById(database.shifts, payload.shiftId || database.settings.defaultShiftId);
+  const shift = payload.shiftId ? findEntityById(database.shifts, payload.shiftId) : null;
 
   if (!operator) {
     throw new Error('Operador não encontrado');
@@ -1146,7 +1146,7 @@ export function createMovementRecord(payload) {
     activityCode: payload.activityCode || activityType.code,
     activityName: payload.activityName || activityType.name,
     classification: payload.classification || activityType.classification,
-    location: payload.location || activityType.defaultLocation || null,
+    location: payload.location || null,
     startDateTime,
     endDateTime,
     durationMinutes,

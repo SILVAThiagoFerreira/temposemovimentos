@@ -1,12 +1,6 @@
 import { StatusChip } from './StatusChip';
 import { formatDate, formatDateTime, formatDuration, formatTime } from '../services/timeService';
 
-function locationLabel(value) {
-  if (value === 'CHASSI') return 'C';
-  if (value === 'UNIDADE') return 'U';
-  return '-';
-}
-
 export function RecordsTable({ records, onEdit, onDelete, onClose, emptyMessage = 'Nenhum registro encontrado.' }) {
   return (
     <div className="card table-card">
@@ -18,7 +12,6 @@ export function RecordsTable({ records, onEdit, onDelete, onClose, emptyMessage 
               <th>Equipamento</th>
               <th>Código</th>
               <th>Atividade</th>
-              <th>Local</th>
               <th>Operador</th>
               <th>Início</th>
               <th>Fim</th>
@@ -30,7 +23,7 @@ export function RecordsTable({ records, onEdit, onDelete, onClose, emptyMessage 
           <tbody>
             {!records.length ? (
               <tr>
-                <td colSpan="11">
+                <td colSpan="10">
                   <p className="empty-state">{emptyMessage}</p>
                 </td>
               </tr>
@@ -46,12 +39,9 @@ export function RecordsTable({ records, onEdit, onDelete, onClose, emptyMessage 
                 <td>{record.activityCode}</td>
                 <td>
                   <strong>{record.activityName}</strong>
-                  <small>{record.classification}</small>
                 </td>
-                <td>{locationLabel(record.location)}</td>
                 <td>
                   <strong>{record.operatorName}</strong>
-                  <small>{record.shiftName || '-'}</small>
                 </td>
                 <td>
                   <strong>{formatDate(record.startDateTime)}</strong>

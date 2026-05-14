@@ -8,7 +8,7 @@ import { StatusChip } from '../components/StatusChip';
 import { isSameDay } from '../services/timeService';
 
 export function OperatorPanel({ standalone = false, onLogout }) {
-  const { session, operators, equipments, records, activityTypes, shifts, startMovementRecord, closeMovementRecord, logout } = useApp();
+  const { session, operators, equipments, records, activityTypes, startMovementRecord, closeMovementRecord, logout } = useApp();
   const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
 
   useEffect(() => {
@@ -48,8 +48,6 @@ export function OperatorPanel({ standalone = false, onLogout }) {
       operatorId: session?.operatorId,
       operatorName: session?.operatorName,
       registration: session?.registration,
-      shiftId: session?.shiftId || payload.shiftId,
-      shiftName: session?.shiftName || payload.shiftName,
       equipmentId: equipment.id,
       plate: equipment.plate,
       equipmentCode: equipment.code,
@@ -102,7 +100,7 @@ export function OperatorPanel({ standalone = false, onLogout }) {
         <article className="card hero-card">
           <p className="eyebrow">Operador logado</p>
           <h2>{session.operatorName}</h2>
-          <p>{session.shiftName || 'Turno não informado'}</p>
+          <p>Fluxo operacional ativo</p>
           <StatusChip tone="info">{session.registration || 'Sem matrícula'}</StatusChip>
         </article>
 
@@ -150,12 +148,8 @@ export function OperatorPanel({ standalone = false, onLogout }) {
                 <strong>{operatorActiveRecord.plate}</strong>
               </div>
               <div>
-                <span>Classificação</span>
-                <strong>{operatorActiveRecord.classification}</strong>
-              </div>
-              <div>
-                <span>Local</span>
-                <strong>{operatorActiveRecord.location || '-'}</strong>
+                <span>Atividade</span>
+                <strong>{operatorActiveRecord.activityCode || '-'} - {operatorActiveRecord.activityName}</strong>
               </div>
             </div>
           </div>
@@ -179,13 +173,10 @@ export function OperatorPanel({ standalone = false, onLogout }) {
         operators={operators}
         equipments={equipments}
         activityTypes={activityTypes}
-        shifts={shifts}
         defaultOperatorId={session.operatorId}
         defaultEquipmentId={selectedEquipmentId}
-        defaultShiftId={session.shiftId}
         hideOperatorSelect
         hideEquipmentSelect
-        hideShiftSelect
         submitLabel="Iniciar atividade"
         onSubmit={handleStart}
       />
@@ -202,9 +193,11 @@ export function OperatorPanel({ standalone = false, onLogout }) {
       </section>
 
       {operatorActiveRecord ? (
-        <button className="button button--primary operator-finish-button" type="button" onClick={handleCloseActive}>
-          Encerrar a atividade
-        </button>
+        <div className="operator-actions-footer">
+          <button className="button button--primary operator-finish-button" type="button" onClick={handleCloseActive}>
+            Encerrar a atividade
+          </button>
+        </div>
       ) : null}
     </div>
   );

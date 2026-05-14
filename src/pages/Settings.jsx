@@ -1,18 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { StatusChip } from '../components/StatusChip';
 import { getRoleLabel, getRoleOrder } from '../utils/roles';
 
 const integrationRoadmap = ['Firebase Firestore', 'Supabase', 'API própria', 'Power BI', 'Google Sheets', 'Banco SQL'];
 
-function createEmptyUserForm(defaultShiftId) {
+function createEmptyUserForm() {
   return {
     id: '',
     name: '',
     registration: '',
     role: 'OPERADOR',
     password: '1234',
-    shiftId: defaultShiftId || '',
     active: true,
   };
 }
@@ -23,7 +22,6 @@ export function Settings() {
     operators,
     settings,
     storageMeta,
-    shifts,
     updateSettings,
     saveOperator,
     updateOperator,
@@ -35,15 +33,8 @@ export function Settings() {
   } = useApp();
 
   const isManager = session?.role === 'GERENTE';
-  const defaultShiftId = shifts[0]?.id || '';
   const [notice, setNotice] = useState('');
-  const [userForm, setUserForm] = useState(() => createEmptyUserForm(defaultShiftId));
-
-  useEffect(() => {
-    if (userForm.role === 'OPERADOR' && !userForm.shiftId && defaultShiftId) {
-      setUserForm((current) => ({ ...current, shiftId: defaultShiftId }));
-    }
-  }, [defaultShiftId, userForm.role, userForm.shiftId]);
+  const [userForm, setUserForm] = useState(() => createEmptyUserForm());
 
   const storageLabel = isLocalMode ? 'LOCAL / OFFLINE' : 'ONLINE';
 
@@ -80,7 +71,6 @@ export function Settings() {
       registration: user.registration || '',
       role: user.role || 'OPERADOR',
       password: '',
-      shiftId: user.role === 'OPERADOR' ? user.shiftId || defaultShiftId : '',
       active: user.active !== false,
     });
     setNotice('');
@@ -102,14 +92,13 @@ export function Settings() {
       return;
     }
 
-    const selectedShift = shifts.find((shift) => shift.id === userForm.shiftId) || shifts[0] || null;
     const payload = {
       id: userForm.id,
       name,
       registration: userForm.registration.trim(),
       role: userForm.role,
-      shiftId: userForm.role === 'OPERADOR' ? selectedShift?.id || defaultShiftId || null : userForm.shiftId || null,
-      shiftName: userForm.role === 'OPERADOR' ? selectedShift?.name || '' : '',
+      shiftId: null,
+      shiftName: '',
       active: userForm.active,
     };
 
@@ -126,7 +115,7 @@ export function Settings() {
         setNotice('Usuário criado.');
       }
 
-      setUserForm(createEmptyUserForm(defaultShiftId));
+      setUserForm(createEmptyUserForm());
     } catch (error) {
       setNotice(error.message || 'Falha ao salvar usuário.');
     }
@@ -152,7 +141,7 @@ export function Settings() {
       deleteOperator(user.id);
       setNotice('Usuário excluído.');
       if (userForm.id === user.id) {
-        setUserForm(createEmptyUserForm(defaultShiftId));
+        setUserForm(createEmptyUserForm());
       }
     } catch (error) {
       setNotice(error.message || 'Falha ao excluir usuário.');
@@ -221,14 +210,7 @@ export function Settings() {
                 <span>Classe</span>
                 <select
                   value={userForm.role}
-                  onChange={(event) => {
-                    const nextRole = event.target.value;
-                    setUserForm({
-                      ...userForm,
-                      role: nextRole,
-                      shiftId: nextRole === 'OPERADOR' ? userForm.shiftId || defaultShiftId : '',
-                    });
-                  }}
+                  onChange={(event) => setUserForm({ ...userForm, role: event.target.value })}
                 >
                   <option value="OPERADOR">Operador</option>
                   <option value="CLIENTE">Cliente</option>
@@ -246,22 +228,6 @@ export function Settings() {
                 />
               </label>
 
-              <label>
-                <span>Turno</span>
-                <select
-                  value={userForm.shiftId}
-                  onChange={(event) => setUserForm({ ...userForm, shiftId: event.target.value })}
-                  disabled={userForm.role !== 'OPERADOR'}
-                >
-                  <option value="">Sem turno</option>
-                  {shifts.map((shift) => (
-                    <option key={shift.id} value={shift.id}>
-                      {shift.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
               <label className="toggle-field toggle-field--inline">
                 <input
                   type="checkbox"
@@ -277,7 +243,7 @@ export function Settings() {
                 {userForm.id ? 'Salvar alteração' : 'Criar usuário'}
               </button>
               {userForm.id ? (
-                <button className="button button--ghost" type="button" onClick={() => setUserForm(createEmptyUserForm(defaultShiftId))}>
+                <button className="button button--ghost" type="button" onClick={() => setUserForm(createEmptyUserForm())}>
                   Cancelar edição
                 </button>
               ) : null}
@@ -294,7 +260,7 @@ export function Settings() {
                   <div>
                     <strong>{user.name}</strong>
                     <small>
-                      {getRoleLabel(user.role)} • {user.shiftName || 'Sem turno'} • {user.active === false ? 'Inativo' : 'Ativo'}
+                      {getRoleLabel(user.role)} • {user.active === false ? 'Inativo' : 'Ativo'}
                     </small>
                   </div>
 
@@ -365,19 +331,6 @@ export function Settings() {
               <span>Backup secundário</span>
               <strong>{storageMeta?.indexedDbAvailable ? 'IndexedDB ativo' : 'Indisponível'}</strong>
             </div>
-            <div>
-              <span>Turno padrão</span>
-              <select
-                value={settings.defaultShiftId || ''}
-                onChange={(event) => updateSettings({ defaultShiftId: event.target.value })}
-              >
-                {shifts.map((shift) => (
-                  <option key={shift.id} value={shift.id}>
-                    {shift.name}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
           <div className="form-actions">
             <button className="button button--secondary" type="button" onClick={handleEnablePersistence}>
@@ -420,8 +373,8 @@ export function Settings() {
               <strong>{activeManagers}</strong>
             </div>
             <div>
-              <span>Modo</span>
-              <strong>{settings.storageMode || 'LOCAL'}</strong>
+              <span>Armazenamento local</span>
+              <strong>{storageMeta?.indexedDbAvailable ? 'Sim' : 'Não'}</strong>
             </div>
           </div>
         </article>

@@ -46,15 +46,12 @@ export function Login({ navigate }) {
 
     try {
       const user = await authenticateOperator(selectedUserId, password.trim());
-      const selectedShiftName = user.shiftName || '';
 
       loginOperator({
         operatorId: user.id,
         operatorName: user.name,
         registration: user.registration || '',
         role: user.role,
-        shiftId: user.shiftId || null,
-        shiftName: selectedShiftName,
         loggedAt: new Date().toISOString(),
         accessToken: user.accessToken || null,
         expiresAt: user.expiresAt || null,
@@ -129,10 +126,9 @@ export function Login({ navigate }) {
               >
                 <div>
                   <strong>{user.name}</strong>
-                  <small>{user.shiftName || 'Sem turno'}</small>
                 </div>
-                  <StatusChip tone={roleTone(user.role)}>{getRoleLabel(user.role)}</StatusChip>
-                </button>
+                <StatusChip tone={roleTone(user.role)}>{getRoleLabel(user.role)}</StatusChip>
+              </button>
               ))
           ) : (
             <p className="empty-state">Nenhum usuário ativo disponível.</p>

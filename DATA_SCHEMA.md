@@ -23,7 +23,7 @@
     }
   },
   "seed": {
-    "catalogVersion": 3,
+    "catalogVersion": 4,
     "users": [],
     "equipments": [],
     "activityTypes": [],
@@ -43,8 +43,6 @@
   "registration": "",
   "role": "OPERADOR",
   "password": "1234",
-  "shiftId": "shift-1",
-  "shiftName": "1º TURNO",
   "active": true,
   "createdAt": "ISO-8601",
   "updatedAt": "ISO-8601"
@@ -52,6 +50,7 @@
 ```
 
 - `role` aceita `OPERADOR`, `CLIENTE` e `GERENTE`.
+- Os campos de turno deixaram de ser expostos no fluxo atual.
 
 ## Session
 
@@ -61,13 +60,12 @@
   "operatorName": "Paulo",
   "registration": "",
   "role": "OPERADOR",
-  "shiftId": "shift-1",
-  "shiftName": "1º TURNO",
   "loggedAt": "ISO-8601"
 }
 ```
 
 - `role` aceita `OPERADOR`, `CLIENTE` e `GERENTE`.
+- A sessão não depende mais de turno visível.
 
 ## MovementRecord
 
@@ -77,18 +75,13 @@
   "operatorId": "usr-paulo",
   "operatorName": "Paulo",
   "registration": "",
-  "shiftId": "shift-1",
-  "shiftName": "1º TURNO",
   "equipmentId": "eq-beg-8a40",
   "plate": "BEG-8A40",
   "equipmentCode": "UMR-1072",
-  "location": "CHASSI",
   "activityTypeId": "act-01",
   "activityCode": "01",
   "activityName": "Checklist",
   "classification": "OPERAÇÃO",
-  "failureDescription": "",
-  "correctiveAction": "",
   "notes": "",
   "startDateTime": "ISO-8601",
   "endDateTime": null,
@@ -109,6 +102,7 @@
 - O encerramento preenche `endDateTime`, `durationMinutes`, `durationHours`, `editedAt` e `editedBy`.
 - As durações são calculadas em precisão de minuto; fechamentos automáticos registram ao menos 1 minuto quando a troca ocorre no mesmo instante.
 - O botão `Encerrar a atividade` finaliza o apontamento em aberto no fim do expediente.
+- `shiftId`, `shiftName`, `location`, `failureDescription` e `correctiveAction` são campos legados/históricos e não fazem parte do fluxo visível atual.
 
 ## AuditEvent
 

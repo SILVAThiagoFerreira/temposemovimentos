@@ -20,7 +20,6 @@ export function DataExport() {
     equipments,
     operators,
     activityTypes,
-    shifts,
     exportData,
     importData,
     resetDatabase,
@@ -213,7 +212,6 @@ export function DataExport() {
           operators={operators}
           equipments={equipments}
           activityTypes={activityTypes}
-          shifts={shifts}
           onSubmit={handleUpdate}
           onCancel={() => setEditingRecord(null)}
         />

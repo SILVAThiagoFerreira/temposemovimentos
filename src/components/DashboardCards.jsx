@@ -1,5 +1,7 @@
 import { StatusChip } from './StatusChip';
 import { formatDuration } from '../services/timeService';
+import { formatUtilization } from '../services/calculationService';
+import { PieChartCard } from './PieChartCard';
 
 function formatHours(value) {
   return `${Number(value || 0).toFixed(2)} h`;
@@ -51,7 +53,7 @@ function StackedBarList({ title, items, emptyMessage }) {
       <div className="card__head">
         <div>
           <p className="eyebrow">{title}</p>
-          <h2>Tempos e gaps por UMR</h2>
+          <h2>Detalhe por UMR</h2>
         </div>
       </div>
 
@@ -157,12 +159,12 @@ export function DashboardCards({ summary }) {
     <div className="dashboard-layout">
       <section className="stats-grid">
         <article className="card stat-card stat-card--success">
-          <p>Equipamentos ativos agora</p>
+          <p>Apontamentos em aberto</p>
           <strong>{summary.activeEquipmentCount}</strong>
-          <small>apontamentos em aberto</small>
+          <small>no período selecionado</small>
         </article>
         <article className="card stat-card">
-          <p>Total de horas no dia</p>
+          <p>Total de horas no período</p>
           <strong>{summary.totalHours.toFixed(2)} h</strong>
           <small>{summary.totalRecords} registros</small>
         </article>
@@ -177,27 +179,27 @@ export function DashboardCards({ summary }) {
           <small>eventos críticos</small>
         </article>
         <article className="card stat-card">
-          <p>Eventos em aberto</p>
-          <strong>{summary.openCount}</strong>
-          <small>precisam de encerramento</small>
+          <p>Registros encerrados</p>
+          <strong>{summary.closedCount}</strong>
+          <small>no período selecionado</small>
         </article>
         <article className="card stat-card">
-          <p>Eventos encerrados hoje</p>
-          <strong>{summary.closedCount}</strong>
-          <small>acompanhamento diário</small>
+          <p>Disponibilidade física</p>
+          <strong>{formatUtilization(summary.physicalAvailabilityPercent)}</strong>
+          <small>consolidada do período</small>
         </article>
         <article className="card stat-card stat-card--info">
           <p>IU médio da frota</p>
           <strong>{utilizationAverage.toFixed(1)}%</strong>
-          <small>com base nos turnos</small>
+          <small>no período selecionado</small>
         </article>
       </section>
 
       <section className="card dashboard-block">
         <div className="card__head">
           <div>
-            <p className="eyebrow">Equipamentos e atividade atual</p>
-            <h2>Status ao vivo</h2>
+            <p className="eyebrow">Equipamentos e atividade</p>
+            <h2>Atividade por UMR</h2>
           </div>
         </div>
 
@@ -229,11 +231,64 @@ export function DashboardCards({ summary }) {
         </div>
       </section>
 
-      <StackedBarList
-        title="Distribuição por UMR"
-        items={summary.equipmentBreakdowns}
-        emptyMessage="Nenhum apontamento para o período."
-      />
+      <section className="card dashboard-block">
+        <div className="card__head">
+          <div>
+            <p className="eyebrow">Indicadores físicos</p>
+            <h2>Disponibilidade e utilização</h2>
+          </div>
+        </div>
+
+        <div className="dashboard-pie-grid dashboard-pie-grid--two">
+          <PieChartCard
+            eyebrow="Disponibilidade física"
+            title="Disponibilidade física"
+            subtitle="Disponível x manutenção"
+            centerValue={formatUtilization(summary.physicalAvailabilityPercent)}
+            centerLabel="do período"
+            segments={summary.physicalAvailabilitySegments}
+            footnote={`Base de ${summary.periodDays} dia(s) e ${summary.periodAvailableMinutes} min disponíveis.`}
+          />
+
+          <PieChartCard
+            eyebrow="Utilização física"
+            title="Utilização física"
+            subtitle="Operação x demais tempos"
+            centerValue={formatUtilization(summary.physicalUtilizationPercent)}
+            centerLabel="do período"
+            segments={summary.physicalUtilizationSegments}
+            footnote={`Base de ${summary.periodDays} dia(s) e ${summary.periodAvailableMinutes} min disponíveis.`}
+          />
+        </div>
+      </section>
+
+      <section className="card dashboard-block">
+        <div className="card__head">
+          <div>
+            <p className="eyebrow">Códigos por UMR</p>
+            <h2>Quantidade e percentual por código</h2>
+          </div>
+        </div>
+
+        {!summary.codeDistributionByEquipment.length ? <p className="empty-state">Sem dados no período selecionado.</p> : null}
+
+        <div className="dashboard-pie-grid">
+          {summary.codeDistributionByEquipment.map((item) => (
+            <PieChartCard
+              key={item.key}
+              eyebrow={`UMR ${item.label}`}
+              title={item.label}
+              subtitle={item.subtitle}
+              centerValue={String(item.totalCount)}
+              centerLabel="registros"
+              segments={item.segments}
+              emptyMessage="Sem registros no período selecionado."
+              footnote="Quantidade e percentual de cada código no período selecionado."
+              className="pie-chart-card--compact"
+            />
+          ))}
+        </div>
+      </section>
 
       <div className="dashboard-columns">
         <BarList

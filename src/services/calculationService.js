@@ -1,4 +1,4 @@
-import { formatDuration, isSameDay, minutesToHours } from './timeService';
+import { endOfDay, formatDuration, minutesToHours, parseSafeDate, startOfDay } from './timeService';
 
 const MEAL_ACTIVITY_CODE = '05';
 const CRITICAL_GAP_CODES = new Set(['07', '08', '09']);
@@ -42,29 +42,80 @@ function sortByMinutesDesc(items) {
   return [...items].sort((left, right) => right.minutes - left.minutes);
 }
 
+function sortByCountDesc(items) {
+  return [...items].sort((left, right) => {
+    const countDelta = Number(right.count || 0) - Number(left.count || 0);
+    if (countDelta !== 0) {
+      return countDelta;
+    }
+
+    return String(left.label || left.name || left.code || '').localeCompare(String(right.label || right.name || right.code || ''), 'pt-BR');
+  });
+}
+
+function calculateOverlapMinutes(record, periodStart, periodEnd, referenceDate = new Date()) {
+  if (!record) {
+    return 0;
+  }
+
+  const start = parseSafeDate(record.startDateTime);
+  const end = parseSafeDate(record.endDateTime) || parseSafeDate(referenceDate);
+
+  if (!start || !end) {
+    return 0;
+  }
+
+  const overlapStart = Math.max(start.getTime(), periodStart.getTime());
+  const overlapEnd = Math.min(end.getTime(), periodEnd.getTime());
+
+  if (overlapEnd <= overlapStart) {
+    return 0;
+  }
+
+  return Math.max(0, Math.round((overlapEnd - overlapStart) / 60000));
+}
+
 export function summarizeDashboard({
   records = [],
   equipments = [],
   activityTypes = [],
   shifts = [],
+  periodStart = null,
+  periodEnd = null,
   referenceDate = new Date(),
 }) {
+  const resolvedReferenceDate = parseSafeDate(referenceDate) || new Date();
+  const resolvedPeriodStart = startOfDay(parseSafeDate(periodStart) || resolvedReferenceDate);
+  const requestedPeriodEnd = parseSafeDate(periodEnd) || resolvedReferenceDate;
+  const resolvedPeriodEnd = new Date(Math.min(endOfDay(requestedPeriodEnd).getTime(), resolvedReferenceDate.getTime()));
+
+  if (resolvedPeriodEnd.getTime() < resolvedPeriodStart.getTime()) {
+    resolvedPeriodEnd.setTime(resolvedPeriodStart.getTime());
+  }
+
+  const periodDays =
+    resolvedPeriodEnd.getTime() >= resolvedPeriodStart.getTime()
+      ? Math.max(
+          1,
+          Math.floor((startOfDay(resolvedPeriodEnd).getTime() - startOfDay(resolvedPeriodStart).getTime()) / 86400000) + 1,
+        )
+      : 0;
+
+  const primaryShift = shifts.find((shift) => shift.active !== false) || shifts[0] || null;
+  const shiftMinutesPerDay = Number(primaryShift?.availableMinutes || 480);
+  const periodAvailableMinutes = periodDays * shiftMinutesPerDay;
+
   const equipmentById = new Map(equipments.map((equipment) => [equipment.id, equipment]));
-  const shiftById = new Map(shifts.map((shift) => [shift.id, shift]));
   const activityByCode = new Map(activityTypes.map((activity) => [activity.code, activity]));
 
   const relevantRecords = records.filter(
-    (record) =>
-      isSameDay(record.startDateTime, referenceDate) ||
-      isSameDay(record.endDateTime, referenceDate) ||
-      record.status === 'ABERTO',
+    (record) => calculateOverlapMinutes(record, resolvedPeriodStart, resolvedPeriodEnd, resolvedReferenceDate) > 0,
   );
 
   const byEquipment = new Map();
   const byActivity = new Map();
   const byClassification = new Map();
   const byCause = new Map();
-  const availableMinutes = new Map();
   const latestByEquipment = new Map();
   const maintenanceByActivity = new Map();
   const criticalGapActivities = new Map();
@@ -76,10 +127,10 @@ export function summarizeDashboard({
   let otherMinutes = 0;
 
   relevantRecords.forEach((record) => {
-    const minutes = calculateRecordMinutes(record, referenceDate);
-    const classification = normalizeClassification(record.classification);
+    const minutes = calculateOverlapMinutes(record, resolvedPeriodStart, resolvedPeriodEnd, resolvedReferenceDate);
+    const activity = activityByCode.get(record.activityCode);
+    const classification = normalizeClassification(record.classification || activity?.classification || 'OUTROS');
     const equipment = equipmentById.get(record.equipmentId);
-    const shift = shiftById.get(record.shiftId);
     const activityKey = record.activityCode || record.activityName || 'SEM CÓDIGO';
 
     totalMinutes += minutes;
@@ -206,18 +257,13 @@ export function summarizeDashboard({
     byCause.get(causeKey).minutes += minutes;
     byCause.get(causeKey).count += 1;
 
-    const shiftMinutes = shift?.availableMinutes || 0;
-    if (record.shiftId && shiftMinutes > 0) {
-      availableMinutes.set(record.shiftId, shiftMinutes);
-    }
-
-    const previousLatest = latestByEquipment.get(record.equipmentId);
-    const currentStamp = new Date(record.updatedAt || record.createdAt || record.startDateTime || referenceDate).getTime();
-    const previousStamp = previousLatest
-      ? new Date(previousLatest.updatedAt || previousLatest.createdAt || previousLatest.startDateTime || referenceDate).getTime()
+    const currentStamp = new Date(record.updatedAt || record.createdAt || record.startDateTime || resolvedReferenceDate).getTime();
+    const previousRecord = latestByEquipment.get(record.equipmentId);
+    const previousStamp = previousRecord
+      ? new Date(previousRecord.updatedAt || previousRecord.createdAt || previousRecord.startDateTime || resolvedReferenceDate).getTime()
       : -1;
 
-    if (!previousLatest || currentStamp >= previousStamp) {
+    if (!previousRecord || currentStamp >= previousStamp) {
       latestByEquipment.set(record.equipmentId, record);
     }
   });
@@ -245,23 +291,13 @@ export function summarizeDashboard({
       gapStats: new Map(),
     };
 
-    const recordsForEquipment = relevantRecords.filter((record) => record.equipmentId === equipment.id);
-    const shiftIds = [...new Set(recordsForEquipment.map((record) => record.shiftId).filter(Boolean))];
-    const minutesAvailable = shiftIds.length
-      ? shiftIds.reduce((sum, shiftId) => sum + (shiftById.get(shiftId)?.availableMinutes || 480), 0)
-      : 480;
-
     const latestRecord = latestByEquipment.get(equipment.id) || null;
-    const currentActivityName = latestRecord
-      ? latestRecord.status === 'ABERTO'
-        ? latestRecord.activityName
-        : latestRecord.activityName || '-'
-      : '-';
+    const currentActivityName = latestRecord ? latestRecord.activityName || '-' : '-';
 
     return {
       ...stat,
-      availableMinutes: minutesAvailable,
-      utilizationPercent: minutesAvailable > 0 ? Number(((stat.operationMinutes / minutesAvailable) * 100).toFixed(1)) : 0,
+      availableMinutes: periodAvailableMinutes,
+      utilizationPercent: periodAvailableMinutes > 0 ? Number(((stat.operationMinutes / periodAvailableMinutes) * 100).toFixed(1)) : 0,
       currentActivityName,
       lastRecord: latestRecord,
     };
@@ -271,14 +307,14 @@ export function summarizeDashboard({
     const stat = byEquipment.get(equipment.equipmentId) || equipment;
     const gapItems = [...(stat.gapStats?.values() || [])].sort((left, right) => right.minutes - left.minutes);
     const mainGap = gapItems[0] || null;
-    const totalMinutes = Number(stat.totalMinutes ?? stat.minutes ?? 0);
+    const totalMinutesForEquipment = Number(stat.totalMinutes ?? stat.minutes ?? 0);
 
     return {
       key: equipment.equipmentId,
       label: equipment.code,
       subtitle: equipment.plate,
-      totalMinutes,
-      totalHours: minutesToHours(totalMinutes),
+      totalMinutes: totalMinutesForEquipment,
+      totalHours: minutesToHours(totalMinutesForEquipment),
       operationMinutes: stat.operationMinutes || 0,
       maintenanceMinutes: stat.maintenanceMinutes || 0,
       mealMinutes: stat.mealMinutes || 0,
@@ -300,6 +336,48 @@ export function summarizeDashboard({
       mainGapHours: minutesToHours(mainGap?.minutes || 0),
     };
   });
+
+  const codeDistributionByEquipment = equipments
+    .map((equipment) => {
+      const recordsForEquipment = relevantRecords.filter((record) => record.equipmentId === equipment.id);
+
+      if (!recordsForEquipment.length) {
+        return null;
+      }
+
+      const byCode = new Map();
+
+      recordsForEquipment.forEach((record) => {
+        const activity = activityByCode.get(record.activityCode);
+        const key = record.activityCode || record.activityName || 'SEM CÓDIGO';
+
+        ensureStat(byCode, key, () => ({
+          key,
+          code: record.activityCode || '-',
+          name: activity?.name || record.activityName || '-',
+          count: 0,
+        }));
+        byCode.get(key).count += 1;
+      });
+
+      const totalCount = recordsForEquipment.length;
+
+      return {
+        key: equipment.id,
+        equipmentId: equipment.id,
+        label: equipment.code,
+        subtitle: equipment.plate,
+        totalCount,
+        segments: sortByCountDesc([...byCode.values()]).map((item) => ({
+          key: item.key,
+          label: `${item.code} - ${item.name}`,
+          value: item.count,
+          detail: `${item.count} ${item.count === 1 ? 'registro' : 'registros'}`,
+          percent: totalCount > 0 ? Number(((item.count / totalCount) * 100).toFixed(1)) : 0,
+        })),
+      };
+    })
+    .filter(Boolean);
 
   const maintenanceByEquipment = equipmentBreakdowns
     .filter((item) => item.maintenanceMinutes > 0)
@@ -341,33 +419,54 @@ export function summarizeDashboard({
   }));
 
   const openRecords = relevantRecords.filter((record) => record.status === 'ABERTO');
-  const closedTodayRecords = relevantRecords.filter((record) => record.status === 'ENCERRADO');
-  const totalOperationHours = minutesToHours(operationMinutes);
-  const totalStopHours = minutesToHours(maintenanceMinutes + idleMinutes + otherMinutes);
+  const closedRecords = relevantRecords.filter((record) => record.status === 'ENCERRADO');
+  const totalStopMinutes = maintenanceMinutes + idleMinutes + otherMinutes;
+  const operationBoundMinutes = Math.min(periodAvailableMinutes, operationMinutes);
+  const maintenanceBoundMinutes = Math.min(periodAvailableMinutes, maintenanceMinutes);
+  const availabilityMinutes = Math.max(0, periodAvailableMinutes - maintenanceBoundMinutes);
+  const nonUtilizationMinutes = Math.max(0, periodAvailableMinutes - operationBoundMinutes);
+  const physicalAvailabilityPercent = periodAvailableMinutes > 0 ? Number(((availabilityMinutes / periodAvailableMinutes) * 100).toFixed(1)) : 0;
+  const physicalUtilizationPercent = periodAvailableMinutes > 0 ? Number(((operationBoundMinutes / periodAvailableMinutes) * 100).toFixed(1)) : 0;
 
   const summary = {
+    periodStart: resolvedPeriodStart.toISOString(),
+    periodEnd: resolvedPeriodEnd.toISOString(),
+    periodDays,
+    periodAvailableMinutes,
+    physicalAvailabilityPercent,
+    physicalUtilizationPercent,
+    physicalAvailabilitySegments: [
+      { key: 'available', label: 'Disponível', value: availabilityMinutes, detail: formatDuration(availabilityMinutes) },
+      { key: 'maintenance', label: 'Manutenção', value: maintenanceBoundMinutes, detail: formatDuration(maintenanceBoundMinutes) },
+    ],
+    physicalUtilizationSegments: [
+      { key: 'operation', label: 'Em operação', value: operationBoundMinutes, detail: formatDuration(operationBoundMinutes) },
+      { key: 'rest', label: 'Demais tempos', value: nonUtilizationMinutes, detail: formatDuration(nonUtilizationMinutes) },
+    ],
     totalMinutes,
     totalHours: minutesToHours(totalMinutes),
     operationMinutes,
-    operationHours: totalOperationHours,
+    operationHours: minutesToHours(operationMinutes),
     maintenanceMinutes,
     maintenanceHours: minutesToHours(maintenanceMinutes),
     idleMinutes,
     idleHours: minutesToHours(idleMinutes),
     otherMinutes,
     otherHours: minutesToHours(otherMinutes),
-    stopMinutes: maintenanceMinutes + idleMinutes + otherMinutes,
-    stopHours: totalStopHours,
+    stopMinutes: totalStopMinutes,
+    stopHours: minutesToHours(totalStopMinutes),
     openCount: openRecords.length,
-    closedCount: closedTodayRecords.length,
+    closedCount: closedRecords.length,
     activeEquipmentCount: openRecords.length ? new Set(openRecords.map((record) => record.equipmentId)).size : 0,
-    hoursByEquipment: sortByMinutesDesc(equipmentMetrics.map((equipment) => ({
-      key: equipment.id,
-      label: `${equipment.code}`,
-      subtitle: equipment.plate,
-      minutes: equipment.minutes,
-      hours: minutesToHours(equipment.minutes),
-    }))),
+    hoursByEquipment: sortByMinutesDesc(
+      equipmentMetrics.map((equipment) => ({
+        key: equipment.id,
+        label: `${equipment.code}`,
+        subtitle: equipment.plate,
+        minutes: equipment.minutes,
+        hours: minutesToHours(equipment.minutes),
+      })),
+    ),
     byClassification: sortByMinutesDesc([...byClassification.values()]),
     byActivity: sortByMinutesDesc([...byActivity.values()]),
     topCauses: sortByMinutesDesc([...byCause.values()]).slice(0, 6),
@@ -376,10 +475,12 @@ export function summarizeDashboard({
     maintenanceByActivity: maintenanceByActivityItems,
     mealAdherenceByEquipment,
     criticalGapActivities: criticalGapItems,
+    codeDistributionByEquipment,
     equipmentMetrics,
     openRecords,
+    periodRecords: relevantRecords,
     latestByEquipment,
-    totalRecords: records.length,
+    totalRecords: relevantRecords.length,
   };
 
   return summary;

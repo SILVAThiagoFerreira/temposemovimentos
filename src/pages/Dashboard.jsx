@@ -1,12 +1,54 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { DashboardCards } from '../components/DashboardCards';
 import { RecordsTable } from '../components/RecordsTable';
 import { StatusChip } from '../components/StatusChip';
 import { summarizeDashboard } from '../services/calculationService';
+import { formatDate, toDateInputValue } from '../services/timeService';
 
 export function Dashboard() {
   const { records, equipments, activityTypes, shifts } = useApp();
+  const today = useMemo(() => toDateInputValue(new Date()), []);
+  const [period, setPeriod] = useState(() => ({ startDate: today, endDate: today }));
+  const [tick, setTick] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setTick(Date.now()), 60000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  function updatePeriod(field, value) {
+    setPeriod((current) => {
+      const next = { ...current, [field]: value || today };
+
+      if (next.startDate && next.endDate && next.endDate < next.startDate) {
+        if (field === 'startDate') {
+          next.endDate = next.startDate;
+        } else {
+          next.startDate = next.endDate;
+        }
+      }
+
+      return next;
+    });
+  }
+
+  function selectToday() {
+    setPeriod({ startDate: today, endDate: today });
+  }
+
+  const isTodayRange = period.startDate === today && period.endDate === today;
+
+  const periodLabel = useMemo(() => {
+    const startLabel = formatDate(`${period.startDate}T00:00:00`);
+    const endLabel = formatDate(`${period.endDate}T00:00:00`);
+
+    if (period.startDate === period.endDate) {
+      return startLabel;
+    }
+
+    return `${startLabel} a ${endLabel}`;
+  }, [period.endDate, period.startDate]);
 
   const summary = useMemo(
     () =>
@@ -15,14 +57,16 @@ export function Dashboard() {
         equipments,
         activityTypes,
         shifts,
-        referenceDate: new Date(),
+        periodStart: period.startDate,
+        periodEnd: period.endDate,
+        referenceDate: new Date(tick),
       }),
-    [activityTypes, equipments, records, shifts],
+    [activityTypes, equipments, period.endDate, period.startDate, records, shifts, tick],
   );
 
   const recentRecords = useMemo(
-    () => [...records].slice(0, 12),
-    [records],
+    () => [...summary.periodRecords].slice(0, 12),
+    [summary.periodRecords],
   );
 
   return (
@@ -31,9 +75,35 @@ export function Dashboard() {
         <div>
           <p className="eyebrow">Supervisão</p>
           <h2>Dashboard operacional</h2>
-          <p>Atualiza automaticamente a cada novo apontamento.</p>
+          <p>Escolha um intervalo para analisar disponibilidade, utilização e códigos por UMR.</p>
         </div>
-        <StatusChip tone="info">Frota UMB / Caminhões</StatusChip>
+        <StatusChip tone={isTodayRange ? 'success' : 'info'}>{isTodayRange ? 'AO VIVO' : 'INTERVALO'}</StatusChip>
+      </section>
+
+      <section className="card dashboard-filters">
+        <div className="card__head">
+          <div>
+            <p className="eyebrow">Período de análise</p>
+            <h2>{periodLabel}</h2>
+          </div>
+          <StatusChip tone={isTodayRange ? 'success' : 'info'}>{isTodayRange ? 'Dia atual' : 'Intervalo selecionado'}</StatusChip>
+        </div>
+
+        <div className="dashboard-filters__controls">
+          <label>
+            <span>Data inicial</span>
+            <input type="date" value={period.startDate} onChange={(event) => updatePeriod('startDate', event.target.value)} />
+          </label>
+
+          <label>
+            <span>Data final</span>
+            <input type="date" value={period.endDate} onChange={(event) => updatePeriod('endDate', event.target.value)} />
+          </label>
+
+          <button className="button button--secondary" type="button" onClick={selectToday}>
+            Hoje
+          </button>
+        </div>
       </section>
 
       <DashboardCards summary={summary} />
@@ -42,7 +112,7 @@ export function Dashboard() {
         <div className="card__head">
           <div>
             <p className="eyebrow">Últimos apontamentos</p>
-            <h2>Movimentação recente</h2>
+            <h2>Movimentação do período</h2>
           </div>
         </div>
 

@@ -3,21 +3,16 @@ import { formatDate, formatDateTime, formatTime } from './timeService';
 const CSV_HEADERS = [
   'ID',
   'Operador',
-  'Turno',
   'Placa',
   'UMB',
-  'Local',
   'Código',
   'Atividade',
-  'Classificação',
   'Data inicial',
   'Hora inicial',
   'Data final',
   'Hora final',
   'Duração em minutos',
   'Duração em horas',
-  'Falha',
-  'Ação corretiva',
   'Observações',
   'Status',
   'Criado em',
@@ -35,37 +30,20 @@ function escapeCsv(value) {
   return escaped;
 }
 
-function localLocationLabel(value) {
-  if (value === 'CHASSI') {
-    return 'C - Chassi';
-  }
-
-  if (value === 'UNIDADE') {
-    return 'U - Unidade';
-  }
-
-  return '-';
-}
-
 export function recordsToCsv(records = []) {
   const rows = records.map((record) => [
     record.id,
     record.operatorName || '-',
-    record.shiftName || '-',
     record.plate || '-',
     record.equipmentCode || '-',
-    localLocationLabel(record.location),
     record.activityCode || '-',
     record.activityName || '-',
-    record.classification || '-',
     formatDate(record.startDateTime),
     formatTime(record.startDateTime),
     record.endDateTime ? formatDate(record.endDateTime) : '-',
     record.endDateTime ? formatTime(record.endDateTime) : '-',
     record.durationMinutes ?? '-',
     record.durationHours ?? '-',
-    record.failureDescription || '-',
-    record.correctiveAction || '-',
     record.notes || '-',
     record.status || '-',
     formatDateTime(record.createdAt),

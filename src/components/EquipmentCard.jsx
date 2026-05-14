@@ -23,7 +23,7 @@ export function EquipmentCard({ equipment, selected, openRecord, onSelect }) {
 
       <div className="equipment-card__meta">
         <span>{isBusy ? openRecord.activityName : 'Disponível para apontamento'}</span>
-        <small>{isBusy ? `${openRecord.operatorName} • ${openRecord.shiftName || '-'}` : 'Pronto para operação'}</small>
+        <small>{isBusy ? openRecord.operatorName : 'Pronto para operação'}</small>
       </div>
     </button>
   );
