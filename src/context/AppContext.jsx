@@ -120,6 +120,7 @@ export function AppProvider({ children }) {
   const value = useMemo(
     () => ({
       ...state,
+      records: state.movementRecords,
       ...actions,
       refresh,
       canInstallApp: Boolean(installPromptEvent),
