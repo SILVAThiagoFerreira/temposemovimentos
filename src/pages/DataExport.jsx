@@ -87,7 +87,7 @@ export function DataExport() {
 
     resetDatabase();
     setEditingRecord(null);
-    setNotice('Base local restaurada.');
+    setNotice('Base restaurada.');
   }
 
   function handleEdit(record) {

@@ -31,11 +31,15 @@ const requiredFiles = [
   'DATA_SCHEMA.md',
   'config.json',
   'src/main.jsx',
+  'src/services/firebaseClient.js',
   'input/README.md',
   'input/backup-template.json',
   'output/README.md',
   'logs/README.md',
   'tests/README.md',
+  'firebase.json',
+  '.firebaserc',
+  'firestore.rules',
 ];
 
 requiredFiles.forEach(fileExistsAndNonEmpty);
@@ -45,6 +49,9 @@ const config = readJson(resolve(root, 'config.json'));
 assert(config?.meta?.name, 'config.json sem meta.name');
 assert(config?.storage?.keys?.database, 'config.json sem storage.keys.database');
 assert(config?.storage?.keys?.session, 'config.json sem storage.keys.session');
+assert(config?.firebase?.webConfig?.apiKey, 'config.json sem firebase.webConfig.apiKey');
+assert(config?.firebase?.stateCollection, 'config.json sem firebase.stateCollection');
+assert(config?.firebase?.stateDocument, 'config.json sem firebase.stateDocument');
 assert(Array.isArray(config?.seed?.users) && config.seed.users.length >= 5, 'config.json sem usuários iniciais');
 assert(Array.isArray(config?.seed?.equipments) && config.seed.equipments.length >= 3, 'config.json sem equipamentos iniciais');
 assert(Array.isArray(config?.seed?.activityTypes) && config.seed.activityTypes.length >= 12, 'config.json sem códigos iniciais');

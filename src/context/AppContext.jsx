@@ -132,7 +132,7 @@ export function AppProvider({ children }) {
       ...actions,
       refresh,
       canInstallApp: Boolean(installPromptEvent),
-      isLocalMode: state.settings?.storageMode !== 'ONLINE',
+      isLocalMode: state.settings?.storageMode !== 'ONLINE' || state.storageMeta?.backendAvailable !== true,
     }),
     [actions, installPromptEvent, refresh, state],
   );

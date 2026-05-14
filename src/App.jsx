@@ -12,7 +12,7 @@ import { Settings } from './pages/Settings';
 const ROUTES = [
   { path: '/operador', label: 'Operador', helper: 'Apontamento rápido' },
   { path: '/dashboard', label: 'Dashboard', helper: 'Supervisão' },
-  { path: '/cadastros', label: 'Cadastros', helper: 'Base local' },
+  { path: '/cadastros', label: 'Cadastros', helper: 'Base sincronizada' },
   { path: '/dados', label: 'Dados', helper: 'Exportação' },
   { path: '/configuracoes', label: 'Configurações', helper: 'PWA e fase 2' },
 ];
@@ -124,7 +124,7 @@ function AppShell() {
     <div className="app-frame">
       <Header
         title={title}
-        subtitle="Apontamento operacional local para UMBs e caminhões"
+        subtitle="Apontamento operacional sincronizado para UMBs e caminhões"
         session={session}
         canInstallApp={canInstallApp}
         onInstall={installApp}

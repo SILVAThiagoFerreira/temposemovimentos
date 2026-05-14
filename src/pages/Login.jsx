@@ -32,7 +32,7 @@ export function Login({ navigate }) {
     }
   }, [activeUsers, selectedUserId]);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     if (!selectedUserId) {
@@ -46,7 +46,7 @@ export function Login({ navigate }) {
     }
 
     try {
-      const user = authenticateOperator(selectedUserId, password.trim());
+      const user = await authenticateOperator(selectedUserId, password.trim());
       const selectedShiftName = user.shiftName || '';
 
       loginOperator({
@@ -57,6 +57,9 @@ export function Login({ navigate }) {
         shiftId: user.shiftId || null,
         shiftName: selectedShiftName,
         loggedAt: new Date().toISOString(),
+        accessToken: user.accessToken || null,
+        expiresAt: user.expiresAt || null,
+        sessionId: user.sessionId || null,
       });
 
       navigate(user.role === 'GERENTE' ? '/dashboard' : '/operador');
@@ -69,11 +72,11 @@ export function Login({ navigate }) {
     <section className="login-view">
       <div className="login-hero card card--shell">
         <img className="login-logo" src={enaexLogo} alt="Enaex Brasil" />
-        <p className="eyebrow">Acesso local</p>
+        <p className="eyebrow">Acesso sincronizado</p>
         <h1>SISTEMA DE TEMPOS E MOVIMENTOS</h1>
         <p className="login-copy">
-          Selecione um usuário cadastrado e informe a senha para entrar. Os operadores acessam só o apontamento;
-          o gerente acessa o sistema completo.
+          Selecione um usuário cadastrado e informe a senha para entrar. O acesso consulta o Firestore e mantém o cache local;
+          os operadores acessam só o apontamento, e o gerente acessa o sistema completo.
         </p>
 
         <div className="login-points">

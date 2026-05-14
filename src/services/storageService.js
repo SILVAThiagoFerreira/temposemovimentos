@@ -3,6 +3,7 @@ import { initialEquipments } from '../data/initialEquipments';
 import { initialShifts } from '../data/initialShifts';
 import { initialUsers } from '../data/initialUsers';
 import { authConfig, storageConfig } from '../config/runtimeConfig';
+import { ensureFirebaseClient, isFirebaseConfigured, readRemoteDatabase, subscribeRemoteDatabase, writeRemoteDatabase } from './firebaseClient';
 import { createId } from '../utils/id';
 import { differenceMinutes, minutesToHours, nowIso } from './timeService';
 
@@ -15,11 +16,18 @@ const PERSISTENCE_STORE = storageConfig.persistence.storeName;
 
 let persistenceDbPromise = null;
 let persistenceQueue = Promise.resolve();
+let remoteSyncQueue = Promise.resolve();
+let remoteListenerUnsubscribe = null;
 let memoryDatabaseSnapshot = null;
 let memorySessionSnapshot = null;
 const storageMeta = {
   persistentStorageGranted: false,
   indexedDbAvailable: false,
+  backendConfigured: false,
+  backendAvailable: false,
+  connectionState: 'OFFLINE',
+  lastRemoteSyncAt: null,
+  lastRemoteSyncError: null,
   bootstrappedAt: null,
 };
 
@@ -182,6 +190,116 @@ function mirrorSessionSnapshot(session) {
   persistSnapshot(SESSION_KEY, session);
 }
 
+function markBackendStatus({ available, error = null, syncedAt = null } = {}) {
+  storageMeta.backendConfigured = isFirebaseConfigured();
+  if (typeof available === 'boolean') {
+    storageMeta.backendAvailable = available;
+    storageMeta.connectionState = available ? 'ONLINE' : 'OFFLINE';
+  }
+  if (error !== undefined) {
+    storageMeta.lastRemoteSyncError = error;
+  }
+  if (syncedAt !== undefined) {
+    storageMeta.lastRemoteSyncAt = syncedAt;
+  }
+}
+
+function setDatabaseSettingsMode(database, mode) {
+  return {
+    ...database,
+    settings: {
+      ...database.settings,
+      storageMode: mode,
+      updatedAt: nowIso(),
+    },
+    updatedAt: nowIso(),
+  };
+}
+
+async function bootstrapBackendSnapshot(database) {
+  try {
+    const response = await readRemoteDatabase();
+
+    if (response) {
+      markBackendStatus({ available: true, error: null, syncedAt: nowIso() });
+      return response;
+    }
+
+    await writeRemoteDatabase(database);
+    markBackendStatus({ available: true, error: null, syncedAt: nowIso() });
+    return database;
+  } catch (error) {
+    markBackendStatus({ available: false, error: error?.message || 'Falha ao inicializar Firebase' });
+    return null;
+  }
+}
+
+async function syncBackendSnapshot(database) {
+  try {
+    await writeRemoteDatabase(database);
+    markBackendStatus({ available: true, error: null, syncedAt: nowIso() });
+    return database;
+  } catch (error) {
+    markBackendStatus({ available: false, error: error?.message || 'Falha ao sincronizar Firebase' });
+    return null;
+  }
+}
+
+function queueBackendSync(database, reason = 'database-sync') {
+  if (!isFirebaseConfigured()) {
+    return Promise.resolve(null);
+  }
+
+  remoteSyncQueue = remoteSyncQueue
+    .then(async () => {
+      const synced = await syncBackendSnapshot(database);
+
+      if (!synced) {
+        return null;
+      }
+
+      const normalized = normalizeDatabase(synced);
+      memoryDatabaseSnapshot = cloneSnapshot(normalized);
+      safeWriteJson(DB_KEY, normalized);
+      persistSnapshot(DB_KEY, normalized);
+      emitChange({ reason: `${reason}-remote`, scope: 'database' });
+      return normalized;
+    })
+    .catch(() => null);
+
+  return remoteSyncQueue;
+}
+
+async function attachRemoteListener() {
+  if (!isFirebaseConfigured() || remoteListenerUnsubscribe) {
+    return;
+  }
+
+  remoteListenerUnsubscribe = await subscribeRemoteDatabase((remoteDatabase, error) => {
+    if (error) {
+      markBackendStatus({ available: false, error: error.message || 'Falha ao ouvir Firebase' });
+      return;
+    }
+
+    if (!remoteDatabase) {
+      return;
+    }
+
+    const normalizedRemote = normalizeDatabase(remoteDatabase);
+    const currentDatabase = memoryDatabaseSnapshot || readDatabase();
+
+    if (readTimeStamp(normalizedRemote, 'updatedAt') <= readTimeStamp(currentDatabase, 'updatedAt')) {
+      return;
+    }
+
+    memoryDatabaseSnapshot = cloneSnapshot(normalizedRemote);
+    safeWriteJson(DB_KEY, normalizedRemote);
+    persistSnapshot(DB_KEY, normalizedRemote);
+    markBackendStatus({ available: true, error: null, syncedAt: nowIso() });
+    emitChange({ reason: 'firebase-snapshot', scope: 'database' });
+  });
+}
+
 function mergeMissingSeedUsers(users) {
   const existingIds = new Set(users.map((user) => user.id));
   const missingUsers = initialUsers.filter((user) => !existingIds.has(user.id));
@@ -241,13 +359,14 @@ function normalizeOperator(operator = {}) {
     String(operator.shiftName || '').trim() ||
     initialShifts.find((shift) => shift.id === operator.shiftId)?.name ||
     '';
+  const hasPasswordField = Object.prototype.hasOwnProperty.call(operator, 'password');
 
   return {
     id: operator.id || createId('op'),
     name: String(operator.name || '').trim(),
     registration: String(operator.registration || '').trim(),
     role: String(operator.role || authConfig.roles.operational).trim().toUpperCase(),
-    password: String(operator.password ?? authConfig.defaultPassword).trim(),
+    password: hasPasswordField ? String(operator.password ?? '').trim() : '',
     shiftId: operator.shiftId || null,
     shiftName,
     active: operator.active !== false,
@@ -399,6 +518,9 @@ function normalizeDatabase(raw) {
 
 export async function bootstrapStorage() {
   storageMeta.bootstrappedAt = nowIso();
+  storageMeta.backendConfigured = isFirebaseConfigured();
+  storageMeta.backendAvailable = false;
+  storageMeta.lastRemoteSyncError = null;
   storageMeta.persistentStorageGranted = storageConfig.requestPersistentStorage
     ? await requestPersistentStoragePermission()
     : false;
@@ -411,16 +533,40 @@ export async function bootstrapStorage() {
       idbGet(SESSION_KEY).catch(() => null),
     ]);
 
-    const resolvedDatabase = chooseNewestSnapshot(
-      localDatabase ? normalizeDatabase(localDatabase) : null,
-      indexedDatabase ? normalizeDatabase(indexedDatabase) : null,
-      createInitialDatabase(),
-      'updatedAt',
-    );
+    const freshDatabase = createInitialDatabase();
+    const localSnapshot = localDatabase ? normalizeDatabase(localDatabase) : null;
+    const indexedSnapshot = indexedDatabase ? normalizeDatabase(indexedDatabase) : null;
 
-    const resolvedSession = chooseNewestSnapshot(localSession, indexedSession, null, 'loggedAt');
+    let resolvedDatabase = chooseNewestSnapshot(localSnapshot, indexedSnapshot, freshDatabase, 'updatedAt');
 
-    memoryDatabaseSnapshot = resolvedDatabase ? cloneSnapshot(resolvedDatabase) : createInitialDatabase();
+    let resolvedSession = chooseNewestSnapshot(localSession, indexedSession, null, 'loggedAt');
+
+    if (resolvedSession?.expiresAt && new Date(resolvedSession.expiresAt).getTime() <= Date.now()) {
+      resolvedSession = null;
+    }
+
+    if (storageMeta.backendConfigured) {
+      await ensureFirebaseClient();
+      const remoteSnapshot = await bootstrapBackendSnapshot(setDatabaseSettingsMode(resolvedDatabase || freshDatabase, 'ONLINE'));
+
+      if (remoteSnapshot) {
+        const normalizedRemote = normalizeDatabase(remoteSnapshot);
+        const chosenDatabase = chooseNewestSnapshot(
+          resolvedDatabase,
+          normalizedRemote,
+          freshDatabase,
+          'updatedAt',
+        );
+        resolvedDatabase = setDatabaseSettingsMode(chosenDatabase, 'ONLINE');
+        storageMeta.backendAvailable = true;
+        if (readTimeStamp(chosenDatabase, 'updatedAt') > readTimeStamp(normalizedRemote, 'updatedAt')) {
+          await writeRemoteDatabase(resolvedDatabase);
+        }
+        await attachRemoteListener();
+      }
+    }
+
+    memoryDatabaseSnapshot = resolvedDatabase ? cloneSnapshot(resolvedDatabase) : freshDatabase;
     memorySessionSnapshot = resolvedSession ? { ...resolvedSession } : null;
 
     if (resolvedDatabase) {
@@ -437,9 +583,14 @@ export async function bootstrapStorage() {
     }
 
     if (!resolvedDatabase) {
-      const fresh = createInitialDatabase();
+      const fresh = setDatabaseSettingsMode(createInitialDatabase(), storageMeta.backendAvailable ? 'ONLINE' : 'LOCAL');
+      memoryDatabaseSnapshot = cloneSnapshot(fresh);
       setLocalSnapshot(DB_KEY, fresh);
       persistSnapshot(DB_KEY, fresh);
+    }
+
+    if (storageMeta.backendConfigured && !remoteListenerUnsubscribe) {
+      await attachRemoteListener();
     }
   } catch {
     const fallback = normalizeDatabase(safeReadJson(DB_KEY));
@@ -474,6 +625,7 @@ function writeDatabase(database, reason = 'database-write') {
   safeWriteJson(DB_KEY, normalized);
   mirrorDatabaseSnapshot(normalized);
   emitChange({ reason, scope: 'database' });
+  void queueBackendSync(normalized, reason);
   return normalized;
 }
 
@@ -529,6 +681,20 @@ function writeSession(session) {
 
 function findEntityById(collection, id) {
   return collection.find((item) => item.id === id) || null;
+}
+
+function authenticateOperatorFromDatabase(database, operatorId, password) {
+  const existing = findEntityById(database.operators, operatorId);
+
+  if (!existing || existing.active === false) {
+    throw new Error('Usuário inativo ou não encontrado');
+  }
+
+  if (String(existing.password || '') !== String(password || '')) {
+    throw new Error('Senha inválida');
+  }
+
+  return existing;
 }
 
 function upsertById(collection, entity, normalizer) {
@@ -625,19 +791,8 @@ export function saveOperator(operator) {
   return item;
 }
 
-export function authenticateOperator(operatorId, password) {
-  const database = readDatabase();
-  const existing = findEntityById(database.operators, operatorId);
-
-  if (!existing || existing.active === false) {
-    throw new Error('Usuário inativo ou não encontrado');
-  }
-
-  if (String(existing.password || '') !== String(password || '')) {
-    throw new Error('Senha inválida');
-  }
-
-  return existing;
+export async function authenticateOperator(operatorId, password) {
+  return authenticateOperatorFromDatabase(readDatabase(), operatorId, password);
 }
 
 export function updateOperator(id, patch) {
@@ -962,10 +1117,9 @@ export function importData(payload) {
 }
 
 export function resetDatabase() {
-  const fresh = createInitialDatabase();
-  safeWriteJson(DB_KEY, fresh);
+  const fresh = setDatabaseSettingsMode(createInitialDatabase(), storageMeta.backendAvailable ? 'ONLINE' : 'LOCAL');
+  writeDatabase(fresh, 'reset');
   clearSession();
-  emitChange({ reason: 'reset', scope: 'database' });
   return loadAppState();
 }
 

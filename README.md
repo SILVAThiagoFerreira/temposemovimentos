@@ -1,6 +1,6 @@
 # Sistema de Tempos e Movimentos - UMB / Caminhões
 
-Sistema web PWA para apontamento operacional em tablets, com persistência local reforçada, exportação e base pronta para evolução online.
+Sistema web PWA para apontamento operacional em tablets, com frontend no GitHub Pages, Firestore direto e cache local para operação offline.
 
 ## Objetivo
 
@@ -16,8 +16,9 @@ Registrar atividades, paradas e duração por equipamento em campo, com acesso p
 ## Processamento
 
 - `src/main.jsx` inicia o bootstrap do armazenamento.
-- `src/services/storageService.js` restaura e espelha dados em `localStorage` e `IndexedDB`.
-- `src/pages/Login.jsx` autentica por usuário fixo.
+- `src/services/storageService.js` restaura o snapshot local, sincroniza com o Firestore e mantém o espelho em `localStorage` e `IndexedDB`.
+- `src/services/firebaseClient.js` inicializa o Firebase web SDK sem exigir sessão anônima.
+- `src/pages/Login.jsx` autentica por usuário e recupera a sessão.
 - `src/pages/OperatorPanel.jsx` executa o fluxo operacional.
 - `src/pages/Settings.jsx` administra usuários somente para gerente.
 
@@ -27,7 +28,7 @@ Registrar atividades, paradas e duração por equipamento em campo, com acesso p
 - Dashboard de supervisão.
 - Exportação CSV.
 - Backup JSON.
-- Dados persistidos entre reinícios de navegador e limpeza de cache local.
+- Dados persistidos entre reinícios de navegador, troca de dispositivo e reabertura da aba.
 
 ## Validação
 
@@ -43,6 +44,8 @@ Registrar atividades, paradas e duração por equipamento em campo, com acesso p
 4. `npm run build`
 5. `npm run validate`
 
+O Firebase web config já está em `config.json`.
+
 ## Estrutura principal
 
 - `config.json` - fonte central de parâmetros e seeds.
@@ -54,4 +57,9 @@ Registrar atividades, paradas e duração por equipamento em campo, com acesso p
 
 ## Publicação
 
-O deploy está preparado para GitHub Pages via GitHub Actions.
+O frontend é publicado no GitHub Pages e sincroniza direto com Firestore.
+
+## Deploy
+
+- Nenhum segredo é necessário para o build do GitHub Pages.
+- Se mudar as regras do Firestore, publique `firestore.rules` com o Firebase CLI.

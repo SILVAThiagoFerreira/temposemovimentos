@@ -7,3 +7,12 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 VISUAL/
+chave de serviço firebase/
+*.firebase-adminsdk-*.json
+.env
+.env.local
+.env.*.local
+server/.env
+server/.env.local
+server/node_modules/
+.firebase/

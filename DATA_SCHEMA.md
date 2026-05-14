@@ -6,6 +6,7 @@
 {
   "meta": {},
   "storage": {},
+  "firebase": {},
   "auth": {},
   "seed": {},
   "validation": {},
@@ -78,6 +79,20 @@
 }
 ```
 
+## AuditEvent
+
+```json
+{
+  "id": "evt-...",
+  "eventType": "state-sync",
+  "scope": "database",
+  "actorId": "usr-paulo",
+  "actorName": "Paulo",
+  "payload": {},
+  "createdAt": "ISO-8601"
+}
+```
+
 ## BackupPayload
 
 ```json
@@ -99,6 +114,25 @@
 {
   "persistentStorageGranted": true,
   "indexedDbAvailable": true,
-  "bootstrappedAt": "ISO-8601"
+  "bootstrappedAt": "ISO-8601",
+  "backendConfigured": true,
+  "backendAvailable": true,
+  "connectionState": "ONLINE",
+  "lastRemoteSyncAt": "ISO-8601",
+  "lastRemoteSyncError": null
+}
+```
+
+## Snapshot
+
+```json
+{
+  "version": 1,
+  "operators": [],
+  "equipments": [],
+  "activityTypes": [],
+  "shifts": [],
+  "movementRecords": [],
+  "settings": {}
 }
 ```

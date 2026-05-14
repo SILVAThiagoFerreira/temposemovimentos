@@ -84,7 +84,7 @@ export function Settings() {
       name: user.name || '',
       registration: user.registration || '',
       role: user.role || 'OPERADOR',
-      password: user.password || '1234',
+      password: '',
       shiftId: user.shiftId || defaultShiftId,
       active: user.active !== false,
     });
@@ -102,7 +102,7 @@ export function Settings() {
       return;
     }
 
-    if (!password) {
+    if (!password && !userForm.id) {
       setNotice('Informe a senha.');
       return;
     }
@@ -113,11 +113,14 @@ export function Settings() {
       name,
       registration: userForm.registration.trim(),
       role: userForm.role,
-      password,
       shiftId: userForm.role === 'OPERADOR' ? selectedShift?.id || defaultShiftId || null : userForm.shiftId || null,
       shiftName: userForm.role === 'OPERADOR' ? selectedShift?.name || '' : '',
       active: userForm.active,
     };
+
+    if (!userForm.id || password) {
+      payload.password = password;
+    }
 
     try {
       if (payload.id) {
@@ -242,7 +245,7 @@ export function Settings() {
                   type="password"
                   value={userForm.password}
                   onChange={(event) => setUserForm({ ...userForm, password: event.target.value })}
-                  placeholder="Senha"
+                  placeholder="Nova senha (opcional na edição)"
                 />
               </label>
 
@@ -348,10 +351,10 @@ export function Settings() {
           <div className="card__head">
             <div>
               <p className="eyebrow">Armazenamento</p>
-              <h2>Base local</h2>
+              <h2>Base sincronizada</h2>
             </div>
           </div>
-          <p>Os dados são gravados em `localStorage` e espelhados em `IndexedDB`. O navegador também é solicitado a manter esse armazenamento como persistente.</p>
+          <p>Os dados são gravados em cache local, espelhados em `IndexedDB` e sincronizados com o Firestore. O navegador também é solicitado a manter esse armazenamento como persistente.</p>
           <div className="settings-rows">
             <div>
               <span>Status atual</span>
