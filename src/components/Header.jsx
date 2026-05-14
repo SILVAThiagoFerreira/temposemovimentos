@@ -29,7 +29,7 @@ export function Header({
         {session ? (
           <div className="header-session card__inline">
             <strong>{session.operatorName}</strong>
-            <span>{session.shiftName || 'Turno não informado'}</span>
+            <span>{session.role === 'GERENTE' ? 'Gerente' : session.shiftName || 'Turno não informado'}</span>
           </div>
         ) : null}
         {canInstallApp ? (

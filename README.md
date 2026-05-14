@@ -4,7 +4,7 @@ Aplicação web 100% front-end para tablets, com foco em apontamento operacional
 
 ## Fase 1 - MVP Offline
 
-- Login local do operador.
+- Login com usuários fixos e senha.
 - Apontamento de atividades/paradas.
 - Controle de atividade aberta.
 - Dashboard local.
@@ -12,6 +12,20 @@ Aplicação web 100% front-end para tablets, com foco em apontamento operacional
 - Backup e restore JSON.
 - PWA instalável.
 - Cache básico para uso offline.
+
+### Usuários iniciais
+
+- Paulo - Operador - senha `1234`
+- Deyvis - Operador - senha `1234`
+- Gilmar - Operador - senha `1234`
+- Thiago Gama - Operador - senha `1234`
+- Jose Wilkinson - Gerente - senha `1234`
+
+### Regras de acesso
+
+- Usuários operacionais entram só na tela de apontamento.
+- O gerente acessa todas as telas.
+- Somente o gerente pode criar, editar, ativar, desativar e excluir usuários em `Configurações`.
 
 ## Fase 2 - Modo Online
 

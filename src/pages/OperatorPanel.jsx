@@ -7,8 +7,8 @@ import { RecordsTable } from '../components/RecordsTable';
 import { StatusChip } from '../components/StatusChip';
 import { isSameDay } from '../services/timeService';
 
-export function OperatorPanel({ navigate }) {
-  const { session, operators, equipments, records, activityTypes, shifts, startMovementRecord, closeMovementRecord } = useApp();
+export function OperatorPanel({ standalone = false, onLogout }) {
+  const { session, operators, equipments, records, activityTypes, shifts, startMovementRecord, closeMovementRecord, logout } = useApp();
   const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
 
   useEffect(() => {
@@ -74,6 +74,30 @@ export function OperatorPanel({ navigate }) {
 
   return (
     <div className="page-stack">
+      {standalone ? (
+        <section className="card operator-topbar card--shell">
+          <div>
+            <p className="eyebrow">Modo operacional</p>
+            <h2>{session.operatorName}</h2>
+            <p>{session.role === 'GERENTE' ? 'Gerente com acesso completo' : 'Acesso somente ao apontamento'}</p>
+          </div>
+          <button
+            className="button button--ghost"
+            type="button"
+            onClick={() => {
+              if (onLogout) {
+                onLogout();
+                return;
+              }
+
+              logout();
+            }}
+          >
+            Sair
+          </button>
+        </section>
+      ) : null}
+
       <section className="hero-row">
         <article className="card hero-card">
           <p className="eyebrow">Operador logado</p>

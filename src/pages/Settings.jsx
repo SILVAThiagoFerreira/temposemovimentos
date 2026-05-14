@@ -1,18 +1,50 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { StatusChip } from '../components/StatusChip';
 
-const integrationRoadmap = [
-  'Firebase Firestore',
-  'Supabase',
-  'API própria',
-  'Power BI',
-  'Google Sheets',
-  'Banco SQL',
-];
+const integrationRoadmap = ['Firebase Firestore', 'Supabase', 'API própria', 'Power BI', 'Google Sheets', 'Banco SQL'];
+
+function createEmptyUserForm(defaultShiftId) {
+  return {
+    id: '',
+    name: '',
+    registration: '',
+    role: 'OPERADOR',
+    password: '1234',
+    shiftId: defaultShiftId || '',
+    active: true,
+  };
+}
+
+function roleLabel(role) {
+  return role === 'GERENTE' ? 'Gerente' : 'Operador';
+}
 
 export function Settings() {
-  const { settings, shifts, updateSettings, canInstallApp, installApp, isLocalMode } = useApp();
+  const {
+    session,
+    operators,
+    settings,
+    shifts,
+    updateSettings,
+    saveOperator,
+    updateOperator,
+    deleteOperator,
+    canInstallApp,
+    installApp,
+    isLocalMode,
+  } = useApp();
+
+  const isManager = session?.role === 'GERENTE';
+  const defaultShiftId = shifts[0]?.id || '';
+  const [notice, setNotice] = useState('');
+  const [userForm, setUserForm] = useState(() => createEmptyUserForm(defaultShiftId));
+
+  useEffect(() => {
+    if (userForm.role === 'OPERADOR' && !userForm.shiftId && defaultShiftId) {
+      setUserForm((current) => ({ ...current, shiftId: defaultShiftId }));
+    }
+  }, [defaultShiftId, userForm.role, userForm.shiftId]);
 
   const storageLabel = isLocalMode ? 'LOCAL / OFFLINE' : 'ONLINE';
 
@@ -24,18 +56,270 @@ export function Settings() {
     [isLocalMode, storageLabel],
   );
 
+  const activeManagers = useMemo(
+    () => operators.filter((user) => user.role === 'GERENTE' && user.active !== false).length,
+    [operators],
+  );
+
+  const visibleUsers = useMemo(
+    () =>
+      [...operators].sort((left, right) => {
+        const leftRole = left.role === 'GERENTE' ? 1 : 0;
+        const rightRole = right.role === 'GERENTE' ? 1 : 0;
+        return rightRole - leftRole || left.name.localeCompare(right.name, 'pt-BR');
+      }),
+    [operators],
+  );
+
+  function fillUserForm(user) {
+    setUserForm({
+      id: user.id,
+      name: user.name || '',
+      registration: user.registration || '',
+      role: user.role || 'OPERADOR',
+      password: user.password || '1234',
+      shiftId: user.shiftId || defaultShiftId,
+      active: user.active !== false,
+    });
+    setNotice('');
+  }
+
+  function handleUserSubmit(event) {
+    event.preventDefault();
+
+    const name = userForm.name.trim();
+    const password = userForm.password.trim();
+
+    if (!name) {
+      setNotice('Informe o nome do usuário.');
+      return;
+    }
+
+    if (!password) {
+      setNotice('Informe a senha.');
+      return;
+    }
+
+    const selectedShift = shifts.find((shift) => shift.id === userForm.shiftId) || shifts[0] || null;
+    const payload = {
+      id: userForm.id,
+      name,
+      registration: userForm.registration.trim(),
+      role: userForm.role,
+      password,
+      shiftId: userForm.role === 'OPERADOR' ? selectedShift?.id || defaultShiftId || null : userForm.shiftId || null,
+      shiftName: userForm.role === 'OPERADOR' ? selectedShift?.name || '' : '',
+      active: userForm.active,
+    };
+
+    try {
+      if (payload.id) {
+        updateOperator(payload.id, payload);
+        setNotice('Usuário atualizado.');
+      } else {
+        saveOperator(payload);
+        setNotice('Usuário criado.');
+      }
+
+      setUserForm(createEmptyUserForm(defaultShiftId));
+    } catch (error) {
+      setNotice(error.message || 'Falha ao salvar usuário.');
+    }
+  }
+
+  function handleToggleActive(user) {
+    const nextActive = !user.active;
+
+    try {
+      updateOperator(user.id, { active: nextActive });
+      setNotice(nextActive ? 'Usuário ativado.' : 'Usuário desativado.');
+    } catch (error) {
+      setNotice(error.message || 'Falha ao alterar status.');
+    }
+  }
+
+  function handleDeleteUser(user) {
+    if (!window.confirm(`Excluir o usuário ${user.name}?`)) {
+      return;
+    }
+
+    try {
+      deleteOperator(user.id);
+      setNotice('Usuário excluído.');
+      if (userForm.id === user.id) {
+        setUserForm(createEmptyUserForm(defaultShiftId));
+      }
+    } catch (error) {
+      setNotice(error.message || 'Falha ao excluir usuário.');
+    }
+  }
+
+  if (!isManager) {
+    return (
+      <div className="page-stack">
+        <section className="card page-banner">
+          <div>
+            <p className="eyebrow">Configurações</p>
+            <h2>Acesso restrito</h2>
+            <p>Somente usuários da classe Gerente podem alterar cadastros de usuários.</p>
+          </div>
+          <StatusChip tone="danger">SEM PERMISSÃO</StatusChip>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="page-stack">
       <section className="card page-banner">
         <div>
           <p className="eyebrow">Configurações</p>
-          <h2>Ambiente do sistema</h2>
-          <p>Preparado para a Fase 2 sem alterar as telas do operador.</p>
+          <h2>Usuários e ambiente</h2>
+          <p>Cadastros de usuários, PWA e base local.</p>
         </div>
         <StatusChip tone={storageState.tone}>{storageState.label}</StatusChip>
       </section>
 
+      {notice ? <div className="alert alert--info">{notice}</div> : null}
+
       <section className="settings-grid">
+        <article className="card settings-card settings-card--wide">
+          <div className="card__head">
+            <div>
+              <p className="eyebrow">Usuários</p>
+              <h2>Gerenciamento completo</h2>
+            </div>
+            <StatusChip tone="info">{operators.length} cadastrados</StatusChip>
+          </div>
+
+          <form className="user-admin-form" onSubmit={handleUserSubmit}>
+            <div className="form-grid form-grid--two">
+              <label>
+                <span>Nome</span>
+                <input
+                  value={userForm.name}
+                  onChange={(event) => setUserForm({ ...userForm, name: event.target.value })}
+                  placeholder="Nome do usuário"
+                />
+              </label>
+
+              <label>
+                <span>Matrícula</span>
+                <input
+                  value={userForm.registration}
+                  onChange={(event) => setUserForm({ ...userForm, registration: event.target.value })}
+                  placeholder="Opcional"
+                />
+              </label>
+
+              <label>
+                <span>Classe</span>
+                <select
+                  value={userForm.role}
+                  onChange={(event) =>
+                    setUserForm({
+                      ...userForm,
+                      role: event.target.value,
+                      shiftId: event.target.value === 'OPERADOR' ? userForm.shiftId || defaultShiftId : '',
+                    })
+                  }
+                >
+                  <option value="OPERADOR">Operador</option>
+                  <option value="GERENTE">Gerente</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Senha</span>
+                <input
+                  type="password"
+                  value={userForm.password}
+                  onChange={(event) => setUserForm({ ...userForm, password: event.target.value })}
+                  placeholder="Senha"
+                />
+              </label>
+
+              <label>
+                <span>Turno</span>
+                <select
+                  value={userForm.shiftId}
+                  onChange={(event) => setUserForm({ ...userForm, shiftId: event.target.value })}
+                  disabled={userForm.role === 'GERENTE'}
+                >
+                  <option value="">Sem turno</option>
+                  {shifts.map((shift) => (
+                    <option key={shift.id} value={shift.id}>
+                      {shift.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="toggle-field toggle-field--inline">
+                <input
+                  type="checkbox"
+                  checked={userForm.active}
+                  onChange={(event) => setUserForm({ ...userForm, active: event.target.checked })}
+                />
+                <span>Ativo</span>
+              </label>
+            </div>
+
+            <div className="form-actions">
+              <button className="button button--primary" type="submit">
+                {userForm.id ? 'Salvar alteração' : 'Criar usuário'}
+              </button>
+              {userForm.id ? (
+                <button className="button button--ghost" type="button" onClick={() => setUserForm(createEmptyUserForm(defaultShiftId))}>
+                  Cancelar edição
+                </button>
+              ) : null}
+            </div>
+          </form>
+
+          <div className="entity-list user-list">
+            {visibleUsers.map((user) => {
+              const canDeleteManager = user.role === 'GERENTE' && activeManagers <= 1;
+              const canToggleManager = user.role === 'GERENTE' && activeManagers <= 1 && user.active !== false;
+
+              return (
+                <div key={user.id} className={`entity-row ${user.active === false ? 'is-inactive' : ''}`}>
+                  <div>
+                    <strong>{user.name}</strong>
+                    <small>
+                      {roleLabel(user.role)} • {user.shiftName || 'Sem turno'} • {user.active === false ? 'Inativo' : 'Ativo'}
+                    </small>
+                  </div>
+
+                  <div className="entity-actions">
+                    <button className="button button--ghost button--tiny" type="button" onClick={() => fillUserForm(user)}>
+                      Editar
+                    </button>
+                    <button
+                      className="button button--secondary button--tiny"
+                      type="button"
+                      onClick={() => handleToggleActive(user)}
+                      disabled={canToggleManager}
+                      title={canToggleManager ? 'É necessário manter ao menos um gerente ativo' : 'Alternar status'}
+                    >
+                      {user.active === false ? 'Ativar' : 'Desativar'}
+                    </button>
+                    <button
+                      className="button button--danger button--tiny"
+                      type="button"
+                      onClick={() => handleDeleteUser(user)}
+                      disabled={canDeleteManager}
+                      title={canDeleteManager ? 'É necessário manter ao menos um gerente ativo' : 'Excluir usuário'}
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </article>
+
         <article className="card settings-card">
           <div className="card__head">
             <div>
@@ -102,14 +386,18 @@ export function Settings() {
         <article className="card settings-card">
           <div className="card__head">
             <div>
-              <p className="eyebrow">Base carregada</p>
-              <h2>Resumo</h2>
+              <p className="eyebrow">Resumo</p>
+              <h2>Base carregada</h2>
             </div>
           </div>
           <div className="settings-rows">
             <div>
-              <span>Turnos</span>
-              <strong>{shifts.length}</strong>
+              <span>Usuários ativos</span>
+              <strong>{operators.filter((user) => user.active !== false).length}</strong>
+            </div>
+            <div>
+              <span>Gerentes ativos</span>
+              <strong>{activeManagers}</strong>
             </div>
             <div>
               <span>Modo</span>

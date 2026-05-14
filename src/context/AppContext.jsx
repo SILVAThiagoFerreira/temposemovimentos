@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import {
   clearSession,
   closeMovementRecord,
+  authenticateOperator as authenticateOperatorUser,
   createMovementRecord,
   deleteActivityType,
   deleteEquipment,
@@ -82,6 +83,7 @@ export function AppProvider({ children }) {
     () => ({
       loginOperator: (session) => run(() => saveSession(session)),
       logout: () => run(() => clearSession()),
+      authenticateOperator: (operatorId, password) => authenticateOperatorUser(operatorId, password),
       saveOperator: (operator) => run(() => saveOperator(operator)),
       updateOperator: (id, patch) => run(() => updateOperator(id, patch)),
       deleteOperator: (id) => run(() => deleteOperator(id)),

@@ -1,6 +1,7 @@
 import { initialActivityTypes } from '../data/initialActivityTypes';
 import { initialEquipments } from '../data/initialEquipments';
 import { initialShifts } from '../data/initialShifts';
+import { initialUsers } from '../data/initialUsers';
 import { createId } from '../utils/id';
 import { differenceMinutes, minutesToHours, nowIso } from './timeService';
 
@@ -12,10 +13,16 @@ function cloneItems(items) {
   return items.map((item) => ({ ...item }));
 }
 
+function mergeMissingSeedUsers(users) {
+  const existingIds = new Set(users.map((user) => user.id));
+  const missingUsers = initialUsers.filter((user) => !existingIds.has(user.id));
+  return [...cloneItems(missingUsers), ...users];
+}
+
 function createInitialDatabase() {
   return {
     version: DB_VERSION,
-    operators: [],
+    operators: cloneItems(initialUsers),
     equipments: cloneItems(initialEquipments),
     activityTypes: cloneItems(initialActivityTypes),
     shifts: cloneItems(initialShifts),
@@ -23,6 +30,7 @@ function createInitialDatabase() {
     settings: {
       storageMode: 'LOCAL',
       defaultShiftId: initialShifts[0]?.id ?? null,
+      userCatalogSeeded: true,
       updatedAt: nowIso(),
     },
     createdAt: nowIso(),
@@ -55,12 +63,19 @@ function emitChange(detail = {}) {
 }
 
 function normalizeOperator(operator = {}) {
+  const shiftName =
+    String(operator.shiftName || '').trim() ||
+    initialShifts.find((shift) => shift.id === operator.shiftId)?.name ||
+    '';
+
   return {
     id: operator.id || createId('op'),
     name: String(operator.name || '').trim(),
     registration: String(operator.registration || '').trim(),
+    role: String(operator.role || 'OPERADOR').trim().toUpperCase(),
+    password: String(operator.password ?? '1234').trim(),
     shiftId: operator.shiftId || null,
-    shiftName: operator.shiftName || '',
+    shiftName,
     active: operator.active !== false,
     createdAt: operator.createdAt || nowIso(),
     updatedAt: operator.updatedAt || operator.createdAt || nowIso(),
@@ -115,6 +130,7 @@ function normalizeSettings(settings = {}) {
   return {
     storageMode: String(settings.storageMode || 'LOCAL').toUpperCase(),
     defaultShiftId: settings.defaultShiftId || initialShifts[0]?.id || null,
+    userCatalogSeeded: settings.userCatalogSeeded === true,
     updatedAt: settings.updatedAt || nowIso(),
   };
 }
@@ -174,7 +190,21 @@ function normalizeDatabase(raw) {
     ...raw,
   };
 
-  database.operators = Array.isArray(raw.operators) ? raw.operators.map(normalizeOperator) : [];
+  database.settings = normalizeSettings(raw.settings || {});
+
+  if (Array.isArray(raw.operators)) {
+    const normalizedOperators = raw.operators.map(normalizeOperator);
+    database.operators = database.settings.userCatalogSeeded
+      ? normalizedOperators
+      : mergeMissingSeedUsers(normalizedOperators);
+    database.settings.userCatalogSeeded = true;
+  } else if (database.settings.userCatalogSeeded) {
+    database.operators = [];
+  } else {
+    database.operators = cloneItems(initialUsers);
+    database.settings.userCatalogSeeded = true;
+  }
+
   database.equipments = Array.isArray(raw.equipments)
     ? raw.equipments.map(normalizeEquipment)
     : cloneItems(initialEquipments);
@@ -187,7 +217,6 @@ function normalizeDatabase(raw) {
   database.movementRecords = Array.isArray(raw.movementRecords)
     ? raw.movementRecords.map(normalizeRecord)
     : [];
-  database.settings = normalizeSettings(raw.settings || {});
   database.version = DB_VERSION;
   database.updatedAt = nowIso();
 
@@ -223,6 +252,7 @@ function readSession() {
     operatorId: raw.operatorId || null,
     operatorName: String(raw.operatorName || '').trim(),
     registration: String(raw.registration || '').trim(),
+    role: String(raw.role || 'OPERADOR').trim().toUpperCase(),
     shiftId: raw.shiftId || null,
     shiftName: String(raw.shiftName || '').trim(),
     loggedAt: raw.loggedAt || nowIso(),
@@ -240,6 +270,7 @@ function writeSession(session) {
     operatorId: session.operatorId || null,
     operatorName: String(session.operatorName || '').trim(),
     registration: String(session.registration || '').trim(),
+    role: String(session.role || 'OPERADOR').trim().toUpperCase(),
     shiftId: session.shiftId || null,
     shiftName: String(session.shiftName || '').trim(),
     loggedAt: session.loggedAt || nowIso(),
@@ -338,6 +369,21 @@ export function saveOperator(operator) {
   return item;
 }
 
+export function authenticateOperator(operatorId, password) {
+  const database = readDatabase();
+  const existing = findEntityById(database.operators, operatorId);
+
+  if (!existing || existing.active === false) {
+    throw new Error('Usuário inativo ou não encontrado');
+  }
+
+  if (String(existing.password || '') !== String(password || '')) {
+    throw new Error('Senha inválida');
+  }
+
+  return existing;
+}
+
 export function updateOperator(id, patch) {
   const database = readDatabase();
   const existing = findEntityById(database.operators, id);
@@ -346,11 +392,34 @@ export function updateOperator(id, patch) {
     throw new Error('Operador não encontrado');
   }
 
+  const nextCandidate = normalizeOperator({ ...existing, ...patch, id });
+  const activeManagers = database.operators.filter((user) => user.role === 'GERENTE' && user.active !== false).length;
+
+  if (
+    existing.role === 'GERENTE' &&
+    activeManagers <= 1 &&
+    (nextCandidate.role !== 'GERENTE' || nextCandidate.active === false)
+  ) {
+    throw new Error('Não é permitido remover o último gerente ativo');
+  }
+
   return saveOperator({ ...existing, ...patch, id });
 }
 
 export function deleteOperator(id) {
   const database = readDatabase();
+  const existing = findEntityById(database.operators, id);
+
+  if (!existing) {
+    throw new Error('Operador não encontrado');
+  }
+
+  const activeManagers = database.operators.filter((user) => user.role === 'GERENTE' && user.active !== false).length;
+
+  if (existing.role === 'GERENTE' && activeManagers <= 1) {
+    throw new Error('Não é permitido excluir o último gerente ativo');
+  }
+
   const next = database.operators.filter((operator) => operator.id !== id);
   saveSection('operators', next);
 }

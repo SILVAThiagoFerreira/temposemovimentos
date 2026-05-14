@@ -344,6 +344,13 @@ small {
   box-shadow: var(--shadow-soft);
 }
 
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .button--primary {
   color: #ffffff;
   background: linear-gradient(180deg, var(--primary-2), var(--primary));
@@ -925,6 +932,47 @@ label > span {
   background: #ffffff;
 }
 
+.user-picker {
+  display: grid;
+  gap: 10px;
+}
+
+.login-user-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.login-user-card strong,
+.login-user-card small {
+  display: block;
+}
+
+.login-user-card small {
+  color: var(--muted);
+}
+
+.login-user-card.is-selected {
+  border-color: rgba(36, 95, 158, 0.48);
+  box-shadow: 0 16px 28px rgba(36, 95, 158, 0.12);
+  background: linear-gradient(180deg, #f4f8ff 0%, #ffffff 100%);
+}
+
+.login-footnote {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
 .login-stats strong {
   display: block;
   font-size: 1.6rem;
@@ -1001,6 +1049,11 @@ label > span {
   background: #ffffff;
 }
 
+.entity-row.is-inactive {
+  opacity: 0.72;
+  background: #f8fafc;
+}
+
 .entity-row strong,
 .entity-row small {
   display: block;
@@ -1010,6 +1063,18 @@ label > span {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.operator-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.operator-topbar p {
+  color: var(--muted);
+  margin-top: 4px;
 }
 
 .settings-rows {

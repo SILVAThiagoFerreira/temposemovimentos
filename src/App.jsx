@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
@@ -36,13 +36,21 @@ function normalizeRoute(hash) {
   return route.split('?')[0];
 }
 
+function defaultRouteForSession(session) {
+  if (!session) {
+    return '/login';
+  }
+
+  return session.role === 'GERENTE' ? '/dashboard' : '/operador';
+}
+
 function useHashRoute(session) {
-  const [route, setRoute] = useState(() => normalizeRoute(window.location.hash) || (session ? '/operador' : '/login'));
+  const [route, setRoute] = useState(() => normalizeRoute(window.location.hash) || defaultRouteForSession(session) || '/login');
 
   useEffect(() => {
     const handleHashChange = () => {
       const next = normalizeRoute(window.location.hash);
-      setRoute(next || (session ? '/operador' : '/login'));
+      setRoute(next || defaultRouteForSession(session) || '/login');
     };
 
     window.addEventListener('hashchange', handleHashChange);
@@ -52,7 +60,7 @@ function useHashRoute(session) {
   useEffect(() => {
     const current = normalizeRoute(window.location.hash);
     if (!current) {
-      window.location.hash = session ? '/operador' : '/login';
+      window.location.hash = defaultRouteForSession(session) || '/login';
     }
   }, [session]);
 
@@ -70,18 +78,27 @@ function useHashRoute(session) {
 function AppShell() {
   const { session, logout, canInstallApp, installApp, isLocalMode } = useApp();
   const [route, navigate] = useHashRoute(session);
+  const isManager = session?.role === 'GERENTE';
 
-  const currentRoute = useMemo(() => {
-    if (!session) {
-      return '/login';
-    }
+  if (!session) {
+    return <Login navigate={navigate} />;
+  }
 
-    if (route === '/login') {
-      return '/operador';
-    }
+  if (!isManager) {
+    return (
+      <div className="app-frame app-frame--operator">
+        <OperatorPanel
+          standalone
+          onLogout={() => {
+            logout();
+            navigate('/login');
+          }}
+        />
+      </div>
+    );
+  }
 
-    return ROUTE_TITLES[route] ? route : '/operador';
-  }, [route, session]);
+  const currentRoute = route === '/login' ? '/dashboard' : ROUTE_TITLES[route] ? route : '/dashboard';
   const title = ROUTE_TITLES[currentRoute] || 'Sistema de Tempos e Movimentos';
 
   const page = (() => {
@@ -89,7 +106,7 @@ function AppShell() {
       case '/login':
         return <Login navigate={navigate} />;
       case '/operador':
-        return <OperatorPanel navigate={navigate} />;
+        return <OperatorPanel />;
       case '/dashboard':
         return <Dashboard />;
       case '/cadastros':
@@ -102,10 +119,6 @@ function AppShell() {
         return <Login navigate={navigate} />;
     }
   })();
-
-  if (currentRoute === '/login' && !session) {
-    return page;
-  }
 
   return (
     <div className="app-frame">

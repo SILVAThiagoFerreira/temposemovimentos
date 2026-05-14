@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { StatusChip } from '../components/StatusChip';
-import { formatDateTime, toDateTimeInputValue } from '../services/timeService';
+import { formatDateTime } from '../services/timeService';
 
 function calculateShiftMinutes(startTime, endTime) {
   if (!startTime || !endTime) {
@@ -16,35 +16,12 @@ function calculateShiftMinutes(startTime, endTime) {
   return endMinutes > startMinutes ? endMinutes - startMinutes : 24 * 60 - startMinutes + endMinutes;
 }
 
-function emptyOperatorForm(defaultShiftId) {
-  return {
-    id: '',
-    name: '',
-    registration: '',
-    shiftId: defaultShiftId || '',
-    active: true,
-  };
-}
-
 function emptyEquipmentForm() {
-  return {
-    id: '',
-    plate: '',
-    code: '',
-    description: '',
-    active: true,
-  };
+  return { id: '', plate: '', code: '', description: '', active: true };
 }
 
 function emptyActivityForm() {
-  return {
-    id: '',
-    code: '',
-    name: '',
-    classification: 'OPERAÇÃO',
-    defaultLocation: '',
-    active: true,
-  };
+  return { id: '', code: '', name: '', classification: 'OPERAÇÃO', defaultLocation: '', active: true };
 }
 
 function emptyShiftForm() {
@@ -60,13 +37,9 @@ function emptyShiftForm() {
 
 export function Registrations() {
   const {
-    operators,
     equipments,
     activityTypes,
     shifts,
-    saveOperator,
-    updateOperator,
-    deleteOperator,
     saveEquipment,
     updateEquipment,
     deleteEquipment,
@@ -78,54 +51,18 @@ export function Registrations() {
     deleteShift,
   } = useApp();
 
-  const defaultShiftId = shifts[0]?.id || '';
-  const [operatorForm, setOperatorForm] = useState(() => emptyOperatorForm(defaultShiftId));
   const [equipmentForm, setEquipmentForm] = useState(() => emptyEquipmentForm());
   const [activityForm, setActivityForm] = useState(() => emptyActivityForm());
   const [shiftForm, setShiftForm] = useState(() => emptyShiftForm());
 
   const stats = useMemo(
     () => [
-      { label: 'Operadores', value: operators.length, tone: 'success' },
       { label: 'Equipamentos', value: equipments.length, tone: 'info' },
       { label: 'Códigos', value: activityTypes.length, tone: 'warning' },
-      { label: 'Turnos', value: shifts.length, tone: 'neutral' },
+      { label: 'Turnos', value: shifts.length, tone: 'success' },
     ],
-    [activityTypes.length, equipments.length, operators.length, shifts.length],
+    [activityTypes.length, equipments.length, shifts.length],
   );
-
-  function handleOperatorSubmit(event) {
-    event.preventDefault();
-    const payload = {
-      ...operatorForm,
-      name: operatorForm.name.trim(),
-      registration: operatorForm.registration.trim(),
-      shiftId: operatorForm.shiftId || defaultShiftId || null,
-      shiftName: shifts.find((shift) => shift.id === operatorForm.shiftId)?.name || '',
-    };
-
-    if (!payload.name) {
-      return;
-    }
-
-    if (payload.id) {
-      updateOperator(payload.id, payload);
-    } else {
-      saveOperator(payload);
-    }
-
-    setOperatorForm(emptyOperatorForm(defaultShiftId));
-  }
-
-  function editOperator(operator) {
-    setOperatorForm({
-      id: operator.id,
-      name: operator.name,
-      registration: operator.registration,
-      shiftId: operator.shiftId || defaultShiftId,
-      active: operator.active !== false,
-    });
-  }
 
   function handleEquipmentSubmit(event) {
     event.preventDefault();
@@ -232,8 +169,8 @@ export function Registrations() {
       <section className="card page-banner">
         <div>
           <p className="eyebrow">Cadastros</p>
-          <h2>Base local do sistema</h2>
-          <p>Equipamentos, códigos, operadores e turnos.</p>
+          <h2>Base operacional</h2>
+          <p>Equipamentos, códigos e turnos.</p>
         </div>
         <StatusChip tone="info">{formatDateTime(new Date())}</StatusChip>
       </section>
@@ -248,61 +185,6 @@ export function Registrations() {
       </section>
 
       <section className="registrations-grid">
-        <article className="card registration-card">
-          <div className="card__head">
-            <div>
-              <p className="eyebrow">Operadores</p>
-              <h2>Cadastro local</h2>
-            </div>
-          </div>
-
-          <form className="mini-form" onSubmit={handleOperatorSubmit}>
-            <input value={operatorForm.name} onChange={(event) => setOperatorForm({ ...operatorForm, name: event.target.value })} placeholder="Nome" />
-            <input value={operatorForm.registration} onChange={(event) => setOperatorForm({ ...operatorForm, registration: event.target.value })} placeholder="Matrícula" />
-            <select value={operatorForm.shiftId} onChange={(event) => setOperatorForm({ ...operatorForm, shiftId: event.target.value })}>
-              {shifts.map((shift) => (
-                <option key={shift.id} value={shift.id}>
-                  {shift.name}
-                </option>
-              ))}
-            </select>
-            <label className="toggle-field toggle-field--inline">
-              <input type="checkbox" checked={operatorForm.active} onChange={(event) => setOperatorForm({ ...operatorForm, active: event.target.checked })} />
-              <span>Ativo</span>
-            </label>
-            <button className="button button--primary" type="submit">
-              {operatorForm.id ? 'Atualizar' : 'Adicionar'}
-            </button>
-          </form>
-
-          <div className="entity-list">
-            {operators.map((operator) => (
-              <div key={operator.id} className="entity-row">
-                <div>
-                  <strong>{operator.name}</strong>
-                  <small>
-                    {operator.registration || 'Sem matrícula'} • {operator.shiftName || operator.shiftId || '-'}
-                  </small>
-                </div>
-                <div className="entity-actions">
-                  <button className="button button--ghost button--tiny" type="button" onClick={() => editOperator(operator)}>
-                    Editar
-                  </button>
-                  <button
-                    className="button button--danger button--tiny"
-                    type="button"
-                    onClick={() => {
-                      if (window.confirm('Excluir operador?')) deleteOperator(operator.id);
-                    }}
-                  >
-                    Excluir
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </article>
-
         <article className="card registration-card">
           <div className="card__head">
             <div>
