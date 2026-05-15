@@ -80,7 +80,7 @@ export function Dashboard() {
         <StatusChip tone={isTodayRange ? 'success' : 'info'}>{isTodayRange ? 'AO VIVO' : 'INTERVALO'}</StatusChip>
       </section>
 
-      <section className="card dashboard-filters">
+      <section className="card card--shell dashboard-filters">
         <div className="card__head">
           <div className="dashboard-filters__title">
             <p className="eyebrow">Período de análise</p>
