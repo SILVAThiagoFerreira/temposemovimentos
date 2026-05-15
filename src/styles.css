@@ -879,6 +879,16 @@ label > span {
   gap: 16px;
 }
 
+.dashboard-filters__title {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.dashboard-filters__title h2 {
+  overflow-wrap: anywhere;
+}
+
 .dashboard-filters__controls {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr)) auto;

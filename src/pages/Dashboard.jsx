@@ -82,7 +82,7 @@ export function Dashboard() {
 
       <section className="card dashboard-filters">
         <div className="card__head">
-          <div>
+          <div className="dashboard-filters__title">
             <p className="eyebrow">Período de análise</p>
             <h2>{periodLabel}</h2>
           </div>
