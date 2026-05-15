@@ -14,7 +14,7 @@
 10. Persistir qualquer alteração no cache local e sincronizar com o documento do Firestore.
 11. Permitir exportação/importação JSON e exportação CSV.
 12. Renderizar o dashboard com intervalo selecionável e gráficos de pizza por período/UMR.
-13. Encerrar manualmente o apontamento em aberto ao fim do expediente pelo botão `Encerrar a atividade` no rodapé do módulo de operação.
+13. Encerrar manualmente o apontamento em aberto ao fim do expediente pelo botão `Encerrar a atividade` abaixo da tabela `Histórico do dia` no fim do módulo de operação.
 14. Escutar alterações remotas do Firestore e reaplicar no cache local.
 15. Validar integridade com `tests/smoke.mjs` e build.
 

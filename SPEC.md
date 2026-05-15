@@ -20,7 +20,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - Cada equipamento pode ter no máximo um apontamento aberto.
 - Ao iniciar uma nova atividade, o sistema encerra automaticamente o apontamento aberto anterior do mesmo operador.
 - O módulo operacional trabalha com um único turno implícito; não há seleção nem gestão de turnos na interface.
-- O operador encerra manualmente o apontamento em aberto no fim do expediente pelo botão `Encerrar a atividade`, exibido no rodapé da página e mantido fixo em tablets para não cobrir o conteúdo.
+- O operador encerra manualmente o apontamento em aberto no fim do expediente pelo botão `Encerrar a atividade`, exibido abaixo da tabela `Histórico do dia` no fim da página.
 - Os campos `Local`, `Descrição da falha`, `Ação corretiva` e `Tipo / Classificação` deixam de ser editados pelo operador; a classificação passa a ser derivada do código da atividade.
 - Hora final deve ser maior que hora inicial.
 - Lançamento manual é permitido, mas deve ser identificado.
