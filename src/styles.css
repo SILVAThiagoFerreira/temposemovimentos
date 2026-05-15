@@ -1387,11 +1387,44 @@ label > span {
   z-index: 30;
   min-width: min(320px, calc(100vw - 48px));
   justify-content: center;
-  box-shadow: var(--shadow-strong);
+  box-shadow: var(--shadow-soft);
 }
 
 .operator-flow-note {
   margin-top: -4px;
+}
+
+@media (min-width: 641px) and (max-width: 1180px) {
+  .operator-panel {
+    padding-bottom: calc(132px + env(safe-area-inset-bottom));
+  }
+
+  .operator-actions-footer {
+    position: fixed;
+    left: 50%;
+    right: auto;
+    bottom: 16px;
+    z-index: 30;
+    width: min(420px, calc(100vw - 32px));
+    margin-top: 0;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    justify-content: center;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(18px);
+    transform: translateX(-50%);
+  }
+
+  .operator-finish-button {
+    position: static;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    min-width: 0;
+    box-shadow: none;
+  }
 }
 
 .settings-rows {

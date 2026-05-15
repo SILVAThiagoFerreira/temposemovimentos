@@ -71,7 +71,7 @@ export function OperatorPanel({ standalone = false, onLogout }) {
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack operator-panel">
       {standalone ? (
         <section className="card operator-topbar card--shell">
           <div>
