@@ -53,6 +53,19 @@ function sortByCountDesc(items) {
   });
 }
 
+function isWithinPeriod(date, periodStart, periodEnd) {
+  const time = date.getTime();
+  return time >= periodStart.getTime() && time <= periodEnd.getTime();
+}
+
+function sortRecordsByStartDesc(records) {
+  return [...records].sort((left, right) => {
+    const rightStamp = parseSafeDate(right.startDateTime)?.getTime() || 0;
+    const leftStamp = parseSafeDate(left.startDateTime)?.getTime() || 0;
+    return rightStamp - leftStamp;
+  });
+}
+
 function calculateOverlapMinutes(record, periodStart, periodEnd, referenceDate = new Date()) {
   if (!record) {
     return 0;
@@ -63,6 +76,10 @@ function calculateOverlapMinutes(record, periodStart, periodEnd, referenceDate =
 
   if (!start || !end) {
     return 0;
+  }
+
+  if (end.getTime() <= start.getTime()) {
+    return end.getTime() === start.getTime() && isWithinPeriod(start, periodStart, periodEnd) ? 1 : 0;
   }
 
   const overlapStart = Math.max(start.getTime(), periodStart.getTime());
@@ -101,7 +118,7 @@ export function summarizeDashboard({
   const resolvedReferenceDate = parseSafeDate(referenceDate) || new Date();
   const resolvedPeriodStart = startOfDay(parseDashboardDateInput(periodStart, 'start') || resolvedReferenceDate);
   const requestedPeriodEnd = parseDashboardDateInput(periodEnd, 'end') || resolvedReferenceDate;
-  const resolvedPeriodEnd = new Date(Math.min(endOfDay(requestedPeriodEnd).getTime(), resolvedReferenceDate.getTime()));
+  const resolvedPeriodEnd = endOfDay(requestedPeriodEnd);
 
   if (resolvedPeriodEnd.getTime() < resolvedPeriodStart.getTime()) {
     resolvedPeriodEnd.setTime(resolvedPeriodStart.getTime());
@@ -492,7 +509,7 @@ export function summarizeDashboard({
     codeDistributionByEquipment,
     equipmentMetrics,
     openRecords,
-    periodRecords: relevantRecords,
+    periodRecords: sortRecordsByStartDesc(relevantRecords),
     latestByEquipment,
     totalRecords: relevantRecords.length,
   };

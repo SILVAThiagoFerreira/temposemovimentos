@@ -12,17 +12,18 @@ export function Dashboard() {
   const [period, setPeriod] = useState(() => ({ startDate: today, endDate: today }));
   const [tick, setTick] = useState(() => Date.now());
   const isTodayRange = period.startDate === today && period.endDate === today;
+  const isLiveRange = period.startDate <= today && period.endDate >= today;
 
   useEffect(() => {
-    const timer = window.setInterval(() => setTick(Date.now()), isTodayRange ? 1000 : 60000);
+    const timer = window.setInterval(() => setTick(Date.now()), isLiveRange ? 1000 : 60000);
     return () => window.clearInterval(timer);
-  }, [isTodayRange]);
+  }, [isLiveRange]);
 
   useEffect(() => {
-    if (isTodayRange) {
+    if (isLiveRange) {
       setTick(Date.now());
     }
-  }, [isTodayRange]);
+  }, [isLiveRange]);
 
   function updatePeriod(field, value) {
     setPeriod((current) => {
@@ -82,7 +83,7 @@ export function Dashboard() {
           <h2>Painel da frota</h2>
           <p>Disponibilidade, utilização e paradas.</p>
         </div>
-        <StatusChip tone={isTodayRange ? 'success' : 'info'}>{isTodayRange ? 'AO VIVO' : 'INTERVALO'}</StatusChip>
+        <StatusChip tone={isLiveRange ? 'success' : 'info'}>{isLiveRange ? 'AO VIVO' : 'INTERVALO'}</StatusChip>
       </section>
 
       <section className="card card--shell dashboard-filters">
@@ -91,7 +92,7 @@ export function Dashboard() {
             <p className="eyebrow">Janela de análise</p>
             <h2>{periodLabel}</h2>
           </div>
-          <StatusChip tone={isTodayRange ? 'success' : 'info'}>{isTodayRange ? 'Hoje' : 'Intervalo'}</StatusChip>
+          <StatusChip tone={isLiveRange ? 'success' : 'info'}>{isTodayRange ? 'Hoje' : isLiveRange ? 'Ao vivo' : 'Intervalo'}</StatusChip>
         </div>
 
         <div className="dashboard-filters__controls">

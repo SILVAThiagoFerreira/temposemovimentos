@@ -24,6 +24,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - O botão `Recarregar Atualização do Sistema` recarrega a interface sem apagar `localStorage`, `IndexedDB` ou apontamentos já salvos.
 - Os campos `Local`, `Descrição da falha`, `Ação corretiva` e `Tipo / Classificação` deixam de ser editados pelo operador; a classificação passa a ser derivada do código da atividade.
 - O dashboard de `Hoje` contabiliza apontamentos em aberto imediatamente, mesmo antes de completar 1 minuto, para manter o resumo ao vivo.
+- Intervalos que incluem o dia atual atualizam em tempo real; intervalos com data inicial e final iguais consideram o dia completo selecionado.
 - Os filtros de data do dashboard usam o dia local completo, sem deslocamento de fuso.
 - Hora final deve ser maior que hora inicial.
 - Lançamento manual é permitido, mas deve ser identificado.
