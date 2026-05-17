@@ -8,7 +8,8 @@
   "storage": {
     "keys": {
       "database": "temposemovimentos-db",
-      "session": "temposemovimentos-session"
+      "session": "temposemovimentos-session",
+      "uiLanguage": "temposemovimentos-ui-language"
     },
     "persistence": {
       "dbName": "temposemovimentos-persistence",
@@ -43,7 +44,7 @@
     }
   },
   "seed": {
-    "catalogVersion": 5,
+    "catalogVersion": 6,
     "users": [
       {
         "id": "usr-paulo",
@@ -87,10 +88,11 @@
       },
       {
         "id": "usr-jose-wilkinson",
-        "name": "Jose Wilkinson",
+        "name": "Administrador - US Vale Verde",
         "registration": "",
         "role": "GERENTE",
-        "password": "1234",
+        "password": "0987",
+        "syncPassword": true,
         "shiftId": null,
         "shiftName": "",
         "active": true

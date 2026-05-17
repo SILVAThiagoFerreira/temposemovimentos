@@ -1,37 +1,41 @@
 import { StatusChip } from './StatusChip';
 import { formatDate, formatDateTime, formatDuration, formatTime } from '../services/timeService';
+import { useApp } from '../context/AppContext';
 
-export function RecordsTable({ records, onEdit, onDelete, onClose, emptyMessage = 'Nenhum registro encontrado.' }) {
+export function RecordsTable({ records, onEdit, onDelete, onClose, emptyMessage = '' }) {
+  const { language, t } = useApp();
+  const resolvedEmptyMessage = emptyMessage || t('table.empty');
+
   return (
     <div className="card table-card">
       <div className="table-wrap">
         <table className="records-table">
           <thead>
             <tr>
-              <th>Data</th>
-              <th>Equipamento</th>
-              <th>Código</th>
-              <th>Atividade</th>
-              <th>Operador</th>
-              <th>Início</th>
-              <th>Fim</th>
-              <th>Duração</th>
-              <th>Situação</th>
-              <th>Ações</th>
+              <th>{t('table.headers.date')}</th>
+              <th>{t('table.headers.equipment')}</th>
+              <th>{t('table.headers.code')}</th>
+              <th>{t('table.headers.activity')}</th>
+              <th>{t('table.headers.operator')}</th>
+              <th>{t('table.headers.start')}</th>
+              <th>{t('table.headers.end')}</th>
+              <th>{t('table.headers.duration')}</th>
+              <th>{t('table.headers.status')}</th>
+              <th>{t('table.headers.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {!records.length ? (
               <tr>
                 <td colSpan="10">
-                  <p className="empty-state">{emptyMessage}</p>
+                  <p className="empty-state">{resolvedEmptyMessage}</p>
                 </td>
               </tr>
             ) : null}
 
             {records.map((record) => (
               <tr key={record.id}>
-                <td>{formatDate(record.startDateTime)}</td>
+                <td>{formatDate(record.startDateTime, language)}</td>
                 <td>
                   <strong>{record.plate}</strong>
                   <small>{record.equipmentCode}</small>
@@ -44,38 +48,38 @@ export function RecordsTable({ records, onEdit, onDelete, onClose, emptyMessage 
                   <strong>{record.operatorName}</strong>
                 </td>
                 <td>
-                  <strong>{formatDate(record.startDateTime)}</strong>
-                  <small>{formatTime(record.startDateTime)}</small>
+                  <strong>{formatDate(record.startDateTime, language)}</strong>
+                  <small>{formatTime(record.startDateTime, language)}</small>
                 </td>
                 <td>
-                  <strong>{record.endDateTime ? formatDate(record.endDateTime) : '-'}</strong>
-                  <small>{record.endDateTime ? formatTime(record.endDateTime) : '-'}</small>
+                  <strong>{record.endDateTime ? formatDate(record.endDateTime, language) : '-'}</strong>
+                  <small>{record.endDateTime ? formatTime(record.endDateTime, language) : '-'}</small>
                 </td>
                 <td>
-                  <strong>{record.durationMinutes != null ? formatDuration(record.durationMinutes) : '-'}</strong>
-                  <small>{record.durationHours != null ? `${record.durationHours.toFixed(2)} h` : '-'}</small>
+                  <strong>{record.durationMinutes != null ? formatDuration(record.durationMinutes, language) : '-'}</strong>
+                  <small>{record.durationHours != null ? `${record.durationHours.toFixed(2)} ${t('common.hoursLabel').toLowerCase()}` : '-'}</small>
                 </td>
                 <td>
                   <StatusChip tone={record.status === 'ABERTO' ? 'danger' : 'neutral'}>
-                    {record.status}
+                    {record.status === 'ABERTO' ? t('table.open') : t('table.closed')}
                   </StatusChip>
-                  {record.manualEntry ? <small>MANUAL</small> : null}
+                  {record.manualEntry ? <small>{t('table.manual')}</small> : null}
                 </td>
                 <td>
                   <div className="table-actions">
                     {onEdit ? (
                       <button type="button" className="button button--ghost button--tiny" onClick={() => onEdit(record)}>
-                        Editar
+                        {t('table.edit')}
                       </button>
                     ) : null}
                     {onClose && record.status === 'ABERTO' ? (
                       <button type="button" className="button button--secondary button--tiny" onClick={() => onClose(record)}>
-                        Encerrar
+                        {t('table.close')}
                       </button>
                     ) : null}
                     {onDelete ? (
                       <button type="button" className="button button--danger button--tiny" onClick={() => onDelete(record)}>
-                        Excluir
+                        {t('table.delete')}
                       </button>
                     ) : null}
                   </div>
@@ -86,7 +90,7 @@ export function RecordsTable({ records, onEdit, onDelete, onClose, emptyMessage 
         </table>
       </div>
 
-      {!records.length ? null : <p className="table-footnote">Atualizado em {formatDateTime(new Date())}</p>}
+      {!records.length ? null : <p className="table-footnote">{t('table.footnote', { value: formatDateTime(new Date(), language) })}</p>}
     </div>
   );
 }

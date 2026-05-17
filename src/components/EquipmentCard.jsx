@@ -1,6 +1,8 @@
 import { StatusChip } from './StatusChip';
+import { useApp } from '../context/AppContext';
 
 export function EquipmentCard({ equipment, selected, openRecord, onSelect }) {
+  const { t } = useApp();
   const isBusy = Boolean(openRecord);
 
   return (
@@ -15,15 +17,15 @@ export function EquipmentCard({ equipment, selected, openRecord, onSelect }) {
           <h3>{equipment.code}</h3>
         </div>
         <StatusChip tone={isBusy ? 'danger' : equipment.active ? 'success' : 'neutral'}>
-          {isBusy ? 'ABERTO' : equipment.active ? 'ATIVO' : 'INATIVO'}
+          {isBusy ? t('equipmentCard.open') : equipment.active ? t('equipmentCard.active') : t('equipmentCard.inactive')}
         </StatusChip>
       </div>
 
       <p className="equipment-card__description">{equipment.description}</p>
 
       <div className="equipment-card__meta">
-        <span>{isBusy ? openRecord.activityName : 'Disponível para apontamento'}</span>
-        <small>{isBusy ? openRecord.operatorName : 'Pronto para operação'}</small>
+        <span>{isBusy ? openRecord.activityName : t('equipmentCard.available')}</span>
+        <small>{isBusy ? openRecord.operatorName : t('equipmentCard.ready')}</small>
       </div>
     </button>
   );

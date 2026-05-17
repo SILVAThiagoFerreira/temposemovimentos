@@ -3,6 +3,12 @@ import { useApp } from '../context/AppContext';
 import { StatusChip } from '../components/StatusChip';
 import { formatDateTime } from '../services/timeService';
 
+function getClassificationLabel(value, t) {
+  const normalized = String(value || 'OUTROS').trim().toUpperCase();
+  const key = normalized === 'OPERAÇÃO' ? 'operation' : normalized === 'MANUTENÇÃO' ? 'maintenance' : normalized === 'OCIOSIDADE' ? 'idle' : 'other';
+  return t(`classifications.${key}`);
+}
+
 function emptyEquipmentForm() {
   return { id: '', plate: '', code: '', description: '', active: true };
 }
@@ -21,6 +27,8 @@ export function Registrations() {
     saveActivityType,
     updateActivityType,
     deleteActivityType,
+    language,
+    t,
   } = useApp();
 
   const [equipmentForm, setEquipmentForm] = useState(() => emptyEquipmentForm());
@@ -28,10 +36,10 @@ export function Registrations() {
 
   const stats = useMemo(
     () => [
-      { label: 'Equipamentos', value: equipments.length, tone: 'info' },
-      { label: 'Códigos', value: activityTypes.length, tone: 'warning' },
+      { label: t('registrations.stats.equipments'), value: equipments.length, tone: 'info' },
+      { label: t('registrations.stats.codes'), value: activityTypes.length, tone: 'warning' },
     ],
-    [activityTypes.length, equipments.length],
+    [activityTypes.length, equipments.length, t],
   );
 
   function handleEquipmentSubmit(event) {
@@ -104,11 +112,11 @@ export function Registrations() {
     <div className="page-stack">
       <section className="card page-banner">
         <div>
-          <p className="eyebrow">Cadastro mestre</p>
-          <h2>Base operacional</h2>
-          <p>Equipamentos e códigos.</p>
+          <p className="eyebrow">{t('registrations.banner.eyebrow')}</p>
+          <h2>{t('registrations.banner.title')}</h2>
+          <p>{t('registrations.banner.copy')}</p>
         </div>
-        <StatusChip tone="info">{formatDateTime(new Date())}</StatusChip>
+        <StatusChip tone="info">{formatDateTime(new Date(), language)}</StatusChip>
       </section>
 
       <section className="stats-grid stats-grid--compact">
@@ -124,21 +132,21 @@ export function Registrations() {
         <article className="card registration-card">
           <div className="card__head">
             <div>
-              <p className="eyebrow">Equipamentos</p>
-              <h2>Placas e UMBs</h2>
+              <p className="eyebrow">{t('registrations.equipment.eyebrow')}</p>
+              <h2>{t('registrations.equipment.title')}</h2>
             </div>
           </div>
 
           <form className="mini-form" onSubmit={handleEquipmentSubmit}>
-            <input value={equipmentForm.plate} onChange={(event) => setEquipmentForm({ ...equipmentForm, plate: event.target.value })} placeholder="Placa" />
-            <input value={equipmentForm.code} onChange={(event) => setEquipmentForm({ ...equipmentForm, code: event.target.value })} placeholder="UMB" />
-            <input value={equipmentForm.description} onChange={(event) => setEquipmentForm({ ...equipmentForm, description: event.target.value })} placeholder="Descrição" />
+            <input value={equipmentForm.plate} onChange={(event) => setEquipmentForm({ ...equipmentForm, plate: event.target.value })} placeholder={t('registrations.equipment.plate')} />
+            <input value={equipmentForm.code} onChange={(event) => setEquipmentForm({ ...equipmentForm, code: event.target.value })} placeholder={t('registrations.equipment.code')} />
+            <input value={equipmentForm.description} onChange={(event) => setEquipmentForm({ ...equipmentForm, description: event.target.value })} placeholder={t('registrations.equipment.description')} />
             <label className="toggle-field toggle-field--inline">
               <input type="checkbox" checked={equipmentForm.active} onChange={(event) => setEquipmentForm({ ...equipmentForm, active: event.target.checked })} />
-              <span>Ativo</span>
+              <span>{t('registrations.equipment.active')}</span>
             </label>
             <button className="button button--primary" type="submit">
-              {equipmentForm.id ? 'Atualizar' : 'Adicionar'}
+              {equipmentForm.id ? t('registrations.equipment.update') : t('registrations.equipment.add')}
             </button>
           </form>
 
@@ -153,16 +161,16 @@ export function Registrations() {
                 </div>
                 <div className="entity-actions">
                   <button className="button button--ghost button--tiny" type="button" onClick={() => editEquipment(equipment)}>
-                    Editar
+                    {t('registrations.equipment.edit')}
                   </button>
                   <button
                     className="button button--danger button--tiny"
                     type="button"
                     onClick={() => {
-                      if (window.confirm('Excluir equipamento?')) deleteEquipment(equipment.id);
+                      if (window.confirm(t('registrations.equipment.confirmDelete'))) deleteEquipment(equipment.id);
                     }}
                   >
-                    Excluir
+                    {t('registrations.equipment.delete')}
                   </button>
                 </div>
               </div>
@@ -173,31 +181,31 @@ export function Registrations() {
         <article className="card registration-card">
           <div className="card__head">
             <div>
-              <p className="eyebrow">Atividades e paradas</p>
-              <h2>Códigos</h2>
+              <p className="eyebrow">{t('registrations.activity.eyebrow')}</p>
+              <h2>{t('registrations.activity.title')}</h2>
             </div>
           </div>
 
           <form className="mini-form" onSubmit={handleActivitySubmit}>
-            <input value={activityForm.code} onChange={(event) => setActivityForm({ ...activityForm, code: event.target.value })} placeholder="Código" />
-            <input value={activityForm.name} onChange={(event) => setActivityForm({ ...activityForm, name: event.target.value })} placeholder="Descrição" />
+            <input value={activityForm.code} onChange={(event) => setActivityForm({ ...activityForm, code: event.target.value })} placeholder={t('registrations.activity.code')} />
+            <input value={activityForm.name} onChange={(event) => setActivityForm({ ...activityForm, name: event.target.value })} placeholder={t('registrations.activity.description')} />
             <select value={activityForm.classification} onChange={(event) => setActivityForm({ ...activityForm, classification: event.target.value })}>
-              <option value="OPERAÇÃO">OPERAÇÃO</option>
-              <option value="MANUTENÇÃO">MANUTENÇÃO</option>
-              <option value="OCIOSIDADE">OCIOSIDADE</option>
-              <option value="OUTROS">OUTROS</option>
+              <option value="OPERAÇÃO">{t('classifications.operation')}</option>
+              <option value="MANUTENÇÃO">{t('classifications.maintenance')}</option>
+              <option value="OCIOSIDADE">{t('classifications.idle')}</option>
+              <option value="OUTROS">{t('classifications.other')}</option>
             </select>
             <select value={activityForm.defaultLocation} onChange={(event) => setActivityForm({ ...activityForm, defaultLocation: event.target.value })}>
-              <option value="">Automático</option>
-              <option value="CHASSI">Chassi</option>
-              <option value="UNIDADE">Unidade</option>
+              <option value="">{t('locations.automatic')}</option>
+              <option value="CHASSI">{t('locations.chassis')}</option>
+              <option value="UNIDADE">{t('locations.unit')}</option>
             </select>
             <label className="toggle-field toggle-field--inline">
               <input type="checkbox" checked={activityForm.active} onChange={(event) => setActivityForm({ ...activityForm, active: event.target.checked })} />
-              <span>Ativo</span>
+              <span>{t('registrations.activity.active')}</span>
             </label>
             <button className="button button--primary" type="submit">
-              {activityForm.id ? 'Atualizar' : 'Adicionar'}
+              {activityForm.id ? t('registrations.activity.update') : t('registrations.activity.add')}
             </button>
           </form>
 
@@ -207,21 +215,21 @@ export function Registrations() {
                 <div>
                   <strong>{activityType.code}</strong>
                   <small>
-                    {activityType.name} • {activityType.classification}
+                    {activityType.name} • {getClassificationLabel(activityType.classification, t)}
                   </small>
                 </div>
                 <div className="entity-actions">
                   <button className="button button--ghost button--tiny" type="button" onClick={() => editActivity(activityType)}>
-                    Editar
+                    {t('registrations.activity.edit')}
                   </button>
                   <button
                     className="button button--danger button--tiny"
                     type="button"
                     onClick={() => {
-                      if (window.confirm('Excluir atividade/parada?')) deleteActivityType(activityType.id);
+                      if (window.confirm(t('registrations.activity.confirmDelete'))) deleteActivityType(activityType.id);
                     }}
                   >
-                    Excluir
+                    {t('registrations.activity.delete')}
                   </button>
                 </div>
               </div>

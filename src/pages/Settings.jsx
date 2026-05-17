@@ -2,8 +2,13 @@ import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { StatusChip } from '../components/StatusChip';
 import { getRoleLabel, getRoleOrder } from '../utils/roles';
+import { translateErrorMessage } from '../i18n/errorMessages.js';
 
-const integrationRoadmap = ['Firebase Firestore', 'Supabase', 'API própria', 'Power BI', 'Google Sheets', 'Banco SQL'];
+const integrationRoadmap = {
+  'pt-BR': ['Firebase Firestore', 'Supabase', 'API própria', 'Power BI', 'Google Sheets', 'Banco SQL'],
+  'en-US': ['Firebase Firestore', 'Supabase', 'Custom API', 'Power BI', 'Google Sheets', 'SQL database'],
+  'zh-CN': ['Firebase Firestore', 'Supabase', '自定义 API', 'Power BI', 'Google Sheets', 'SQL 数据库'],
+};
 
 function createEmptyUserForm() {
   return {
@@ -20,7 +25,6 @@ export function Settings() {
   const {
     session,
     operators,
-    settings,
     storageMeta,
     updateSettings,
     saveOperator,
@@ -30,13 +34,15 @@ export function Settings() {
     canInstallApp,
     installApp,
     isLocalMode,
+    language,
+    t,
   } = useApp();
 
   const isManager = session?.role === 'GERENTE';
   const [notice, setNotice] = useState('');
   const [userForm, setUserForm] = useState(() => createEmptyUserForm());
 
-  const storageLabel = isLocalMode ? 'LOCAL / SEM REDE' : 'CONECTADO';
+  const storageLabel = isLocalMode ? t('settings.storage.local') : t('settings.storage.connected');
 
   const storageState = useMemo(
     () => ({
@@ -48,7 +54,7 @@ export function Settings() {
 
   async function handleEnablePersistence() {
     const granted = await requestPersistentStorage();
-    setNotice(granted ? 'Armazenamento persistente ativado.' : 'O navegador não concedeu persistência total, mas o backup em IndexedDB continua ativo.');
+    setNotice(granted ? t('settings.storage.activated') : t('settings.storage.notGranted'));
   }
 
   const activeManagers = useMemo(
@@ -59,9 +65,9 @@ export function Settings() {
   const visibleUsers = useMemo(
     () =>
       [...operators].sort((left, right) => {
-        return getRoleOrder(left.role) - getRoleOrder(right.role) || left.name.localeCompare(right.name, 'pt-BR');
+        return getRoleOrder(left.role) - getRoleOrder(right.role) || left.name.localeCompare(right.name, language);
       }),
-    [operators],
+    [language, operators],
   );
 
   function fillUserForm(user) {
@@ -83,12 +89,12 @@ export function Settings() {
     const password = userForm.password.trim();
 
     if (!name) {
-      setNotice('Informe o nome do usuário.');
+      setNotice(t('movement.errors.requiredField'));
       return;
     }
 
     if (!password && !userForm.id) {
-      setNotice('Informe a senha.');
+      setNotice(t('movement.errors.requiredField'));
       return;
     }
 
@@ -109,15 +115,15 @@ export function Settings() {
     try {
       if (payload.id) {
         updateOperator(payload.id, payload);
-        setNotice('Usuário atualizado.');
+        setNotice(t('settings.users.updated'));
       } else {
         saveOperator(payload);
-        setNotice('Usuário criado.');
+        setNotice(t('settings.users.created'));
       }
 
       setUserForm(createEmptyUserForm());
     } catch (error) {
-      setNotice(error.message || 'Falha ao salvar usuário.');
+      setNotice(translateErrorMessage(error, language));
     }
   }
 
@@ -126,25 +132,25 @@ export function Settings() {
 
     try {
       updateOperator(user.id, { active: nextActive });
-      setNotice(nextActive ? 'Usuário ativado.' : 'Usuário desativado.');
+      setNotice(nextActive ? t('settings.users.activated') : t('settings.users.deactivated'));
     } catch (error) {
-      setNotice(error.message || 'Falha ao alterar situação.');
+      setNotice(translateErrorMessage(error, language));
     }
   }
 
   function handleDeleteUser(user) {
-    if (!window.confirm(`Excluir o usuário ${user.name}?`)) {
+    if (!window.confirm(t('settings.users.confirmDelete', { name: user.name }))) {
       return;
     }
 
     try {
       deleteOperator(user.id);
-      setNotice('Usuário excluído.');
+      setNotice(t('settings.users.deleted'));
       if (userForm.id === user.id) {
         setUserForm(createEmptyUserForm());
       }
     } catch (error) {
-      setNotice(error.message || 'Falha ao excluir usuário.');
+      setNotice(translateErrorMessage(error, language));
     }
   }
 
@@ -153,11 +159,11 @@ export function Settings() {
       <div className="page-stack">
         <section className="card page-banner">
           <div>
-            <p className="eyebrow">Administração do sistema</p>
-            <h2>Acesso restrito</h2>
-            <p>Perfil de gerente obrigatório.</p>
+            <p className="eyebrow">{t('settings.banner.eyebrow')}</p>
+            <h2>{t('settings.access.restrictedTitle')}</h2>
+            <p>{t('settings.access.restrictedCopy')}</p>
           </div>
-          <StatusChip tone="danger">SEM PERMISSÃO</StatusChip>
+          <StatusChip tone="danger">{t('settings.access.noPermission')}</StatusChip>
         </section>
       </div>
     );
@@ -167,9 +173,9 @@ export function Settings() {
     <div className="page-stack">
       <section className="card page-banner">
         <div>
-          <p className="eyebrow">Administração do sistema</p>
-          <h2>Usuários e ambiente</h2>
-          <p>Usuários, PWA e armazenamento.</p>
+          <p className="eyebrow">{t('settings.banner.eyebrow')}</p>
+          <h2>{t('settings.banner.title')}</h2>
+          <p>{t('settings.banner.copy')}</p>
         </div>
         <StatusChip tone={storageState.tone}>{storageState.label}</StatusChip>
       </section>
@@ -180,51 +186,49 @@ export function Settings() {
         <article className="card settings-card settings-card--wide">
           <div className="card__head">
             <div>
-              <p className="eyebrow">Usuários</p>
-              <h2>Controle de acesso</h2>
+              <p className="eyebrow">{t('settings.users.eyebrow')}</p>
+              <h2>{t('settings.users.title')}</h2>
             </div>
-            <StatusChip tone="info">{operators.length} cadastrados</StatusChip>
+            <StatusChip tone="info">{t('settings.users.registered', { count: operators.length })}</StatusChip>
           </div>
 
           <form className="user-admin-form" onSubmit={handleUserSubmit}>
             <div className="form-grid form-grid--two">
               <label>
-                <span>Nome</span>
+                <span>{t('settings.users.name')}</span>
                 <input
                   value={userForm.name}
                   onChange={(event) => setUserForm({ ...userForm, name: event.target.value })}
-                  placeholder="Nome do usuário"
                 />
               </label>
 
               <label>
-                <span>Matrícula</span>
+                <span>{t('settings.users.registration')}</span>
                 <input
                   value={userForm.registration}
                   onChange={(event) => setUserForm({ ...userForm, registration: event.target.value })}
-                  placeholder="Opcional"
                 />
               </label>
 
               <label>
-                <span>Classe</span>
+                <span>{t('settings.users.role')}</span>
                 <select
                   value={userForm.role}
                   onChange={(event) => setUserForm({ ...userForm, role: event.target.value })}
                 >
-                  <option value="OPERADOR">Operador</option>
-                  <option value="CLIENTE">Cliente</option>
-                  <option value="GERENTE">Gerente</option>
+                  <option value="OPERADOR">{getRoleLabel('OPERADOR', language)}</option>
+                  <option value="CLIENTE">{getRoleLabel('CLIENTE', language)}</option>
+                  <option value="GERENTE">{getRoleLabel('GERENTE', language)}</option>
                 </select>
               </label>
 
               <label>
-                <span>Senha</span>
+                <span>{t('settings.users.password')}</span>
                 <input
                   type="password"
                   value={userForm.password}
                   onChange={(event) => setUserForm({ ...userForm, password: event.target.value })}
-                  placeholder="Nova senha (opcional na edição)"
+                  placeholder={t('settings.users.passwordPlaceholder')}
                 />
               </label>
 
@@ -234,17 +238,17 @@ export function Settings() {
                   checked={userForm.active}
                   onChange={(event) => setUserForm({ ...userForm, active: event.target.checked })}
                 />
-                <span>Ativo</span>
+                <span>{t('settings.users.active')}</span>
               </label>
             </div>
 
             <div className="form-actions">
               <button className="button button--primary" type="submit">
-                {userForm.id ? 'Salvar alteração' : 'Criar usuário'}
+                {userForm.id ? t('settings.users.save') : t('settings.users.create')}
               </button>
               {userForm.id ? (
                 <button className="button button--ghost" type="button" onClick={() => setUserForm(createEmptyUserForm())}>
-                  Cancelar edição
+                  {t('settings.users.cancel')}
                 </button>
               ) : null}
             </div>
@@ -260,31 +264,31 @@ export function Settings() {
                   <div>
                     <strong>{user.name}</strong>
                     <small>
-                      {getRoleLabel(user.role)} • {user.active === false ? 'Inativo' : 'Ativo'}
+                      {getRoleLabel(user.role, language)} • {user.active === false ? t('settings.users.inactive') : t('settings.users.active')}
                     </small>
                   </div>
 
                   <div className="entity-actions">
                     <button className="button button--ghost button--tiny" type="button" onClick={() => fillUserForm(user)}>
-                      Editar
+                      {t('settings.users.edit')}
                     </button>
                     <button
                       className="button button--secondary button--tiny"
                       type="button"
                       onClick={() => handleToggleActive(user)}
                       disabled={canToggleManager}
-                      title={canToggleManager ? 'É necessário manter ao menos um gerente ativo' : 'Alternar situação'}
+                      title={canToggleManager ? t('settings.users.keepManager') : user.active === false ? t('settings.users.activate') : t('settings.users.deactivate')}
                     >
-                      {user.active === false ? 'Ativar' : 'Desativar'}
+                      {user.active === false ? t('settings.users.activate') : t('settings.users.deactivate')}
                     </button>
                     <button
                       className="button button--danger button--tiny"
                       type="button"
                       onClick={() => handleDeleteUser(user)}
                       disabled={canDeleteManager}
-                      title={canDeleteManager ? 'É necessário manter ao menos um gerente ativo' : 'Excluir usuário'}
+                      title={canDeleteManager ? t('settings.users.keepManager') : t('settings.users.delete')}
                     >
-                      Excluir
+                      {t('settings.users.delete')}
                     </button>
                   </div>
                 </div>
@@ -296,45 +300,45 @@ export function Settings() {
         <article className="card settings-card">
           <div className="card__head">
             <div>
-              <p className="eyebrow">PWA</p>
-              <h2>Instalação no tablet</h2>
+              <p className="eyebrow">{t('settings.pwa.eyebrow')}</p>
+              <h2>{t('settings.pwa.title')}</h2>
             </div>
           </div>
-          <p>O app pode ser instalado como PWA e operar offline com cache básico.</p>
+          <p>{t('settings.pwa.copy')}</p>
           {canInstallApp ? (
             <button className="button button--primary" type="button" onClick={installApp}>
-              Instalar app
+              {t('settings.pwa.install')}
             </button>
           ) : (
-            <StatusChip tone="neutral">Instalação será oferecida pelo navegador compatível</StatusChip>
+            <StatusChip tone="neutral">{t('settings.pwa.fallback')}</StatusChip>
           )}
         </article>
 
         <article className="card settings-card">
           <div className="card__head">
             <div>
-              <p className="eyebrow">Armazenamento</p>
-              <h2>Base sincronizada</h2>
+              <p className="eyebrow">{t('settings.storage.eyebrow')}</p>
+              <h2>{t('settings.storage.title')}</h2>
             </div>
           </div>
-          <p>Os dados são gravados em cache local, espelhados em `IndexedDB` e sincronizados com o Firestore. O navegador também é solicitado a manter esse armazenamento como persistente.</p>
+          <p>{t('settings.storage.copy')}</p>
           <div className="settings-rows">
             <div>
-              <span>Situação atual</span>
+              <span>{t('settings.storage.currentState')}</span>
               <strong>{storageState.label}</strong>
             </div>
             <div>
-              <span>Persistência do navegador</span>
-              <strong>{storageMeta?.persistentStorageGranted ? 'Ativa' : 'Não confirmada'}</strong>
+              <span>{t('settings.storage.browserPersistence')}</span>
+              <strong>{storageMeta?.persistentStorageGranted ? t('settings.storage.active') : t('settings.storage.notConfirmed')}</strong>
             </div>
             <div>
-              <span>Backup secundário</span>
-              <strong>{storageMeta?.indexedDbAvailable ? 'IndexedDB ativo' : 'Indisponível'}</strong>
+              <span>{t('settings.storage.secondaryBackup')}</span>
+              <strong>{storageMeta?.indexedDbAvailable ? t('settings.storage.indexedDbActive') : t('settings.storage.unavailable')}</strong>
             </div>
           </div>
           <div className="form-actions">
             <button className="button button--secondary" type="button" onClick={handleEnablePersistence}>
-              Ativar armazenamento persistente
+              {t('settings.storage.enablePersistence')}
             </button>
           </div>
         </article>
@@ -342,15 +346,15 @@ export function Settings() {
         <article className="card settings-card settings-card--wide">
           <div className="card__head">
             <div>
-              <p className="eyebrow">Fase 2</p>
-              <h2>Integrações preparadas</h2>
+              <p className="eyebrow">{t('settings.integrations.eyebrow')}</p>
+              <h2>{t('settings.integrations.title')}</h2>
             </div>
           </div>
           <div className="chip-grid">
-            {integrationRoadmap.map((item) => (
+            {(integrationRoadmap[language] || integrationRoadmap['pt-BR']).map((item) => (
               <div key={item} className="roadmap-chip">
                 <strong>{item}</strong>
-                <small>Pronto para adaptar a camada de storage.</small>
+                <small>{t('settings.integrations.copy')}</small>
               </div>
             ))}
           </div>
@@ -359,22 +363,22 @@ export function Settings() {
         <article className="card settings-card">
           <div className="card__head">
             <div>
-              <p className="eyebrow">Resumo</p>
-              <h2>Base carregada</h2>
+              <p className="eyebrow">{t('settings.summary.eyebrow')}</p>
+              <h2>{t('settings.summary.title')}</h2>
             </div>
           </div>
           <div className="settings-rows">
             <div>
-              <span>Usuários ativos</span>
+              <span>{t('settings.summary.activeUsers')}</span>
               <strong>{operators.filter((user) => user.active !== false).length}</strong>
             </div>
             <div>
-              <span>Gerentes ativos</span>
+              <span>{t('settings.summary.activeManagers')}</span>
               <strong>{activeManagers}</strong>
             </div>
             <div>
-              <span>Armazenamento local</span>
-              <strong>{storageMeta?.indexedDbAvailable ? 'Sim' : 'Não'}</strong>
+              <span>{t('settings.summary.localStorage')}</span>
+              <strong>{storageMeta?.indexedDbAvailable ? t('settings.summary.yes') : t('settings.summary.no')}</strong>
             </div>
           </div>
         </article>

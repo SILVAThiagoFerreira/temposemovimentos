@@ -1,15 +1,18 @@
 import { StatusChip } from './StatusChip';
 import { getRoleLabel } from '../utils/roles';
+import { useApp } from '../context/AppContext';
 
 export function Navigation({ items, currentPath, onNavigate, session }) {
+  const { language, t } = useApp();
+
   return (
     <nav className="side-nav card card--shell">
       <div className="nav-top">
-        <p className="nav-title">Área de trabalho</p>
+        <p className="nav-title">{t('navigation.title')}</p>
         {session ? (
-          <StatusChip tone="success">{`${getRoleLabel(session.role).toUpperCase()} ATIVO`}</StatusChip>
+          <StatusChip tone="success">{t('navigation.active', { role: getRoleLabel(session.role, language).toUpperCase() })}</StatusChip>
         ) : (
-          <StatusChip tone="warning">ENTRAR</StatusChip>
+          <StatusChip tone="warning">{t('navigation.login')}</StatusChip>
         )}
       </div>
 

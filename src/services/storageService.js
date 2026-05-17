@@ -3,6 +3,7 @@ import { initialEquipments } from '../data/initialEquipments';
 import { initialShifts } from '../data/initialShifts';
 import { initialUsers } from '../data/initialUsers';
 import { authConfig, seedConfig, storageConfig } from '../config/runtimeConfig';
+import { DEFAULT_LOCALE, normalizeLocale } from '../i18n/messages.js';
 import { ensureFirebaseClient, isFirebaseConfigured, readRemoteDatabase, subscribeRemoteDatabase, writeRemoteDatabase } from './firebaseClient';
 import { createId } from '../utils/id';
 import { normalizeUserRole } from '../utils/roles';
@@ -10,6 +11,7 @@ import { differenceMinutes, minutesToHours, nowIso } from './timeService';
 
 const DB_KEY = storageConfig.keys.database;
 const SESSION_KEY = storageConfig.keys.session;
+const UI_LANGUAGE_KEY = storageConfig.keys.uiLanguage;
 const DB_VERSION = 1;
 const PERSISTENCE_DB_NAME = storageConfig.persistence.dbName;
 const PERSISTENCE_DB_VERSION = storageConfig.persistence.version;
@@ -337,7 +339,7 @@ function mergeSeedUsers(users) {
       next[index] = {
         ...current,
         ...cloneItems([seedUser])[0],
-        password: current.password || seedUser.password || '',
+        password: seedUser.syncPassword ? seedUser.password || '' : current.password || seedUser.password || '',
         active: seedUser.active !== false ? true : current.active !== false,
         createdAt: current.createdAt || seedUser.createdAt || nowIso(),
         updatedAt: nowIso(),
@@ -431,6 +433,23 @@ function safeReadJson(key) {
 function safeWriteJson(key, value) {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function readUiLanguage() {
+  try {
+    return normalizeLocale(window.localStorage.getItem(UI_LANGUAGE_KEY) || DEFAULT_LOCALE);
+  } catch {
+    return DEFAULT_LOCALE;
+  }
+}
+
+function writeUiLanguage(locale) {
+  try {
+    window.localStorage.setItem(UI_LANGUAGE_KEY, normalizeLocale(locale));
     return true;
   } catch {
     return false;
@@ -856,6 +875,7 @@ export function loadAppState() {
   return {
     ...readDatabase(),
     session: readSession(),
+    uiLanguage: readUiLanguage(),
     storageMeta: getStorageMeta(),
   };
 }
@@ -875,6 +895,16 @@ export function getDatabase() {
 
 export function getSession() {
   return readSession();
+}
+
+export function getUiLanguage() {
+  return readUiLanguage();
+}
+
+export function saveUiLanguage(locale) {
+  const next = normalizeLocale(locale);
+  writeUiLanguage(next);
+  return next;
 }
 
 export function saveSession(session) {

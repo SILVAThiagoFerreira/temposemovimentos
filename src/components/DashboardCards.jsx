@@ -2,12 +2,13 @@ import { StatusChip } from './StatusChip';
 import { formatDuration } from '../services/timeService';
 import { formatUtilization } from '../services/calculationService';
 import { PieChartCard } from './PieChartCard';
+import { useApp } from '../context/AppContext';
 
-function formatHours(value) {
-  return `${Number(value || 0).toFixed(2)} h`;
+function formatHours(value, t) {
+  return `${Number(value || 0).toFixed(2)} ${t('common.hoursLabel').toLowerCase()}`;
 }
 
-function BarList({ title, items, emptyMessage }) {
+function BarList({ title, items, emptyMessage, locale, t }) {
   const max = Math.max(...items.map((item) => item.minutes || 0), 0);
 
   return (
@@ -26,16 +27,16 @@ function BarList({ title, items, emptyMessage }) {
 
           return (
             <div key={item.key || item.label} className="bar-list__item">
-              <div className="bar-list__label">
-                <strong>{item.label || item.classification || item.name || item.code || 'Sem título'}</strong>
+            <div className="bar-list__label">
+                <strong>{item.label || item.classification || item.name || item.code || t('common.noTitle')}</strong>
                 <small>{item.subtitle || item.code || item.classification || item.name || ''}</small>
               </div>
               <div className="bar-list__track">
                 <span style={{ width: `${width}%` }} />
               </div>
               <div className="bar-list__value">
-                <strong>{formatHours(item.hours ?? (item.minutes || 0) / 60)}</strong>
-                <small>{item.count ? `${item.count} eventos` : `${item.minutes || 0} min`}</small>
+                <strong>{formatHours(item.hours ?? (item.minutes || 0) / 60, t)}</strong>
+                <small>{item.count ? t('dashboard.labels.events', { count: item.count }) : formatDuration(item.minutes || 0, locale)}</small>
               </div>
             </div>
           );
@@ -45,17 +46,17 @@ function BarList({ title, items, emptyMessage }) {
   );
 }
 
-function StackedBarList({ title, items, emptyMessage }) {
+function StackedBarList({ title, items, emptyMessage, locale, t }) {
   const max = Math.max(...items.map((item) => item.totalMinutes || 0), 0);
 
   return (
     <section className="card dashboard-block dashboard-block--wide">
       <div className="card__head">
-        <div>
-          <p className="eyebrow">{title}</p>
-          <h2>Detalhe por UMR</h2>
+          <div>
+            <p className="eyebrow">{title}</p>
+            <h2>{t('dashboard.sections.detailByEquipment')}</h2>
+          </div>
         </div>
-      </div>
 
       {!items.length ? <p className="empty-state">{emptyMessage}</p> : null}
 
@@ -68,12 +69,12 @@ function StackedBarList({ title, items, emptyMessage }) {
             <article key={item.key || item.label} className="stacked-list__item">
               <div className="stacked-list__head">
                 <div>
-                  <strong>{item.label || 'Sem código'}</strong>
-                  <small>{item.subtitle || 'Sem placa'}</small>
+                  <strong>{item.label || t('dashboard.labels.noCode')}</strong>
+                  <small>{item.subtitle || t('dashboard.labels.noPlate')}</small>
                 </div>
                 <div className="stacked-list__value">
-                  <strong>{formatHours(item.totalHours || totalMinutes / 60)}</strong>
-                  <small>Principal intervalo: {item.mainGapLabel || '-'}</small>
+                  <strong>{formatHours(item.totalHours || totalMinutes / 60, t)}</strong>
+                  <small>{t('dashboard.labels.mainInterval', { value: item.mainGapLabel || t('dashboard.labels.noCriticalIntervals') })}</small>
                 </div>
               </div>
 
@@ -86,7 +87,7 @@ function StackedBarList({ title, items, emptyMessage }) {
                       key={segment.key}
                       className={`stacked-list__segment stacked-list__segment--${segment.key}`}
                       style={{ width: `${segmentWidth}%` }}
-                      title={`${segment.label}: ${formatDuration(segment.minutes)}`}
+                      title={`${segment.label}: ${formatDuration(segment.minutes, locale)}`}
                     />
                   ) : null;
                 })}
@@ -94,10 +95,10 @@ function StackedBarList({ title, items, emptyMessage }) {
 
               <div className="stacked-list__meta">
                 {item.segments.map((segment) => (
-                  <span key={segment.key}>
-                    <strong>{segment.label}</strong>
-                    <small>{formatDuration(segment.minutes)}</small>
-                  </span>
+                    <span key={segment.key}>
+                      <strong>{segment.label}</strong>
+                      <small>{formatDuration(segment.minutes, locale)}</small>
+                    </span>
                 ))}
               </div>
             </article>
@@ -108,17 +109,17 @@ function StackedBarList({ title, items, emptyMessage }) {
   );
 }
 
-function TargetBarList({ title, items, emptyMessage, targetLabel = 'Meta' }) {
+function TargetBarList({ title, items, emptyMessage, targetLabel, locale, t }) {
   const max = Math.max(...items.map((item) => item.targetMinutes || 60), 60);
 
   return (
     <section className="card dashboard-block">
       <div className="card__head">
-        <div>
-          <p className="eyebrow">{title}</p>
-          <h2>Aderência à refeição</h2>
+          <div>
+            <p className="eyebrow">{title}</p>
+            <h2>{t('dashboard.sections.mealAdherence')}</h2>
+          </div>
         </div>
-      </div>
 
       {!items.length ? <p className="empty-state">{emptyMessage}</p> : null}
 
@@ -130,16 +131,16 @@ function TargetBarList({ title, items, emptyMessage, targetLabel = 'Meta' }) {
 
           return (
             <div key={item.key || item.label} className="target-list__item">
-              <div className="target-list__label">
-                <strong>{item.label || 'Sem título'}</strong>
-                <small>{item.subtitle || `${targetLabel} ${formatDuration(targetMinutes)}`}</small>
-              </div>
+                <div className="target-list__label">
+                <strong>{item.label || t('common.noTitle')}</strong>
+                <small>{item.subtitle || `${targetLabel} ${formatDuration(targetMinutes, locale)}`}</small>
+                </div>
               <div className="target-list__track">
                 <span style={{ width: `${Math.min(100, width)}%` }} />
               </div>
               <div className="target-list__value">
-                <strong>{formatDuration(item.minutes || 0)}</strong>
-                <small>{targetLabel} {formatDuration(targetMinutes)}</small>
+                <strong>{formatDuration(item.minutes || 0, locale)}</strong>
+                <small>{targetLabel} {formatDuration(targetMinutes, locale)}</small>
               </div>
               <StatusChip tone={tone}>{Number(item.adherencePercent || 0).toFixed(1)}%</StatusChip>
             </div>
@@ -151,6 +152,7 @@ function TargetBarList({ title, items, emptyMessage, targetLabel = 'Meta' }) {
 }
 
 export function DashboardCards({ summary }) {
+  const { language, t } = useApp();
   const utilizationAverage = summary.equipmentMetrics.length
     ? summary.equipmentMetrics.reduce((sum, item) => sum + Number(item.utilizationPercent || 0), 0) / summary.equipmentMetrics.length
     : 0;
@@ -159,51 +161,51 @@ export function DashboardCards({ summary }) {
     <div className="dashboard-layout">
       <section className="stats-grid">
         <article className="card stat-card stat-card--success">
-          <p>Apontamentos em aberto</p>
+          <p>{t('dashboard.cards.open')}</p>
           <strong>{summary.activeEquipmentCount}</strong>
-          <small>no período selecionado</small>
+          <small>{t('dashboard.cards.openSub')}</small>
         </article>
         <article className="card stat-card">
-          <p>Total de horas no período</p>
+          <p>{t('dashboard.cards.totalHours')}</p>
           <strong>{summary.totalHours.toFixed(2)} h</strong>
-          <small>{summary.totalRecords} registros</small>
+          <small>{t('dashboard.cards.totalHoursSub', { count: summary.totalRecords })}</small>
         </article>
         <article className="card stat-card stat-card--danger">
-          <p>Tempo parado</p>
+          <p>{t('dashboard.cards.stop')}</p>
           <strong>{summary.stopHours.toFixed(2)} h</strong>
-          <small>manutenção + ociosidade</small>
+          <small>{t('dashboard.cards.stopSub')}</small>
         </article>
         <article className="card stat-card stat-card--warning">
-          <p>Tempo de manutenção</p>
+          <p>{t('dashboard.cards.maintenance')}</p>
           <strong>{summary.maintenanceHours.toFixed(2)} h</strong>
-          <small>eventos críticos</small>
+          <small>{t('dashboard.cards.maintenanceSub')}</small>
         </article>
         <article className="card stat-card">
-          <p>Registros encerrados</p>
+          <p>{t('dashboard.cards.closed')}</p>
           <strong>{summary.closedCount}</strong>
-          <small>no período selecionado</small>
+          <small>{t('dashboard.cards.closedSub')}</small>
         </article>
         <article className="card stat-card">
-          <p>Disponibilidade física</p>
+          <p>{t('dashboard.cards.physicalAvailability')}</p>
           <strong>{formatUtilization(summary.physicalAvailabilityPercent)}</strong>
-          <small>consolidada do período</small>
+          <small>{t('dashboard.cards.physicalAvailabilitySub')}</small>
         </article>
         <article className="card stat-card stat-card--info">
-          <p>IU médio da frota</p>
+          <p>{t('dashboard.cards.fleetIU')}</p>
           <strong>{utilizationAverage.toFixed(1)}%</strong>
-          <small>no período selecionado</small>
+          <small>{t('dashboard.cards.fleetIUSub')}</small>
         </article>
       </section>
 
       <section className="card dashboard-block">
         <div className="card__head">
           <div>
-            <p className="eyebrow">Equipamentos e atividade</p>
-            <h2>Atividade por UMR</h2>
+            <p className="eyebrow">{t('dashboard.sections.equipmentAndActivity')}</p>
+            <h2>{t('dashboard.sections.activityByEquipment')}</h2>
           </div>
         </div>
 
-        {!summary.equipmentMetrics.length ? <p className="empty-state">Sem dados disponíveis.</p> : null}
+        {!summary.equipmentMetrics.length ? <p className="empty-state">{t('dashboard.empty.available')}</p> : null}
 
         <div className="equipment-status-list">
           {summary.equipmentMetrics.map((item) => (
@@ -213,12 +215,12 @@ export function DashboardCards({ summary }) {
                 <p>{item.plate}</p>
               </div>
               <div>
-                <small>Atividade atual</small>
+                <small>{t('common.operation')}</small>
                 <p>{item.currentActivityName || '-'}</p>
               </div>
               <div>
-                <small>Horas</small>
-                <p>{formatHours(item.hours ?? item.minutes / 60)}</p>
+                <small>{t('common.hoursLabel')}</small>
+                <p>{formatHours(item.hours ?? item.minutes / 60, t)}</p>
               </div>
               <div>
                 <small>IU</small>
@@ -234,30 +236,30 @@ export function DashboardCards({ summary }) {
       <section className="card dashboard-block">
         <div className="card__head">
           <div>
-            <p className="eyebrow">Indicadores físicos</p>
-            <h2>Disponibilidade e utilização</h2>
+            <p className="eyebrow">{t('dashboard.sections.physicalIndicators')}</p>
+            <h2>{t('dashboard.sections.availabilityAndUtilization')}</h2>
           </div>
         </div>
 
         <div className="dashboard-pie-grid dashboard-pie-grid--two">
           <PieChartCard
-            eyebrow="Disponibilidade física"
-            title="Disponibilidade física"
-            subtitle="Disponível x manutenção"
+            eyebrow={t('dashboard.sections.physicalIndicators')}
+            title={t('dashboard.cards.physicalAvailability')}
+            subtitle={`${t('dashboard.series.available')} x ${t('dashboard.series.maintenance')}`}
             centerValue={formatUtilization(summary.physicalAvailabilityPercent)}
-            centerLabel="do período"
+            centerLabel={t('dashboard.cards.physicalAvailabilitySub')}
             segments={summary.physicalAvailabilitySegments}
-            footnote={`Base de ${summary.periodDays} dia(s) e ${summary.periodAvailableMinutes} min disponíveis.`}
+            footnote={`${summary.periodDays} d · ${formatDuration(summary.periodAvailableMinutes, language)}`}
           />
 
           <PieChartCard
-            eyebrow="Utilização física"
-            title="Utilização física"
-            subtitle="Operação x demais tempos"
+            eyebrow={t('dashboard.sections.availabilityAndUtilization')}
+            title={t('dashboard.sections.availabilityAndUtilization')}
+            subtitle={`${t('dashboard.series.operation')} x ${t('dashboard.series.rest')}`}
             centerValue={formatUtilization(summary.physicalUtilizationPercent)}
-            centerLabel="do período"
+            centerLabel={t('dashboard.cards.physicalAvailabilitySub')}
             segments={summary.physicalUtilizationSegments}
-            footnote={`Base de ${summary.periodDays} dia(s) e ${summary.periodAvailableMinutes} min disponíveis.`}
+            footnote={`${summary.periodDays} d · ${formatDuration(summary.periodAvailableMinutes, language)}`}
           />
         </div>
       </section>
@@ -265,12 +267,12 @@ export function DashboardCards({ summary }) {
       <section className="card dashboard-block">
         <div className="card__head">
           <div>
-            <p className="eyebrow">Códigos por UMR</p>
-            <h2>Quantidade e percentual por código</h2>
+            <p className="eyebrow">{t('dashboard.sections.codesByEquipment')}</p>
+            <h2>{t('dashboard.sections.quantityAndPercent')}</h2>
           </div>
         </div>
 
-        {!summary.codeDistributionByEquipment.length ? <p className="empty-state">Sem dados no período selecionado.</p> : null}
+        {!summary.codeDistributionByEquipment.length ? <p className="empty-state">{t('dashboard.empty.selectedPeriod')}</p> : null}
 
         <div className="dashboard-pie-grid">
           {summary.codeDistributionByEquipment.map((item) => (
@@ -280,10 +282,10 @@ export function DashboardCards({ summary }) {
               title={item.label}
               subtitle={item.subtitle}
               centerValue={String(item.totalCount)}
-              centerLabel="registros"
+              centerLabel={t('common.recordsLabel')}
               segments={item.segments}
-              emptyMessage="Sem registros no período selecionado."
-              footnote="Quantidade e percentual de cada código no período selecionado."
+              emptyMessage={t('dashboard.empty.selectedPeriod')}
+              footnote={t('dashboard.sections.quantityAndPercent')}
               className="pie-chart-card--compact"
             />
           ))}
@@ -292,30 +294,38 @@ export function DashboardCards({ summary }) {
 
       <div className="dashboard-columns">
         <BarList
-          title="Manutenção por UMR"
+          title={t('dashboard.sections.maintenanceByEquipment')}
           items={summary.maintenanceByEquipment}
-          emptyMessage="Sem manutenção registrada."
+          emptyMessage={t('dashboard.empty.maintenance')}
+          locale={language}
+          t={t}
         />
 
         <BarList
-          title="Manutenção por atividade"
+          title={t('dashboard.sections.maintenanceByActivity')}
           items={summary.maintenanceByActivity}
-          emptyMessage="Sem manutenção registrada."
+          emptyMessage={t('dashboard.empty.maintenance')}
+          locale={language}
+          t={t}
         />
       </div>
 
       <div className="dashboard-columns">
         <TargetBarList
-          title="Refeição diária (1h)"
+          title={t('dashboard.sections.mealDaily')}
           items={summary.mealAdherenceByEquipment}
-          emptyMessage="Sem refeição registrada no período."
-          targetLabel="Meta"
+          emptyMessage={t('dashboard.empty.meal')}
+          targetLabel={t('common.target')}
+          locale={language}
+          t={t}
         />
 
         <BarList
-          title="Intervalos críticos"
+          title={t('dashboard.sections.criticalIntervals')}
           items={summary.criticalGapActivities}
-          emptyMessage="Sem intervalos críticos no período."
+          emptyMessage={t('dashboard.empty.critical')}
+          locale={language}
+          t={t}
         />
       </div>
     </div>

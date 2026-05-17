@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useApp } from '../context/AppContext';
 
 const DEFAULT_COLORS = ['#245f9e', '#1f8a57', '#c28a15', '#bf3d3d', '#6b7280', '#8b5cf6', '#0ea5e9', '#f97316'];
 
@@ -7,16 +8,17 @@ function getNumericValue(segment) {
 }
 
 export function PieChartCard({
-  eyebrow = 'Análise',
+  eyebrow = '',
   title,
   subtitle = '',
   centerValue = '0',
   centerLabel = '',
   segments = [],
-  emptyMessage = 'Sem dados no período.',
+  emptyMessage = '',
   footnote = '',
   className = '',
 }) {
+  const { t } = useApp();
   const normalized = useMemo(() => {
     const values = segments.map((segment, index) => ({
       ...segment,
@@ -51,7 +53,7 @@ export function PieChartCard({
     <section className={`card dashboard-block pie-chart-card ${className}`.trim()}>
       <div className="card__head">
         <div>
-          <p className="eyebrow">{eyebrow}</p>
+          <p className="eyebrow">{eyebrow || t('chart.eyebrow')}</p>
           <h2>{title}</h2>
         </div>
       </div>
@@ -59,7 +61,7 @@ export function PieChartCard({
       {subtitle ? <p className="pie-chart-card__subtitle">{subtitle}</p> : null}
 
       {!total ? (
-        <p className="empty-state">{emptyMessage}</p>
+        <p className="empty-state">{emptyMessage || t('chart.empty')}</p>
       ) : (
         <div className="pie-chart-card__body">
           <div className="pie-chart-card__figure">
@@ -76,7 +78,7 @@ export function PieChartCard({
               <div key={segment.key || segment.label || segment.name} className="pie-chart-card__legend-item">
                 <span className="pie-chart-card__swatch" style={{ background: segment.color }} />
                 <div className="pie-chart-card__legend-meta">
-                  <strong>{segment.label || segment.name || segment.code || 'Sem título'}</strong>
+                  <strong>{segment.label || segment.name || segment.code || t('chart.noTitle')}</strong>
                   <small>{segment.detail || segment.subtitle || `${segment.value}`}</small>
                 </div>
                 <span className="pie-chart-card__percent">{Number(segment.percent || 0).toFixed(1)}%</span>

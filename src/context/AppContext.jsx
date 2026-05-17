@@ -26,6 +26,7 @@ import {
   saveEquipment,
   saveOperator,
   saveRecord,
+  saveUiLanguage,
   saveSession,
   saveShift,
   updateActivityType,
@@ -35,6 +36,7 @@ import {
   updateSettings,
   updateShift,
 } from '../services/storageService';
+import { DEFAULT_LOCALE, createTranslator, normalizeLocale } from '../i18n/messages.js';
 
 const AppContext = createContext(null);
 
@@ -58,6 +60,18 @@ export function AppProvider({ children }) {
     },
     [refresh],
   );
+
+  const language = normalizeLocale(state.uiLanguage || DEFAULT_LOCALE);
+  const t = useMemo(() => createTranslator(language), [language]);
+
+  const setLanguage = useCallback((nextLanguage) => {
+    const normalized = saveUiLanguage(nextLanguage);
+    setState((current) => ({
+      ...current,
+      uiLanguage: normalized,
+    }));
+    return normalized;
+  }, []);
 
   useEffect(() => {
     const sync = () => refresh();
@@ -130,11 +144,15 @@ export function AppProvider({ children }) {
       ...state,
       records: state.movementRecords,
       ...actions,
+      language,
+      locale: language,
+      setLanguage,
+      t,
       refresh,
       canInstallApp: Boolean(installPromptEvent),
       isLocalMode: state.settings?.storageMode !== 'ONLINE' || state.storageMeta?.backendAvailable !== true,
     }),
-    [actions, installPromptEvent, refresh, state],
+    [actions, installPromptEvent, language, refresh, setLanguage, state, t],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

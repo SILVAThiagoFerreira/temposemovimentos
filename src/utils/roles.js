@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE, getMessage, normalizeLocale } from '../i18n/messages.js';
+
 const ROLE_LABELS = {
   OPERADOR: 'Operador',
   CLIENTE: 'Cliente',
@@ -21,8 +23,9 @@ export function normalizeUserRole(role) {
   return ROLE_LABELS[normalized] ? normalized : 'OPERADOR';
 }
 
-export function getRoleLabel(role) {
-  return ROLE_LABELS[normalizeUserRole(role)] || 'Operador';
+export function getRoleLabel(role, locale = DEFAULT_LOCALE) {
+  const normalizedLocale = normalizeLocale(locale);
+  return getMessage(normalizedLocale, `roles.${normalizeUserRole(role).toLowerCase()}`) || ROLE_LABELS[normalizeUserRole(role)] || 'Operador';
 }
 
 export function getRoleOrder(role) {

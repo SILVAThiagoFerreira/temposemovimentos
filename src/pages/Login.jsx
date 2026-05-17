@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { StatusChip } from '../components/StatusChip';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { getHomeRouteForRole, getRoleLabel, getRoleOrder } from '../utils/roles';
+import { translateErrorMessage } from '../i18n/errorMessages.js';
 
 const enaexLogo = new URL('../assets/enaex-brasil.png', import.meta.url).href;
 
@@ -10,19 +12,19 @@ function roleTone(role) {
 }
 
 export function Login({ navigate }) {
-  const { operators, authenticateOperator, loginOperator } = useApp();
+  const { operators, authenticateOperator, loginOperator, language, t } = useApp();
   const [selectedUserId, setSelectedUserId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const activeUsers = useMemo(
     () =>
-      [...operators]
+        [...operators]
         .filter((user) => user.active !== false)
         .sort((left, right) => {
-          return getRoleOrder(left.role) - getRoleOrder(right.role) || left.name.localeCompare(right.name, 'pt-BR');
+          return getRoleOrder(left.role) - getRoleOrder(right.role) || left.name.localeCompare(right.name, language);
         }),
-    [operators],
+    [language, operators],
   );
 
   useEffect(() => {
@@ -35,12 +37,12 @@ export function Login({ navigate }) {
     event.preventDefault();
 
     if (!selectedUserId) {
-      setError('Selecione um usuário.');
+      setError(t('common.selectUser'));
       return;
     }
 
     if (!password.trim()) {
-      setError('Informe a senha.');
+      setError(t('common.enterPassword'));
       return;
     }
 
@@ -60,43 +62,46 @@ export function Login({ navigate }) {
 
       navigate(getHomeRouteForRole(user.role));
     } catch (authError) {
-      setError(authError.message || 'Falha ao entrar.');
+      setError(translateErrorMessage(authError, language) || t('login.errors.generic'));
     }
   }
 
   return (
     <section className="login-view">
       <div className="login-hero card card--shell">
+        <div className="login-hero__toolbar">
+          <LanguageSwitcher />
+        </div>
         <div className="login-hero__brand">
           <img className="login-logo" src={enaexLogo} alt="Enaex Brasil" />
-          <span>Sistema de Operações</span>
+          <span>{t('login.hero.brand')}</span>
         </div>
-        <p className="eyebrow">ENAEX // Controle de Campo</p>
-        <h1>Tempo da frota, sem ruído.</h1>
-        <p className="login-copy">Selecione o perfil. Confirme a senha. Siga a operação.</p>
+        <p className="eyebrow">{t('login.hero.eyebrow')}</p>
+        <h1>{t('login.hero.title')}</h1>
+        <p className="login-copy">{t('login.hero.copy')}</p>
 
         <div className="login-points">
-          <StatusChip tone="success">Perfis por função</StatusChip>
-          <StatusChip tone="info">Sincronização ativa</StatusChip>
-          <StatusChip tone="warning">Opera sem rede</StatusChip>
+          <StatusChip tone="success">{t('login.hero.chips.roles')}</StatusChip>
+          <StatusChip tone="info">{t('login.hero.chips.sync')}</StatusChip>
+          <StatusChip tone="warning">{t('login.hero.chips.offline')}</StatusChip>
         </div>
 
         <div className="login-stats">
           <article>
             <strong>{activeUsers.filter((user) => user.role === 'OPERADOR').length}</strong>
-            <span>operadores</span>
+            <span>{t('login.hero.stats.operators')}</span>
           </article>
           <article>
             <strong>{activeUsers.filter((user) => user.role === 'CLIENTE').length}</strong>
-            <span>clientes</span>
+            <span>{t('login.hero.stats.clients')}</span>
           </article>
           <article>
             <strong>{activeUsers.filter((user) => user.role === 'GERENTE').length}</strong>
-            <span>gerentes</span>
+            <span>{t('login.hero.stats.managers')}</span>
           </article>
           <article>
             <strong>{activeUsers.length}</strong>
-            <span>ativos</span>
+            <span>{t('login.hero.stats.active')}</span>
           </article>
         </div>
       </div>
@@ -104,10 +109,10 @@ export function Login({ navigate }) {
       <form className="card login-form card--shell" onSubmit={handleSubmit}>
         <div className="card__head">
           <div>
-            <p className="eyebrow">Entrada segura</p>
-            <h2>Escolha o perfil</h2>
+            <p className="eyebrow">{t('login.form.eyebrow')}</p>
+            <h2>{t('login.form.title')}</h2>
           </div>
-          <StatusChip tone="neutral">Acesso autorizado</StatusChip>
+          <StatusChip tone="neutral">{t('login.form.status')}</StatusChip>
         </div>
 
         {error ? <div className="alert alert--danger">{error}</div> : null}
@@ -127,27 +132,27 @@ export function Login({ navigate }) {
                 <div>
                   <strong>{user.name}</strong>
                 </div>
-                <StatusChip tone={roleTone(user.role)}>{getRoleLabel(user.role)}</StatusChip>
+                <StatusChip tone={roleTone(user.role)}>{getRoleLabel(user.role, language)}</StatusChip>
               </button>
               ))
           ) : (
-            <p className="empty-state">Nenhum usuário ativo disponível.</p>
+            <p className="empty-state">{t('login.form.empty')}</p>
           )}
         </div>
 
         <label>
-          <span>Senha</span>
+          <span>{t('login.form.password')}</span>
           <input
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            placeholder="Digite a senha"
+            placeholder={t('login.form.passwordPlaceholder')}
             autoComplete="current-password"
           />
         </label>
 
         <button className="button button--primary button--full" type="submit" disabled={!activeUsers.length}>
-          Entrar no sistema
+          {t('login.form.submit')}
         </button>
       </form>
     </section>

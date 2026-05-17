@@ -1,3 +1,4 @@
+import { createTranslator, DEFAULT_LOCALE } from '../i18n/messages.js';
 import { endOfDay, formatDuration, minutesToHours, parseSafeDate, startOfDay } from './timeService.js';
 
 const MEAL_ACTIVITY_CODE = '05';
@@ -42,14 +43,14 @@ function sortByMinutesDesc(items) {
   return [...items].sort((left, right) => right.minutes - left.minutes);
 }
 
-function sortByCountDesc(items) {
+function sortByCountDesc(items, locale = DEFAULT_LOCALE) {
   return [...items].sort((left, right) => {
     const countDelta = Number(right.count || 0) - Number(left.count || 0);
     if (countDelta !== 0) {
       return countDelta;
     }
 
-    return String(left.label || left.name || left.code || '').localeCompare(String(right.label || right.name || right.code || ''), 'pt-BR');
+    return String(left.label || left.name || left.code || '').localeCompare(String(right.label || right.name || right.code || ''), locale);
   });
 }
 
@@ -114,7 +115,9 @@ export function summarizeDashboard({
   periodStart = null,
   periodEnd = null,
   referenceDate = new Date(),
+  locale = DEFAULT_LOCALE,
 }) {
+  const t = createTranslator(locale);
   const resolvedReferenceDate = parseSafeDate(referenceDate) || new Date();
   const resolvedPeriodStart = startOfDay(parseDashboardDateInput(periodStart, 'start') || resolvedReferenceDate);
   const requestedPeriodEnd = parseDashboardDateInput(periodEnd, 'end') || resolvedReferenceDate;
@@ -188,7 +191,7 @@ export function summarizeDashboard({
       equipmentId: record.equipmentId,
       plate: equipment?.plate || record.plate || '-',
       code: equipment?.code || record.equipmentCode || '-',
-      description: equipment?.description || 'Equipamento',
+      description: equipment?.description || t('common.noData'),
       minutes: 0,
       totalMinutes: 0,
       operationMinutes: 0,
@@ -258,7 +261,7 @@ export function summarizeDashboard({
         key: activityKey,
         code: record.activityCode || '-',
         label: `${record.activityCode || '-'} - ${activityByCode.get(record.activityCode)?.name || record.activityName || '-'}`,
-        subtitle: 'Manutenção',
+        subtitle: t('dashboard.series.maintenance'),
         minutes: 0,
         count: 0,
       }));
@@ -271,7 +274,7 @@ export function summarizeDashboard({
         key: activityKey,
         code: record.activityCode || '-',
         label: `${record.activityCode || '-'} - ${activityByCode.get(record.activityCode)?.name || record.activityName || '-'}`,
-        subtitle: 'Intervalos críticos',
+        subtitle: t('dashboard.series.gaps'),
         minutes: 0,
         count: 0,
       }));
@@ -336,16 +339,16 @@ export function summarizeDashboard({
 
   const equipmentBreakdowns = equipmentMetrics.map((equipment) => {
     const stat = byEquipment.get(equipment.equipmentId) || equipment;
-    const gapItems = [...(stat.gapStats?.values() || [])].sort((left, right) => right.minutes - left.minutes);
+      const gapItems = [...(stat.gapStats?.values() || [])].sort((left, right) => right.minutes - left.minutes);
     const mainGap = gapItems[0] || null;
     const totalMinutesForEquipment = Number(stat.totalMinutes ?? stat.minutes ?? 0);
 
     return {
       key: equipment.equipmentId,
-      label: equipment.code,
-      subtitle: equipment.plate,
-      totalMinutes: totalMinutesForEquipment,
-      totalHours: minutesToHours(totalMinutesForEquipment),
+        label: equipment.code,
+        subtitle: equipment.plate,
+        totalMinutes: totalMinutesForEquipment,
+        totalHours: minutesToHours(totalMinutesForEquipment),
       operationMinutes: stat.operationMinutes || 0,
       maintenanceMinutes: stat.maintenanceMinutes || 0,
       mealMinutes: stat.mealMinutes || 0,
@@ -353,14 +356,14 @@ export function summarizeDashboard({
       otherIdleMinutes: stat.otherIdleMinutes || 0,
       otherMinutes: stat.otherMinutes || 0,
       segments: [
-        { key: 'operation', label: 'Operação', minutes: stat.operationMinutes || 0 },
-        { key: 'maintenance', label: 'Manutenção', minutes: stat.maintenanceMinutes || 0 },
-        { key: 'meal', label: 'Refeição', minutes: stat.mealMinutes || 0 },
-        { key: 'gaps', label: 'Intervalos críticos', minutes: stat.criticalGapMinutes || 0 },
-        { key: 'idle', label: 'Horas ociosas', minutes: stat.otherIdleMinutes || 0 },
-        { key: 'other', label: 'Outros', minutes: stat.otherMinutes || 0 },
+        { key: 'operation', label: t('dashboard.series.operation'), minutes: stat.operationMinutes || 0 },
+        { key: 'maintenance', label: t('dashboard.series.maintenance'), minutes: stat.maintenanceMinutes || 0 },
+        { key: 'meal', label: t('dashboard.series.meal'), minutes: stat.mealMinutes || 0 },
+        { key: 'gaps', label: t('dashboard.series.gaps'), minutes: stat.criticalGapMinutes || 0 },
+        { key: 'idle', label: t('dashboard.series.idle'), minutes: stat.otherIdleMinutes || 0 },
+        { key: 'other', label: t('dashboard.series.other'), minutes: stat.otherMinutes || 0 },
       ].filter((segment) => segment.minutes > 0),
-      mainGapLabel: mainGap?.name || 'Sem intervalos críticos',
+      mainGapLabel: mainGap?.name || t('dashboard.labels.noCriticalIntervals'),
       mainGapCode: mainGap?.code || '-',
       mainGapMinutes: mainGap?.minutes || 0,
       mainGapCount: mainGap?.count || 0,
@@ -399,11 +402,11 @@ export function summarizeDashboard({
         label: equipment.code,
         subtitle: equipment.plate,
         totalCount,
-        segments: sortByCountDesc([...byCode.values()]).map((item) => ({
+        segments: sortByCountDesc([...byCode.values()], locale).map((item) => ({
           key: item.key,
           label: `${item.code} - ${item.name}`,
           value: item.count,
-          detail: `${item.count} ${item.count === 1 ? 'registro' : 'registros'}`,
+          detail: t('dashboard.labels.records', { count: item.count }),
           percent: totalCount > 0 ? Number(((item.count / totalCount) * 100).toFixed(1)) : 0,
         })),
       };
@@ -441,12 +444,12 @@ export function summarizeDashboard({
 
   const maintenanceByActivityItems = sortByMinutesDesc([...maintenanceByActivity.values()]).map((item) => ({
     ...item,
-    subtitle: `${item.count} eventos`,
+    subtitle: t('dashboard.labels.events', { count: item.count }),
   }));
 
   const criticalGapItems = sortByMinutesDesc([...criticalGapActivities.values()]).map((item) => ({
     ...item,
-    subtitle: `${item.count} eventos`,
+    subtitle: t('dashboard.labels.events', { count: item.count }),
   }));
 
   const openRecords = relevantRecords.filter((record) => record.status === 'ABERTO');
@@ -467,12 +470,12 @@ export function summarizeDashboard({
     physicalAvailabilityPercent,
     physicalUtilizationPercent,
     physicalAvailabilitySegments: [
-      { key: 'available', label: 'Disponível', value: availabilityMinutes, detail: formatDuration(availabilityMinutes) },
-      { key: 'maintenance', label: 'Manutenção', value: maintenanceBoundMinutes, detail: formatDuration(maintenanceBoundMinutes) },
+      { key: 'available', label: t('dashboard.series.available'), value: availabilityMinutes, detail: formatDuration(availabilityMinutes, locale) },
+      { key: 'maintenance', label: t('dashboard.series.maintenance'), value: maintenanceBoundMinutes, detail: formatDuration(maintenanceBoundMinutes, locale) },
     ],
     physicalUtilizationSegments: [
-      { key: 'operation', label: 'Em operação', value: operationBoundMinutes, detail: formatDuration(operationBoundMinutes) },
-      { key: 'rest', label: 'Demais tempos', value: nonUtilizationMinutes, detail: formatDuration(nonUtilizationMinutes) },
+      { key: 'operation', label: t('dashboard.series.inOperation'), value: operationBoundMinutes, detail: formatDuration(operationBoundMinutes, locale) },
+      { key: 'rest', label: t('dashboard.series.rest'), value: nonUtilizationMinutes, detail: formatDuration(nonUtilizationMinutes, locale) },
     ],
     totalMinutes,
     totalHours: minutesToHours(totalMinutes),
@@ -499,8 +502,8 @@ export function summarizeDashboard({
       })),
     ),
     byClassification: sortByMinutesDesc([...byClassification.values()]),
-    byActivity: sortByMinutesDesc([...byActivity.values()]),
-    topCauses: sortByMinutesDesc([...byCause.values()]).slice(0, 6),
+    byActivity: sortByMinutesDesc([...byActivity.values()], locale),
+    topCauses: sortByMinutesDesc([...byCause.values()], locale).slice(0, 6),
     equipmentBreakdowns,
     maintenanceByEquipment,
     maintenanceByActivity: maintenanceByActivityItems,

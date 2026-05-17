@@ -5,6 +5,7 @@ import { RecordsTable } from '../components/RecordsTable';
 import { StatusChip } from '../components/StatusChip';
 import { downloadCsv, downloadTextFile } from '../services/csvService';
 import { isSameDay, toDateInputValue } from '../services/timeService';
+import { translateErrorMessage } from '../i18n/errorMessages.js';
 
 function createBackupName() {
   return `temposemovimentos-backup-${new Date().toISOString().slice(0, 10)}.json`;
@@ -26,6 +27,8 @@ export function DataExport() {
     updateRecord,
     deleteRecord,
     closeMovementRecord,
+    language,
+    t,
   } = useApp();
 
   const [filters, setFilters] = useState({
@@ -53,12 +56,12 @@ export function DataExport() {
 
   function handleCsvExport() {
     downloadCsv(createCsvName(), filteredRecords);
-    setNotice('CSV exportado com sucesso.');
+    setNotice(t('export.notices.csvSuccess'));
   }
 
   function handleJsonExport() {
     downloadTextFile(createBackupName(), JSON.stringify(exportData(), null, 2), 'application/json;charset=utf-8');
-    setNotice('Backup JSON exportado.');
+    setNotice(t('export.notices.jsonSuccess'));
   }
 
   async function handleImportFile(event) {
@@ -71,22 +74,22 @@ export function DataExport() {
       const text = await file.text();
       const parsed = JSON.parse(text);
       importData(parsed);
-      setNotice('Backup importado com sucesso.');
+      setNotice(t('export.notices.importSuccess'));
     } catch (error) {
-      setNotice(error.message || 'Falha ao importar JSON.');
+      setNotice(translateErrorMessage(error, language));
     } finally {
       event.target.value = '';
     }
   }
 
   function handleReset() {
-    if (!window.confirm('Limpar a base local e restaurar os dados iniciais?')) {
+    if (!window.confirm(t('export.confirm.reset'))) {
       return;
     }
 
     resetDatabase();
     setEditingRecord(null);
-    setNotice('Base restaurada.');
+    setNotice(t('export.notices.restored'));
   }
 
   function handleEdit(record) {
@@ -99,38 +102,50 @@ export function DataExport() {
       return;
     }
 
-    updateRecord(editingRecord.id, payload);
-    setEditingRecord(null);
-    setNotice('Registro atualizado.');
+    try {
+      updateRecord(editingRecord.id, payload);
+      setEditingRecord(null);
+      setNotice(t('export.notices.updated'));
+    } catch (error) {
+      setNotice(translateErrorMessage(error, language));
+    }
   }
 
   function handleDelete(record) {
-    if (!window.confirm('Excluir este registro?')) {
+    if (!window.confirm(t('export.confirm.deleteRecord'))) {
       return;
     }
 
-    deleteRecord(record.id);
-    setNotice('Registro excluído.');
+    try {
+      deleteRecord(record.id);
+      setNotice(t('export.notices.deleted'));
+    } catch (error) {
+      setNotice(translateErrorMessage(error, language));
+    }
   }
 
   function handleClose(record) {
-    if (!window.confirm('Encerrar este apontamento agora?')) {
+    if (!window.confirm(t('export.confirm.closeRecord'))) {
       return;
     }
 
-    closeMovementRecord(record.id, {});
-    setNotice('Apontamento encerrado.');
+    try {
+      closeMovementRecord(record.id, {});
+      setNotice(t('export.notices.closed'));
+    } catch (error) {
+      setNotice(translateErrorMessage(error, language));
+    }
   }
 
   return (
     <div className="page-stack">
       <section className="card page-banner">
         <div>
-          <p className="eyebrow">Exportação de dados</p>
-          <h2>Controle de registros</h2>
-          <p>Filtros, CSV, JSON e edições.</p>
+          <p className="eyebrow">{t('export.banner.eyebrow')}</p>
+          <h2>{t('export.banner.title')}</h2>
+          <p>{t('export.banner.copy')}</p>
         </div>
-        <StatusChip tone="info">{filteredRecords.length} registros filtrados</StatusChip>
+        <StatusChip tone="info">{t('export.filteredCount', { count: filteredRecords.length })}</StatusChip>
       </section>
 
       {notice ? <div className="alert alert--info">{notice}</div> : null}
@@ -138,13 +153,13 @@ export function DataExport() {
       <section className="card filters-card">
         <div className="filters-grid">
           <label>
-            <span>Data</span>
+            <span>{t('export.filters.date')}</span>
             <input type="date" value={filters.date} onChange={(event) => setFilters({ ...filters, date: event.target.value })} />
           </label>
           <label>
-            <span>Equipamento</span>
+            <span>{t('export.filters.equipment')}</span>
             <select value={filters.equipmentId} onChange={(event) => setFilters({ ...filters, equipmentId: event.target.value })}>
-              <option value="">Todos</option>
+              <option value="">{t('export.filters.all')}</option>
               {equipments.map((equipment) => (
                 <option key={equipment.id} value={equipment.id}>
                   {equipment.plate} • {equipment.code}
@@ -153,9 +168,9 @@ export function DataExport() {
             </select>
           </label>
           <label>
-            <span>Operador</span>
+            <span>{t('export.filters.operator')}</span>
             <select value={filters.operatorId} onChange={(event) => setFilters({ ...filters, operatorId: event.target.value })}>
-              <option value="">Todos</option>
+              <option value="">{t('export.filters.all')}</option>
               {operators.map((operator) => (
                 <option key={operator.id} value={operator.id}>
                   {operator.name}
@@ -164,9 +179,9 @@ export function DataExport() {
             </select>
           </label>
           <label>
-            <span>Código</span>
+            <span>{t('export.filters.code')}</span>
             <select value={filters.activityCode} onChange={(event) => setFilters({ ...filters, activityCode: event.target.value })}>
-              <option value="">Todos</option>
+              <option value="">{t('export.filters.all')}</option>
               {activityTypes.map((activityType) => (
                 <option key={activityType.id} value={activityType.code}>
                   {activityType.code} - {activityType.name}
@@ -175,28 +190,28 @@ export function DataExport() {
             </select>
           </label>
           <label>
-            <span>Situação</span>
+            <span>{t('export.filters.status')}</span>
             <select value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value })}>
-              <option value="">Todos</option>
-              <option value="ABERTO">ABERTO</option>
-              <option value="ENCERRADO">ENCERRADO</option>
+              <option value="">{t('export.filters.all')}</option>
+              <option value="ABERTO">{t('export.filters.open')}</option>
+              <option value="ENCERRADO">{t('export.filters.closed')}</option>
             </select>
           </label>
         </div>
 
         <div className="export-actions">
           <button className="button button--primary" type="button" onClick={handleCsvExport}>
-            Exportar CSV
+            {t('export.actions.csv')}
           </button>
           <button className="button button--secondary" type="button" onClick={handleJsonExport}>
-            Exportar JSON
+            {t('export.actions.json')}
           </button>
           <button className="button button--ghost" type="button" onClick={() => fileInputRef.current?.click()}>
-            Importar JSON
+            {t('export.actions.importJson')}
           </button>
           <input ref={fileInputRef} type="file" accept="application/json" className="hidden-input" onChange={handleImportFile} />
           <button className="button button--danger" type="button" onClick={handleReset}>
-            Limpar base local
+            {t('export.actions.reset')}
           </button>
         </div>
       </section>
@@ -205,9 +220,9 @@ export function DataExport() {
 
       {editingRecord ? (
         <MovementForm
-          title="Editar registro"
-          submitLabel="Salvar alteração"
-          cancelLabel="Fechar edição"
+          title={t('export.edit.title')}
+          submitLabel={t('export.edit.submit')}
+          cancelLabel={t('export.edit.cancel')}
           record={editingRecord}
           operators={operators}
           equipments={equipments}

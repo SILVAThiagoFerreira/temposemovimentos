@@ -1,23 +1,5 @@
+import { createTranslator, DEFAULT_LOCALE } from '../i18n/messages.js';
 import { formatDate, formatDateTime, formatTime } from './timeService';
-
-const CSV_HEADERS = [
-  'ID',
-  'Operador',
-  'Placa',
-  'UMB',
-  'Código',
-  'Atividade',
-  'Data inicial',
-  'Hora inicial',
-  'Data final',
-  'Hora final',
-  'Duração em minutos',
-  'Duração em horas',
-  'Observações',
-  'Situação',
-  'Criado em',
-  'Atualizado em',
-];
 
 function escapeCsv(value) {
   const text = String(value ?? '');
@@ -30,7 +12,27 @@ function escapeCsv(value) {
   return escaped;
 }
 
-export function recordsToCsv(records = []) {
+export function recordsToCsv(records = [], locale = DEFAULT_LOCALE) {
+  const t = createTranslator(locale);
+  const headers = [
+    t('csv.headers.id'),
+    t('csv.headers.operator'),
+    t('csv.headers.plate'),
+    t('csv.headers.equipment'),
+    t('csv.headers.code'),
+    t('csv.headers.activity'),
+    t('csv.headers.startDate'),
+    t('csv.headers.startTime'),
+    t('csv.headers.endDate'),
+    t('csv.headers.endTime'),
+    t('csv.headers.durationMinutes'),
+    t('csv.headers.durationHours'),
+    t('csv.headers.notes'),
+    t('csv.headers.status'),
+    t('csv.headers.createdAt'),
+    t('csv.headers.updatedAt'),
+  ];
+
   const rows = records.map((record) => [
     record.id,
     record.operatorName || '-',
@@ -38,19 +40,19 @@ export function recordsToCsv(records = []) {
     record.equipmentCode || '-',
     record.activityCode || '-',
     record.activityName || '-',
-    formatDate(record.startDateTime),
-    formatTime(record.startDateTime),
-    record.endDateTime ? formatDate(record.endDateTime) : '-',
-    record.endDateTime ? formatTime(record.endDateTime) : '-',
+    formatDate(record.startDateTime, locale),
+    formatTime(record.startDateTime, locale),
+    record.endDateTime ? formatDate(record.endDateTime, locale) : '-',
+    record.endDateTime ? formatTime(record.endDateTime, locale) : '-',
     record.durationMinutes ?? '-',
     record.durationHours ?? '-',
     record.notes || '-',
     record.status || '-',
-    formatDateTime(record.createdAt),
-    formatDateTime(record.updatedAt),
+    formatDateTime(record.createdAt, locale),
+    formatDateTime(record.updatedAt, locale),
   ]);
 
-  return [CSV_HEADERS, ...rows]
+  return [headers, ...rows]
     .map((row) => row.map(escapeCsv).join(','))
     .join('\r\n');
 }
@@ -70,7 +72,7 @@ export function downloadTextFile(filename, content, mimeType = 'text/plain;chars
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export function downloadCsv(filename, records = []) {
-  const csv = recordsToCsv(records);
+export function downloadCsv(filename, records = [], locale = DEFAULT_LOCALE) {
+  const csv = recordsToCsv(records, locale);
   downloadTextFile(filename, csv, 'text/csv;charset=utf-8');
 }

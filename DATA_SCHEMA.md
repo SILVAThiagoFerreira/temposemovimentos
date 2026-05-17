@@ -10,7 +10,11 @@
     "version": "",
     "entrypoint": "src/main.jsx"
   },
-  "storage": {},
+  "storage": {
+    "keys": {
+      "uiLanguage": "temposemovimentos-ui-language"
+    }
+  },
   "firebase": {},
   "auth": {
     "defaultPassword": "1234",
@@ -23,7 +27,7 @@
     }
   },
   "seed": {
-    "catalogVersion": 5,
+    "catalogVersion": 6,
     "users": [],
     "equipments": [],
     "activityTypes": [],
@@ -51,6 +55,8 @@
 
 - `role` aceita `OPERADOR`, `CLIENTE` e `GERENTE`.
 - Os campos de turno deixaram de ser expostos no fluxo atual.
+- `syncPassword` é um campo opcional do seed usado para sobrescrever a senha existente quando o valor do seed deve prevalecer.
+- `storage.keys.uiLanguage` guarda a preferência de idioma da interface no armazenamento local.
 
 ## Session
 
@@ -133,7 +139,7 @@
     "storageMode": "ONLINE",
     "defaultShiftId": "shift-1",
     "userCatalogSeeded": true,
-    "catalogVersion": 5,
+    "catalogVersion": 6,
     "updatedAt": "ISO-8601"
   }
 }
@@ -168,7 +174,7 @@
     "storageMode": "ONLINE",
     "defaultShiftId": "shift-1",
     "userCatalogSeeded": true,
-    "catalogVersion": 5,
+    "catalogVersion": 6,
     "updatedAt": "ISO-8601"
   }
 }

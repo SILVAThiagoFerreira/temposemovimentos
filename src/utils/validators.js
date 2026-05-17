@@ -1,41 +1,48 @@
+import { DEFAULT_LOCALE, createTranslator } from '../i18n/messages.js';
 import { differenceMinutes, parseSafeDate } from './dateUtils';
 
 export function isFilled(value) {
   return String(value ?? '').trim().length > 0;
 }
 
-export function validateRequiredFields(payload, fields) {
+function resolveTranslator(translate) {
+  return typeof translate === 'function' ? translate : createTranslator(DEFAULT_LOCALE);
+}
+
+export function validateRequiredFields(payload, fields, translate) {
+  const t = resolveTranslator(translate);
   const errors = {};
 
   fields.forEach((field) => {
     if (!isFilled(payload[field])) {
-      errors[field] = 'Campo obrigatório';
+      errors[field] = t('movement.errors.requiredField');
     }
   });
 
   return errors;
 }
 
-export function validateDateRange(startDateTime, endDateTime) {
+export function validateDateRange(startDateTime, endDateTime, translate) {
+  const t = resolveTranslator(translate);
   const start = parseSafeDate(startDateTime);
   const end = parseSafeDate(endDateTime);
 
   if (!start) {
-    return 'Data/hora inicial inválida';
+    return t('movement.errors.invalidStartDateTime');
   }
 
   if (!end) {
-    return 'Data/hora final inválida';
+    return t('movement.errors.invalidEndDateTime');
   }
 
   if (end.getTime() <= start.getTime()) {
-    return 'Hora final deve ser maior que a inicial';
+    return t('movement.errors.endAfterStart');
   }
 
   return null;
 }
 
-export function validateRecordPayload(payload) {
+export function validateRecordPayload(payload, translate) {
   const errors = validateRequiredFields(payload, [
     'operatorId',
     'equipmentId',
@@ -43,10 +50,10 @@ export function validateRecordPayload(payload) {
     'activityCode',
     'activityName',
     'startDateTime',
-  ]);
+  ], translate);
 
   if (payload.manualEntry && payload.endDateTime) {
-    const rangeError = validateDateRange(payload.startDateTime, payload.endDateTime);
+    const rangeError = validateDateRange(payload.startDateTime, payload.endDateTime, translate);
     if (rangeError) {
       errors.endDateTime = rangeError;
     }
@@ -55,8 +62,9 @@ export function validateRecordPayload(payload) {
   return errors;
 }
 
-export function validateShift(payload) {
-  const errors = validateRequiredFields(payload, ['name', 'startTime', 'endTime']);
+export function validateShift(payload, translate) {
+  const t = resolveTranslator(translate);
+  const errors = validateRequiredFields(payload, ['name', 'startTime', 'endTime'], translate);
 
   if (!errors.startTime && !errors.endTime) {
     const [startHour, startMinute] = payload.startTime.split(':').map(Number);
@@ -66,7 +74,7 @@ export function validateShift(payload) {
     const available = endMinutes > startMinutes ? endMinutes - startMinutes : 24 * 60 - startMinutes + endMinutes;
 
     if (available <= 0) {
-      errors.endTime = 'Turno inválido';
+      errors.endTime = t('movement.errors.invalidShift');
     }
   }
 

@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { formatDateTime, nowDateTimeInputValue, toDateTimeInputValue } from '../services/timeService';
 import { StatusChip } from './StatusChip';
 import { validateDateRange, validateRecordPayload } from '../utils/validators';
+import { useApp } from '../context/AppContext';
+import { translateErrorMessage } from '../i18n/errorMessages.js';
 
 function buildInitialState({
   record,
@@ -74,9 +76,9 @@ function buildPayload(form, { operators, equipments, activityTypes, record, defa
 }
 
 export function MovementForm({
-  title = 'Novo apontamento',
-  submitLabel = 'Salvar',
-  cancelLabel = 'Cancelar',
+  title = '',
+  submitLabel = '',
+  cancelLabel = '',
   record = null,
   operators,
   equipments,
@@ -89,6 +91,7 @@ export function MovementForm({
   onSubmit,
   onCancel,
 }) {
+  const { language, t } = useApp();
   const initialState = useMemo(
     () =>
       buildInitialState({
@@ -174,21 +177,25 @@ export function MovementForm({
         }));
       }
     } catch (error) {
-      setErrors({ form: error.message || 'Não foi possível salvar o apontamento' });
+      setErrors({ form: translateErrorMessage(error, language) || t('movement.errors.generic') });
     } finally {
       setIsSaving(false);
     }
   }
 
+  const resolvedTitle = title || (record ? t('movement.editTitle') : t('movement.newTitle'));
+  const resolvedSubmitLabel = submitLabel || t('movement.submit');
+  const resolvedCancelLabel = cancelLabel || t('movement.cancel');
+
   return (
     <form className="card form-card" onSubmit={handleSubmit}>
       <div className="card__head">
         <div>
-          <p className="eyebrow">Apontamento operacional</p>
-          <h2>{title}</h2>
+          <p className="eyebrow">{t('movement.title')}</p>
+          <h2>{resolvedTitle}</h2>
         </div>
         <StatusChip tone={form.manualEntry || record ? 'warning' : 'success'}>
-          {form.manualEntry || record ? 'LANÇAMENTO MANUAL' : 'HORA AUTOMÁTICA'}
+          {form.manualEntry || record ? t('movement.manual') : t('movement.automatic')}
         </StatusChip>
       </div>
 
@@ -197,7 +204,7 @@ export function MovementForm({
       <div className="form-grid">
         {!hideOperatorSelect ? (
           <label>
-            <span>Operador</span>
+            <span>{t('movement.operator')}</span>
             <select value={form.operatorId} onChange={(event) => updateField('operatorId', event.target.value)}>
               {operators.map((operator) => (
                 <option key={operator.id} value={operator.id}>
@@ -209,14 +216,14 @@ export function MovementForm({
           </label>
         ) : (
           <div className="readonly-pill">
-            <span>Operador</span>
+            <span>{t('movement.operator')}</span>
             <strong>{selectedOperator?.name || '-'}</strong>
           </div>
         )}
 
         {!hideEquipmentSelect ? (
           <label>
-            <span>Equipamento</span>
+            <span>{t('movement.equipment')}</span>
             <select value={form.equipmentId} onChange={(event) => updateField('equipmentId', event.target.value)}>
               {equipments.map((equipment) => (
                 <option key={equipment.id} value={equipment.id}>
@@ -228,13 +235,13 @@ export function MovementForm({
           </label>
         ) : (
           <div className="readonly-pill">
-            <span>Equipamento</span>
+            <span>{t('movement.equipment')}</span>
             <strong>{selectedEquipment ? `${selectedEquipment.plate} • ${selectedEquipment.code}` : '-'}</strong>
           </div>
         )}
 
         <label>
-          <span>Código da atividade/parada</span>
+          <span>{t('movement.activityCode')}</span>
           <select
             value={form.activityTypeId}
             onChange={(event) => updateField('activityTypeId', event.target.value)}
@@ -254,24 +261,24 @@ export function MovementForm({
             checked={form.manualEntry}
             onChange={(event) => updateField('manualEntry', event.target.checked)}
           />
-          <span>Lançamento manual</span>
+          <span>{t('movement.manual')}</span>
         </label>
       </div>
 
       <label>
-        <span>Observações</span>
+        <span>{t('movement.notes')}</span>
         <textarea
           rows="3"
           value={form.notes}
           onChange={(event) => updateField('notes', event.target.value)}
-          placeholder="Informações complementares"
+          placeholder={t('movement.notesPlaceholder')}
         />
       </label>
 
       {form.manualEntry || record ? (
         <div className="form-grid form-grid--two">
           <label>
-            <span>Data/hora inicial</span>
+            <span>{t('movement.startDateTime')}</span>
             <input
               type="datetime-local"
               value={form.startDateTime}
@@ -281,7 +288,7 @@ export function MovementForm({
           </label>
 
           <label>
-            <span>Data/hora final</span>
+            <span>{t('movement.endDateTime')}</span>
             <input
               type="datetime-local"
               value={form.endDateTime}
@@ -292,18 +299,18 @@ export function MovementForm({
         </div>
       ) : (
         <div className="form-note">
-          <StatusChip tone="info">Data e hora serão gravadas automaticamente ao iniciar</StatusChip>
-          <p>{formatDateTime(form.startDateTime)}</p>
+          <StatusChip tone="info">{t('movement.autoNote')}</StatusChip>
+          <p>{formatDateTime(form.startDateTime, language)}</p>
         </div>
       )}
 
       <div className="form-actions">
         <button className="button button--primary" type="submit" disabled={isSaving}>
-          {isSaving ? 'Salvando...' : submitLabel}
+          {isSaving ? t('movement.saving') : resolvedSubmitLabel}
         </button>
         {onCancel ? (
           <button className="button button--ghost" type="button" onClick={onCancel}>
-            {cancelLabel}
+            {resolvedCancelLabel}
           </button>
         ) : null}
       </div>

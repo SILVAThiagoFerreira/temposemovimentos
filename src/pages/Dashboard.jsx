@@ -7,7 +7,7 @@ import { summarizeDashboard } from '../services/calculationService';
 import { formatDate, toDateInputValue } from '../services/timeService';
 
 export function Dashboard() {
-  const { records, equipments, activityTypes, shifts } = useApp();
+  const { records, equipments, activityTypes, shifts, language, t } = useApp();
   const today = toDateInputValue(new Date());
   const [period, setPeriod] = useState(() => ({ startDate: today, endDate: today }));
   const [tick, setTick] = useState(() => Date.now());
@@ -46,15 +46,16 @@ export function Dashboard() {
   }
 
   const periodLabel = useMemo(() => {
-    const startLabel = formatDate(`${period.startDate}T00:00:00`);
-    const endLabel = formatDate(`${period.endDate}T00:00:00`);
+    const startLabel = formatDate(`${period.startDate}T00:00:00`, language);
+    const endLabel = formatDate(`${period.endDate}T00:00:00`, language);
+    const rangeConnector = { 'pt-BR': 'a', 'en-US': 'to', 'zh-CN': '至' }[language] || '-';
 
     if (period.startDate === period.endDate) {
       return startLabel;
     }
 
-    return `${startLabel} a ${endLabel}`;
-  }, [period.endDate, period.startDate]);
+    return `${startLabel} ${rangeConnector} ${endLabel}`;
+  }, [language, period.endDate, period.startDate]);
 
   const summary = useMemo(
     () =>
@@ -66,8 +67,9 @@ export function Dashboard() {
         periodStart: period.startDate,
         periodEnd: period.endDate,
         referenceDate: new Date(tick),
+        locale: language,
       }),
-    [activityTypes, equipments, period.endDate, period.startDate, records, shifts, tick],
+    [activityTypes, equipments, language, period.endDate, period.startDate, records, shifts, tick],
   );
 
   const recentRecords = useMemo(
@@ -79,35 +81,35 @@ export function Dashboard() {
     <div className="page-stack">
       <section className="card page-banner">
         <div>
-          <p className="eyebrow">Operação ao vivo</p>
-          <h2>Painel da frota</h2>
-          <p>Disponibilidade, utilização e paradas.</p>
+          <p className="eyebrow">{t('dashboard.banner.eyebrow')}</p>
+          <h2>{t('dashboard.banner.title')}</h2>
+          <p>{t('dashboard.banner.copy')}</p>
         </div>
-        <StatusChip tone={isLiveRange ? 'success' : 'info'}>{isLiveRange ? 'AO VIVO' : 'INTERVALO'}</StatusChip>
+        <StatusChip tone={isLiveRange ? 'success' : 'info'}>{isLiveRange ? t('dashboard.filters.live').toUpperCase() : t('dashboard.filters.interval').toUpperCase()}</StatusChip>
       </section>
 
       <section className="card card--shell dashboard-filters">
         <div className="card__head">
           <div className="dashboard-filters__title">
-            <p className="eyebrow">Janela de análise</p>
+            <p className="eyebrow">{t('dashboard.filters.eyebrow')}</p>
             <h2>{periodLabel}</h2>
           </div>
-          <StatusChip tone={isLiveRange ? 'success' : 'info'}>{isTodayRange ? 'Hoje' : isLiveRange ? 'Ao vivo' : 'Intervalo'}</StatusChip>
+          <StatusChip tone={isLiveRange ? 'success' : 'info'}>{isTodayRange ? t('dashboard.filters.today') : isLiveRange ? t('dashboard.filters.live') : t('dashboard.filters.interval')}</StatusChip>
         </div>
 
         <div className="dashboard-filters__controls">
           <label>
-            <span>Data inicial</span>
+            <span>{t('dashboard.filters.startDate')}</span>
             <input type="date" value={period.startDate} onChange={(event) => updatePeriod('startDate', event.target.value)} />
           </label>
 
           <label>
-            <span>Data final</span>
+            <span>{t('dashboard.filters.endDate')}</span>
             <input type="date" value={period.endDate} onChange={(event) => updatePeriod('endDate', event.target.value)} />
           </label>
 
           <button className="button button--secondary" type="button" onClick={selectToday}>
-            Hoje
+            {t('dashboard.filters.today')}
           </button>
         </div>
       </section>
@@ -117,12 +119,12 @@ export function Dashboard() {
       <section className="card dashboard-recent">
         <div className="card__head">
           <div>
-            <p className="eyebrow">Últimos apontamentos</p>
-            <h2>Movimentação do período</h2>
+            <p className="eyebrow">{t('dashboard.recent.eyebrow')}</p>
+            <h2>{t('dashboard.recent.title')}</h2>
           </div>
         </div>
 
-        <RecordsTable records={recentRecords} emptyMessage="Sem registros para exibir." />
+        <RecordsTable records={recentRecords} emptyMessage={t('dashboard.recent.empty')} />
       </section>
     </div>
   );

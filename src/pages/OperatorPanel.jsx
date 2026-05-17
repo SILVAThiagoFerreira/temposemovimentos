@@ -5,10 +5,11 @@ import { ActiveTimer } from '../components/ActiveTimer';
 import { MovementForm } from '../components/MovementForm';
 import { RecordsTable } from '../components/RecordsTable';
 import { StatusChip } from '../components/StatusChip';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { isSameDay } from '../services/timeService';
 
 export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate }) {
-  const { session, operators, equipments, records, activityTypes, startMovementRecord, closeMovementRecord, logout } = useApp();
+  const { session, operators, equipments, records, activityTypes, startMovementRecord, closeMovementRecord, logout, t } = useApp();
   const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
   async function handleStart(payload) {
     const equipment = equipments.find((item) => item.id === selectedEquipmentId) || selectedEquipment;
     if (!equipment) {
-      throw new Error('Selecione um equipamento');
+      throw new Error(t('common.selectEquipment'));
     }
 
     return startMovementRecord({
@@ -59,7 +60,7 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
       return;
     }
 
-    if (!window.confirm('Encerrar a atividade e finalizar o expediente?')) {
+    if (!window.confirm(t('operator.alerts.closePrompt'))) {
       return;
     }
 
@@ -75,13 +76,14 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
       {standalone ? (
         <section className="card operator-topbar card--shell">
           <div>
-            <p className="eyebrow">Modo operacional</p>
+            <p className="eyebrow">{t('operator.topbar.eyebrow')}</p>
             <h2>{session.operatorName}</h2>
-            <p>{session.role === 'GERENTE' ? 'Acesso total' : 'Somente apontamento'}</p>
+            <p>{session.role === 'GERENTE' ? t('operator.topbar.accessTotal') : t('operator.topbar.pointingOnly')}</p>
           </div>
           <div className="operator-topbar__actions">
+            <LanguageSwitcher />
             <button className="button button--secondary" type="button" onClick={() => void onRefreshUpdate?.()}>
-              Atualizar sistema
+              {t('common.updateSystem')}
             </button>
             <button
               className="button button--ghost"
@@ -95,7 +97,7 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
                 logout();
               }}
             >
-              Sair
+              {t('common.logout')}
             </button>
           </div>
         </section>
@@ -103,24 +105,24 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
 
       <section className="hero-row">
         <article className="card hero-card">
-          <p className="eyebrow">Operador</p>
+          <p className="eyebrow">{t('operator.hero.operator')}</p>
           <h2>{session.operatorName}</h2>
-          <p>Apontamento ativo</p>
-          <StatusChip tone="info">{session.registration || 'Sem matrícula'}</StatusChip>
+          <p>{t('operator.hero.activeRecord')}</p>
+          <StatusChip tone="info">{session.registration || t('operator.hero.noRegistration')}</StatusChip>
         </article>
 
         <article className="card hero-card hero-card--compact">
-          <p className="eyebrow">UMR selecionada</p>
+          <p className="eyebrow">{t('operator.hero.selectedEquipment')}</p>
           <h2>{selectedEquipment ? selectedEquipment.code : '-'}</h2>
-          <p>{selectedEquipment ? `${selectedEquipment.plate} • ${selectedEquipment.description}` : 'Escolha um equipamento'}</p>
-          {selectedEquipmentOpenRecord ? <StatusChip tone="danger">APONTAMENTO EM ABERTO</StatusChip> : <StatusChip tone="success">LIVRE</StatusChip>}
+          <p>{selectedEquipment ? `${selectedEquipment.plate} • ${selectedEquipment.description}` : t('operator.hero.chooseEquipment')}</p>
+          {selectedEquipmentOpenRecord ? <StatusChip tone="danger">{t('operator.hero.openRecord')}</StatusChip> : <StatusChip tone="success">{t('operator.hero.free')}</StatusChip>}
         </article>
 
         <article className="card hero-card hero-card--compact">
-          <p className="eyebrow">Atividade aberta</p>
-          <h2>{operatorActiveRecord ? operatorActiveRecord.activityName : 'Nenhum'}</h2>
-          <p>{operatorActiveRecord ? operatorActiveRecord.plate : 'Sem movimentação em aberto'}</p>
-          {operatorActiveRecord ? <StatusChip tone="warning">ABERTO</StatusChip> : <StatusChip tone="neutral">SEM ATIVIDADE</StatusChip>}
+          <p className="eyebrow">{t('operator.hero.openActivity')}</p>
+          <h2>{operatorActiveRecord ? operatorActiveRecord.activityName : t('operator.hero.none')}</h2>
+          <p>{operatorActiveRecord ? operatorActiveRecord.plate : t('operator.hero.noOpenMovement')}</p>
+          {operatorActiveRecord ? <StatusChip tone="warning">{t('common.open')}</StatusChip> : <StatusChip tone="neutral">{t('operator.hero.noActivity')}</StatusChip>}
         </article>
       </section>
 
@@ -140,20 +142,20 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
         <section className="card active-record-card">
           <div className="card__head">
             <div>
-              <p className="eyebrow">Atividade aberta</p>
+              <p className="eyebrow">{t('operator.hero.openActivity')}</p>
               <h2>{operatorActiveRecord.activityName}</h2>
             </div>
           </div>
 
           <div className="active-record-grid">
-            <ActiveTimer startDateTime={operatorActiveRecord.startDateTime} title="Cronômetro em tempo real" />
+            <ActiveTimer startDateTime={operatorActiveRecord.startDateTime} title={t('operator.form.timer')} />
             <div className="record-summary-list">
               <div>
-                <span>Equipamento</span>
+                <span>{t('operator.form.equipment')}</span>
                 <strong>{operatorActiveRecord.plate}</strong>
               </div>
               <div>
-                <span>Atividade</span>
+                <span>{t('operator.form.activity')}</span>
                 <strong>{operatorActiveRecord.activityCode || '-'} - {operatorActiveRecord.activityName}</strong>
               </div>
             </div>
@@ -163,18 +165,18 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
 
       {operatorActiveRecord ? (
         <div className="alert alert--info operator-flow-note">
-          Ao iniciar a próxima atividade, a anterior será encerrada automaticamente.
+          {t('operator.alerts.autoClose')}
         </div>
       ) : null}
 
       {selectedEquipmentOpenRecord && selectedEquipmentOpenRecord.operatorId !== session.operatorId ? (
         <section className="alert alert--warning">
-          O equipamento selecionado já possui um apontamento aberto por {selectedEquipmentOpenRecord.operatorName}.
+          {t('operator.alerts.busyEquipment', { name: selectedEquipmentOpenRecord.operatorName })}
         </section>
       ) : null}
 
       <MovementForm
-        title="Novo apontamento"
+        title={t('operator.form.title')}
         operators={operators}
         equipments={equipments}
         activityTypes={activityTypes}
@@ -182,25 +184,25 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
         defaultEquipmentId={selectedEquipmentId}
         hideOperatorSelect
         hideEquipmentSelect
-        submitLabel="Iniciar atividade"
+        submitLabel={t('operator.form.submit')}
         onSubmit={handleStart}
       />
 
       <section className="card table-section">
         <div className="card__head">
           <div>
-            <p className="eyebrow">Histórico do dia</p>
-            <h2>{todayRecords.length} registros</h2>
+            <p className="eyebrow">{t('operator.form.history')}</p>
+            <h2>{t('operator.form.count', { count: todayRecords.length })}</h2>
           </div>
         </div>
 
-        <RecordsTable records={todayRecords} emptyMessage="Nenhum registro lançado hoje." />
+        <RecordsTable records={todayRecords} emptyMessage={t('operator.form.empty')} />
       </section>
 
       {operatorActiveRecord ? (
         <div className="operator-actions-footer">
           <button className="button button--primary operator-finish-button" type="button" onClick={handleCloseActive}>
-            Encerrar a atividade
+            {t('operator.form.finish')}
           </button>
         </div>
       ) : null}

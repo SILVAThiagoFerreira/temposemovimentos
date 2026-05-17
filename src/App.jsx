@@ -4,6 +4,7 @@ import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
 import { refreshApplicationAssets } from './services/updateService';
 import { getHomeRouteForRole, isClientRole, isManagerRole, isOperatorRole } from './utils/roles';
+import { metaConfig } from './config/runtimeConfig';
 
 const LoginPage = lazy(() => import('./pages/Login').then((module) => ({ default: module.Login })));
 const OperatorPanelPage = lazy(() => import('./pages/OperatorPanel').then((module) => ({ default: module.OperatorPanel })));
@@ -12,23 +13,21 @@ const RegistrationsPage = lazy(() => import('./pages/Registrations').then((modul
 const DataExportPage = lazy(() => import('./pages/DataExport').then((module) => ({ default: module.DataExport })));
 const SettingsPage = lazy(() => import('./pages/Settings').then((module) => ({ default: module.Settings })));
 
-const loadingFallback = <div className="empty-state">Carregando...</div>;
-
 const ROUTES = [
-  { path: '/operador', label: 'Apontar', helper: 'Registro de tempo', roles: ['OPERADOR', 'GERENTE'] },
-  { path: '/dashboard', label: 'Painel', helper: 'Indicadores da frota', roles: ['CLIENTE', 'GERENTE'] },
-  { path: '/cadastros', label: 'Base', helper: 'Dados operacionais', roles: ['GERENTE'] },
-  { path: '/dados', label: 'Dados', helper: 'Exportações', roles: ['GERENTE'] },
-  { path: '/configuracoes', label: 'Sistema', helper: 'Administração', roles: ['GERENTE'] },
+  { path: '/operador', labelKey: 'navigation.items.operator.label', helperKey: 'navigation.items.operator.helper', roles: ['OPERADOR', 'GERENTE'] },
+  { path: '/dashboard', labelKey: 'navigation.items.dashboard.label', helperKey: 'navigation.items.dashboard.helper', roles: ['CLIENTE', 'GERENTE'] },
+  { path: '/cadastros', labelKey: 'navigation.items.registrations.label', helperKey: 'navigation.items.registrations.helper', roles: ['GERENTE'] },
+  { path: '/dados', labelKey: 'navigation.items.export.label', helperKey: 'navigation.items.export.helper', roles: ['GERENTE'] },
+  { path: '/configuracoes', labelKey: 'navigation.items.settings.label', helperKey: 'navigation.items.settings.helper', roles: ['GERENTE'] },
 ];
 
 const ROUTE_TITLES = {
-  '/login': 'Sistema de Operações ENAEX',
-  '/operador': 'Painel do operador',
-  '/dashboard': 'Painel da frota',
-  '/cadastros': 'Base operacional',
-  '/dados': 'Dados e exportação',
-  '/configuracoes': 'Administração do sistema',
+  '/login': 'routeTitles.login',
+  '/operador': 'routeTitles.operator',
+  '/dashboard': 'routeTitles.dashboard',
+  '/cadastros': 'routeTitles.registrations',
+  '/dados': 'routeTitles.export',
+  '/configuracoes': 'routeTitles.settings',
 };
 
 function normalizeRoute(hash) {
@@ -86,11 +85,21 @@ function useHashRoute(session) {
 }
 
 function AppShell() {
-  const { session, logout, canInstallApp, installApp, isLocalMode } = useApp();
+  const { session, logout, canInstallApp, installApp, isLocalMode, language, t } = useApp();
   const [route, navigate] = useHashRoute(session);
   const isManager = isManagerRole(session?.role);
   const isOperator = isOperatorRole(session?.role);
   const isClient = isClientRole(session?.role);
+  const loadingFallback = <div className="empty-state">{t('common.loading')}</div>;
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
+  useEffect(() => {
+    const currentTitleKey = ROUTE_TITLES[route === '/login' ? '/login' : route] || 'routeTitles.default';
+    document.title = `${t(currentTitleKey)} · ${t('app.name')}`;
+  }, [route, t]);
 
   let content;
 
@@ -113,8 +122,8 @@ function AppShell() {
     content = (
       <div className="app-frame">
         <Header
-          title="Painel da frota"
-          subtitle="Operação de UMR em tempo real"
+          title={t('routeTitles.dashboard')}
+          subtitle={t('header.subtitle')}
           session={session}
           canInstallApp={canInstallApp}
           onRefreshUpdate={refreshApplicationAssets}
@@ -123,7 +132,7 @@ function AppShell() {
             logout();
             navigate('/login');
           }}
-          currentStateLabel={isLocalMode ? 'LOCAL / SEM REDE' : 'CONECTADO'}
+          currentStateLabel={isLocalMode ? t('connection.local') : t('connection.online')}
         />
 
         <div className="app-body app-body--client">
@@ -134,9 +143,13 @@ function AppShell() {
       </div>
     );
   } else {
-    const accessibleRoutes = getAccessibleRoutes(session.role);
+    const accessibleRoutes = getAccessibleRoutes(session.role).map((item) => ({
+      ...item,
+      label: t(item.labelKey),
+      helper: t(item.helperKey),
+    }));
     const currentRoute = route === '/login' ? '/dashboard' : accessibleRoutes.some((item) => item.path === route) ? route : '/dashboard';
-    const title = ROUTE_TITLES[currentRoute] || 'Sistema de Tempos e Movimentos';
+    const title = t(ROUTE_TITLES[currentRoute] || 'routeTitles.default');
 
     const page = (() => {
       switch (currentRoute) {
@@ -161,7 +174,7 @@ function AppShell() {
       <div className="app-frame">
         <Header
           title={title}
-          subtitle="Operação de UMR em tempo real"
+          subtitle={t('header.subtitle')}
           session={session}
           canInstallApp={canInstallApp}
           onRefreshUpdate={refreshApplicationAssets}
@@ -170,7 +183,7 @@ function AppShell() {
             logout();
             navigate('/login');
           }}
-          currentStateLabel={isLocalMode ? 'LOCAL / SEM REDE' : 'CONECTADO'}
+          currentStateLabel={isLocalMode ? t('connection.local') : t('connection.online')}
         />
 
         <div className="app-body">
