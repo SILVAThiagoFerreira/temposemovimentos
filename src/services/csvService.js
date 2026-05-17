@@ -14,7 +14,7 @@ const CSV_HEADERS = [
   'Duração em minutos',
   'Duração em horas',
   'Observações',
-  'Status',
+  'Situação',
   'Criado em',
   'Atualizado em',
 ];

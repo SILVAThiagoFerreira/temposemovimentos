@@ -16,7 +16,7 @@ export function RecordsTable({ records, onEdit, onDelete, onClose, emptyMessage 
               <th>Início</th>
               <th>Fim</th>
               <th>Duração</th>
-              <th>Status</th>
+              <th>Situação</th>
               <th>Ações</th>
             </tr>
           </thead>

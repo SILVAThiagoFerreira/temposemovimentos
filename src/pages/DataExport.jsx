@@ -126,9 +126,9 @@ export function DataExport() {
     <div className="page-stack">
       <section className="card page-banner">
         <div>
-          <p className="eyebrow">Data export</p>
-          <h2>Records control</h2>
-          <p>Filters, CSV, JSON and edits.</p>
+          <p className="eyebrow">Exportação de dados</p>
+          <h2>Controle de registros</h2>
+          <p>Filtros, CSV, JSON e edições.</p>
         </div>
         <StatusChip tone="info">{filteredRecords.length} registros filtrados</StatusChip>
       </section>
@@ -175,7 +175,7 @@ export function DataExport() {
             </select>
           </label>
           <label>
-            <span>Status</span>
+            <span>Situação</span>
             <select value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value })}>
               <option value="">Todos</option>
               <option value="ABERTO">ABERTO</option>

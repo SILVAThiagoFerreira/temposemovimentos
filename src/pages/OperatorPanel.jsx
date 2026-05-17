@@ -75,13 +75,13 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
       {standalone ? (
         <section className="card operator-topbar card--shell">
           <div>
-            <p className="eyebrow">Operator mode</p>
+            <p className="eyebrow">Modo operacional</p>
             <h2>{session.operatorName}</h2>
-            <p>{session.role === 'GERENTE' ? 'Full access' : 'Time entry only'}</p>
+            <p>{session.role === 'GERENTE' ? 'Acesso total' : 'Somente apontamento'}</p>
           </div>
           <div className="operator-topbar__actions">
             <button className="button button--secondary" type="button" onClick={() => void onRefreshUpdate?.()}>
-              Refresh system
+              Atualizar sistema
             </button>
             <button
               className="button button--ghost"
@@ -95,7 +95,7 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
                 logout();
               }}
             >
-              Sign out
+              Sair
             </button>
           </div>
         </section>
@@ -103,24 +103,24 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
 
       <section className="hero-row">
         <article className="card hero-card">
-          <p className="eyebrow">Operator</p>
+          <p className="eyebrow">Operador</p>
           <h2>{session.operatorName}</h2>
-          <p>Live entry</p>
+          <p>Apontamento ativo</p>
           <StatusChip tone="info">{session.registration || 'Sem matrícula'}</StatusChip>
         </article>
 
         <article className="card hero-card hero-card--compact">
-          <p className="eyebrow">Selected UMR</p>
+          <p className="eyebrow">UMR selecionada</p>
           <h2>{selectedEquipment ? selectedEquipment.code : '-'}</h2>
           <p>{selectedEquipment ? `${selectedEquipment.plate} • ${selectedEquipment.description}` : 'Escolha um equipamento'}</p>
           {selectedEquipmentOpenRecord ? <StatusChip tone="danger">APONTAMENTO EM ABERTO</StatusChip> : <StatusChip tone="success">LIVRE</StatusChip>}
         </article>
 
         <article className="card hero-card hero-card--compact">
-          <p className="eyebrow">Open activity</p>
+          <p className="eyebrow">Atividade aberta</p>
           <h2>{operatorActiveRecord ? operatorActiveRecord.activityName : 'Nenhum'}</h2>
           <p>{operatorActiveRecord ? operatorActiveRecord.plate : 'Sem movimentação em aberto'}</p>
-          {operatorActiveRecord ? <StatusChip tone="warning">ABERTO</StatusChip> : <StatusChip tone="neutral">IDLE</StatusChip>}
+          {operatorActiveRecord ? <StatusChip tone="warning">ABERTO</StatusChip> : <StatusChip tone="neutral">SEM ATIVIDADE</StatusChip>}
         </article>
       </section>
 

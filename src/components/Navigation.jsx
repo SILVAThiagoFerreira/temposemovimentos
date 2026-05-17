@@ -5,9 +5,9 @@ export function Navigation({ items, currentPath, onNavigate, session }) {
   return (
     <nav className="side-nav card card--shell">
       <div className="nav-top">
-        <p className="nav-title">Workspace</p>
+        <p className="nav-title">Área de trabalho</p>
         {session ? (
-          <StatusChip tone="success">{`${getRoleLabel(session.role).toUpperCase()} LIVE`}</StatusChip>
+          <StatusChip tone="success">{`${getRoleLabel(session.role).toUpperCase()} ATIVO`}</StatusChip>
         ) : (
           <StatusChip tone="warning">ENTRAR</StatusChip>
         )}

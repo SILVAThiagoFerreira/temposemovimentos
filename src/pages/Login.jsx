@@ -69,34 +69,34 @@ export function Login({ navigate }) {
       <div className="login-hero card card--shell">
         <div className="login-hero__brand">
           <img className="login-logo" src={enaexLogo} alt="Enaex Brasil" />
-          <span>Operations OS</span>
+          <span>Sistema de Operações</span>
         </div>
-        <p className="eyebrow">ENAEX // Field Control</p>
-        <h1>Fleet timing, without the noise.</h1>
-        <p className="login-copy">Select profile. Confirm password. Keep the operation moving.</p>
+        <p className="eyebrow">ENAEX // Controle de Campo</p>
+        <h1>Tempo da frota, sem ruído.</h1>
+        <p className="login-copy">Selecione o perfil. Confirme a senha. Siga a operação.</p>
 
         <div className="login-points">
-          <StatusChip tone="success">Role based</StatusChip>
-          <StatusChip tone="info">Online sync</StatusChip>
-          <StatusChip tone="warning">Offline ready</StatusChip>
+          <StatusChip tone="success">Perfis por função</StatusChip>
+          <StatusChip tone="info">Sincronização ativa</StatusChip>
+          <StatusChip tone="warning">Opera sem rede</StatusChip>
         </div>
 
         <div className="login-stats">
           <article>
             <strong>{activeUsers.filter((user) => user.role === 'OPERADOR').length}</strong>
-            <span>operators</span>
+            <span>operadores</span>
           </article>
           <article>
             <strong>{activeUsers.filter((user) => user.role === 'CLIENTE').length}</strong>
-            <span>clients</span>
+            <span>clientes</span>
           </article>
           <article>
             <strong>{activeUsers.filter((user) => user.role === 'GERENTE').length}</strong>
-            <span>managers</span>
+            <span>gerentes</span>
           </article>
           <article>
             <strong>{activeUsers.length}</strong>
-            <span>active</span>
+            <span>ativos</span>
           </article>
         </div>
       </div>
@@ -104,10 +104,10 @@ export function Login({ navigate }) {
       <form className="card login-form card--shell" onSubmit={handleSubmit}>
         <div className="card__head">
           <div>
-            <p className="eyebrow">Secure access</p>
-            <h2>Choose profile</h2>
+            <p className="eyebrow">Entrada segura</p>
+            <h2>Escolha o perfil</h2>
           </div>
-          <StatusChip tone="neutral">Authorized only</StatusChip>
+          <StatusChip tone="neutral">Acesso autorizado</StatusChip>
         </div>
 
         {error ? <div className="alert alert--danger">{error}</div> : null}
@@ -136,18 +136,18 @@ export function Login({ navigate }) {
         </div>
 
         <label>
-          <span>Password</span>
+          <span>Senha</span>
           <input
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            placeholder="Enter password"
+            placeholder="Digite a senha"
             autoComplete="current-password"
           />
         </label>
 
         <button className="button button--primary button--full" type="submit" disabled={!activeUsers.length}>
-          Enter console
+          Entrar no sistema
         </button>
       </form>
     </section>

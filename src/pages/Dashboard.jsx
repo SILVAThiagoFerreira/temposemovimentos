@@ -78,9 +78,9 @@ export function Dashboard() {
     <div className="page-stack">
       <section className="card page-banner">
         <div>
-          <p className="eyebrow">Live operations</p>
-          <h2>Fleet dashboard</h2>
-          <p>Availability, utilization and downtime.</p>
+          <p className="eyebrow">Operação ao vivo</p>
+          <h2>Painel da frota</h2>
+          <p>Disponibilidade, utilização e paradas.</p>
         </div>
         <StatusChip tone={isTodayRange ? 'success' : 'info'}>{isTodayRange ? 'AO VIVO' : 'INTERVALO'}</StatusChip>
       </section>
@@ -88,10 +88,10 @@ export function Dashboard() {
       <section className="card card--shell dashboard-filters">
         <div className="card__head">
           <div className="dashboard-filters__title">
-            <p className="eyebrow">Analysis window</p>
+            <p className="eyebrow">Janela de análise</p>
             <h2>{periodLabel}</h2>
           </div>
-          <StatusChip tone={isTodayRange ? 'success' : 'info'}>{isTodayRange ? 'Today' : 'Range'}</StatusChip>
+          <StatusChip tone={isTodayRange ? 'success' : 'info'}>{isTodayRange ? 'Hoje' : 'Intervalo'}</StatusChip>
         </div>
 
         <div className="dashboard-filters__controls">

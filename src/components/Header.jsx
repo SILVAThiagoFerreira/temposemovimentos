@@ -20,7 +20,7 @@ export function Header({
           <img src={enaexLogo} alt="Enaex Brasil" />
         </div>
         <div>
-          <p className="eyebrow">ENAEX // Operations OS</p>
+          <p className="eyebrow">ENAEX // Sistema de Operações</p>
           <h1>{title}</h1>
           <p className="subtitle">{subtitle}</p>
         </div>
@@ -36,17 +36,17 @@ export function Header({
         ) : null}
         {session ? (
           <button className="button button--secondary" type="button" onClick={() => void onRefreshUpdate?.()}>
-            Refresh system
+            Atualizar sistema
           </button>
         ) : null}
         {canInstallApp ? (
           <button className="button button--secondary" type="button" onClick={onInstall}>
-            Install app
+            Instalar aplicativo
           </button>
         ) : null}
         {session ? (
           <button className="button button--ghost" type="button" onClick={onLogout}>
-            Sign out
+            Sair
           </button>
         ) : null}
       </div>

@@ -12,23 +12,23 @@ const RegistrationsPage = lazy(() => import('./pages/Registrations').then((modul
 const DataExportPage = lazy(() => import('./pages/DataExport').then((module) => ({ default: module.DataExport })));
 const SettingsPage = lazy(() => import('./pages/Settings').then((module) => ({ default: module.Settings })));
 
-const loadingFallback = <div className="empty-state">Loading console...</div>;
+const loadingFallback = <div className="empty-state">Carregando...</div>;
 
 const ROUTES = [
-  { path: '/operador', label: 'Capture', helper: 'Time entry', roles: ['OPERADOR', 'GERENTE'] },
-  { path: '/dashboard', label: 'Live', helper: 'Fleet KPIs', roles: ['CLIENTE', 'GERENTE'] },
-  { path: '/cadastros', label: 'Master', helper: 'Base data', roles: ['GERENTE'] },
-  { path: '/dados', label: 'Data', helper: 'Exports', roles: ['GERENTE'] },
-  { path: '/configuracoes', label: 'Admin', helper: 'System', roles: ['GERENTE'] },
+  { path: '/operador', label: 'Apontar', helper: 'Registro de tempo', roles: ['OPERADOR', 'GERENTE'] },
+  { path: '/dashboard', label: 'Painel', helper: 'Indicadores da frota', roles: ['CLIENTE', 'GERENTE'] },
+  { path: '/cadastros', label: 'Base', helper: 'Dados operacionais', roles: ['GERENTE'] },
+  { path: '/dados', label: 'Dados', helper: 'Exportações', roles: ['GERENTE'] },
+  { path: '/configuracoes', label: 'Sistema', helper: 'Administração', roles: ['GERENTE'] },
 ];
 
 const ROUTE_TITLES = {
-  '/login': 'ENAEX Operations OS',
-  '/operador': 'Operator Console',
-  '/dashboard': 'Fleet Dashboard',
-  '/cadastros': 'Master Data',
-  '/dados': 'Data Export',
-  '/configuracoes': 'System Admin',
+  '/login': 'Sistema de Operações ENAEX',
+  '/operador': 'Painel do operador',
+  '/dashboard': 'Painel da frota',
+  '/cadastros': 'Base operacional',
+  '/dados': 'Dados e exportação',
+  '/configuracoes': 'Administração do sistema',
 };
 
 function normalizeRoute(hash) {
@@ -113,8 +113,8 @@ function AppShell() {
     content = (
       <div className="app-frame">
         <Header
-          title="Fleet Dashboard"
-          subtitle="Live UMB fleet operations"
+          title="Painel da frota"
+          subtitle="Operação de UMR em tempo real"
           session={session}
           canInstallApp={canInstallApp}
           onRefreshUpdate={refreshApplicationAssets}
@@ -123,7 +123,7 @@ function AppShell() {
             logout();
             navigate('/login');
           }}
-          currentStateLabel={isLocalMode ? 'LOCAL / OFFLINE' : 'ONLINE'}
+          currentStateLabel={isLocalMode ? 'LOCAL / SEM REDE' : 'CONECTADO'}
         />
 
         <div className="app-body app-body--client">
@@ -161,7 +161,7 @@ function AppShell() {
       <div className="app-frame">
         <Header
           title={title}
-          subtitle="Live UMB fleet operations"
+          subtitle="Operação de UMR em tempo real"
           session={session}
           canInstallApp={canInstallApp}
           onRefreshUpdate={refreshApplicationAssets}
@@ -170,7 +170,7 @@ function AppShell() {
             logout();
             navigate('/login');
           }}
-          currentStateLabel={isLocalMode ? 'LOCAL / OFFLINE' : 'ONLINE'}
+          currentStateLabel={isLocalMode ? 'LOCAL / SEM REDE' : 'CONECTADO'}
         />
 
         <div className="app-body">

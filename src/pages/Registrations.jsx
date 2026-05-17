@@ -104,9 +104,9 @@ export function Registrations() {
     <div className="page-stack">
       <section className="card page-banner">
         <div>
-          <p className="eyebrow">Master data</p>
-          <h2>Operational base</h2>
-          <p>Equipment and codes.</p>
+          <p className="eyebrow">Cadastro mestre</p>
+          <h2>Base operacional</h2>
+          <p>Equipamentos e códigos.</p>
         </div>
         <StatusChip tone="info">{formatDateTime(new Date())}</StatusChip>
       </section>

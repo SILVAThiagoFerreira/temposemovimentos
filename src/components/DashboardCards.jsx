@@ -73,7 +73,7 @@ function StackedBarList({ title, items, emptyMessage }) {
                 </div>
                 <div className="stacked-list__value">
                   <strong>{formatHours(item.totalHours || totalMinutes / 60)}</strong>
-                  <small>Gap principal: {item.mainGapLabel || '-'}</small>
+                  <small>Principal intervalo: {item.mainGapLabel || '-'}</small>
                 </div>
               </div>
 
@@ -313,9 +313,9 @@ export function DashboardCards({ summary }) {
         />
 
         <BarList
-          title="Gaps críticos"
+          title="Intervalos críticos"
           items={summary.criticalGapActivities}
-          emptyMessage="Sem gaps críticos no período."
+          emptyMessage="Sem intervalos críticos no período."
         />
       </div>
     </div>

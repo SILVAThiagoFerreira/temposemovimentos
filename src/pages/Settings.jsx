@@ -36,7 +36,7 @@ export function Settings() {
   const [notice, setNotice] = useState('');
   const [userForm, setUserForm] = useState(() => createEmptyUserForm());
 
-  const storageLabel = isLocalMode ? 'LOCAL / OFFLINE' : 'ONLINE';
+  const storageLabel = isLocalMode ? 'LOCAL / SEM REDE' : 'CONECTADO';
 
   const storageState = useMemo(
     () => ({
@@ -128,7 +128,7 @@ export function Settings() {
       updateOperator(user.id, { active: nextActive });
       setNotice(nextActive ? 'Usuário ativado.' : 'Usuário desativado.');
     } catch (error) {
-      setNotice(error.message || 'Falha ao alterar status.');
+      setNotice(error.message || 'Falha ao alterar situação.');
     }
   }
 
@@ -153,9 +153,9 @@ export function Settings() {
       <div className="page-stack">
         <section className="card page-banner">
           <div>
-            <p className="eyebrow">System admin</p>
-            <h2>Restricted access</h2>
-            <p>Manager role required.</p>
+            <p className="eyebrow">Administração do sistema</p>
+            <h2>Acesso restrito</h2>
+            <p>Perfil de gerente obrigatório.</p>
           </div>
           <StatusChip tone="danger">SEM PERMISSÃO</StatusChip>
         </section>
@@ -167,9 +167,9 @@ export function Settings() {
     <div className="page-stack">
       <section className="card page-banner">
         <div>
-          <p className="eyebrow">System admin</p>
-          <h2>Users and environment</h2>
-          <p>Users, PWA and storage.</p>
+          <p className="eyebrow">Administração do sistema</p>
+          <h2>Usuários e ambiente</h2>
+          <p>Usuários, PWA e armazenamento.</p>
         </div>
         <StatusChip tone={storageState.tone}>{storageState.label}</StatusChip>
       </section>
@@ -180,8 +180,8 @@ export function Settings() {
         <article className="card settings-card settings-card--wide">
           <div className="card__head">
             <div>
-              <p className="eyebrow">Users</p>
-              <h2>Access control</h2>
+              <p className="eyebrow">Usuários</p>
+              <h2>Controle de acesso</h2>
             </div>
             <StatusChip tone="info">{operators.length} cadastrados</StatusChip>
           </div>
@@ -273,7 +273,7 @@ export function Settings() {
                       type="button"
                       onClick={() => handleToggleActive(user)}
                       disabled={canToggleManager}
-                      title={canToggleManager ? 'É necessário manter ao menos um gerente ativo' : 'Alternar status'}
+                      title={canToggleManager ? 'É necessário manter ao menos um gerente ativo' : 'Alternar situação'}
                     >
                       {user.active === false ? 'Ativar' : 'Desativar'}
                     </button>
@@ -313,14 +313,14 @@ export function Settings() {
         <article className="card settings-card">
           <div className="card__head">
             <div>
-              <p className="eyebrow">Storage</p>
-              <h2>Synced base</h2>
+              <p className="eyebrow">Armazenamento</p>
+              <h2>Base sincronizada</h2>
             </div>
           </div>
           <p>Os dados são gravados em cache local, espelhados em `IndexedDB` e sincronizados com o Firestore. O navegador também é solicitado a manter esse armazenamento como persistente.</p>
           <div className="settings-rows">
             <div>
-              <span>Status atual</span>
+              <span>Situação atual</span>
               <strong>{storageState.label}</strong>
             </div>
             <div>
