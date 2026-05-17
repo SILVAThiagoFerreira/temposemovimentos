@@ -153,9 +153,9 @@ export function Settings() {
       <div className="page-stack">
         <section className="card page-banner">
           <div>
-            <p className="eyebrow">Configurações</p>
-            <h2>Acesso restrito</h2>
-            <p>Somente usuários da classe Gerente podem alterar cadastros de usuários.</p>
+            <p className="eyebrow">System admin</p>
+            <h2>Restricted access</h2>
+            <p>Manager role required.</p>
           </div>
           <StatusChip tone="danger">SEM PERMISSÃO</StatusChip>
         </section>
@@ -167,9 +167,9 @@ export function Settings() {
     <div className="page-stack">
       <section className="card page-banner">
         <div>
-          <p className="eyebrow">Configurações</p>
-          <h2>Usuários e ambiente</h2>
-          <p>Cadastros de usuários, PWA e base local.</p>
+          <p className="eyebrow">System admin</p>
+          <h2>Users and environment</h2>
+          <p>Users, PWA and storage.</p>
         </div>
         <StatusChip tone={storageState.tone}>{storageState.label}</StatusChip>
       </section>
@@ -180,8 +180,8 @@ export function Settings() {
         <article className="card settings-card settings-card--wide">
           <div className="card__head">
             <div>
-              <p className="eyebrow">Usuários</p>
-              <h2>Gerenciamento completo</h2>
+              <p className="eyebrow">Users</p>
+              <h2>Access control</h2>
             </div>
             <StatusChip tone="info">{operators.length} cadastrados</StatusChip>
           </div>
@@ -313,8 +313,8 @@ export function Settings() {
         <article className="card settings-card">
           <div className="card__head">
             <div>
-              <p className="eyebrow">Armazenamento</p>
-              <h2>Base sincronizada</h2>
+              <p className="eyebrow">Storage</p>
+              <h2>Synced base</h2>
             </div>
           </div>
           <p>Os dados são gravados em cache local, espelhados em `IndexedDB` e sincronizados com o Firestore. O navegador também é solicitado a manter esse armazenamento como persistente.</p>

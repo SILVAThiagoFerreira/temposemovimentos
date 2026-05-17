@@ -8,6 +8,7 @@ export function Header({
   subtitle,
   session,
   canInstallApp,
+  onRefreshUpdate,
   onInstall,
   onLogout,
   currentStateLabel = 'MODO LOCAL',
@@ -19,7 +20,7 @@ export function Header({
           <img src={enaexLogo} alt="Enaex Brasil" />
         </div>
         <div>
-          <p className="eyebrow">Sistema de Tempos e Movimentos</p>
+          <p className="eyebrow">ENAEX // Operations OS</p>
           <h1>{title}</h1>
           <p className="subtitle">{subtitle}</p>
         </div>
@@ -33,14 +34,19 @@ export function Header({
             <span>{getRoleLabel(session.role)}</span>
           </div>
         ) : null}
+        {session ? (
+          <button className="button button--secondary" type="button" onClick={() => void onRefreshUpdate?.()}>
+            Refresh system
+          </button>
+        ) : null}
         {canInstallApp ? (
           <button className="button button--secondary" type="button" onClick={onInstall}>
-            Instalar app
+            Install app
           </button>
         ) : null}
         {session ? (
           <button className="button button--ghost" type="button" onClick={onLogout}>
-            Sair
+            Sign out
           </button>
         ) : null}
       </div>

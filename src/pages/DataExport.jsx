@@ -126,9 +126,9 @@ export function DataExport() {
     <div className="page-stack">
       <section className="card page-banner">
         <div>
-          <p className="eyebrow">Dados e exportação</p>
-          <h2>Backup local e análise</h2>
-          <p>CSV, JSON, filtros por dia e edição posterior de apontamentos encerrados.</p>
+          <p className="eyebrow">Data export</p>
+          <h2>Records control</h2>
+          <p>Filters, CSV, JSON and edits.</p>
         </div>
         <StatusChip tone="info">{filteredRecords.length} registros filtrados</StatusChip>
       </section>

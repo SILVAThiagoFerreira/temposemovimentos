@@ -45,6 +45,7 @@ const requiredFiles = [
 requiredFiles.forEach(fileExistsAndNonEmpty);
 
 const config = readJson(resolve(root, 'config.json'));
+const backupTemplate = readJson(resolve(root, 'input/backup-template.json'));
 const seedUsers = Array.isArray(config?.seed?.users) ? config.seed.users : [];
 const seedActivityTypes = Array.isArray(config?.seed?.activityTypes) ? config.seed.activityTypes : [];
 
@@ -55,19 +56,22 @@ assert(config?.firebase?.webConfig?.apiKey, 'config.json sem firebase.webConfig.
 assert(config?.firebase?.stateCollection, 'config.json sem firebase.stateCollection');
 assert(config?.firebase?.stateDocument, 'config.json sem firebase.stateDocument');
 assert(config?.auth?.roles?.client === 'CLIENTE', 'config.json sem auth.roles.client');
-assert(Number(config?.seed?.catalogVersion) >= 4, 'config.json sem seed.catalogVersion atualizado');
+assert(Number(config?.seed?.catalogVersion) >= 5, 'config.json sem seed.catalogVersion atualizado');
 assert(seedUsers.length === 6, 'config.json com quantidade incorreta de usuários iniciais');
 assert(seedUsers.filter((user) => user.role === 'OPERADOR').length === 4, 'config.json com quantidade incorreta de operadores');
 assert(seedUsers.filter((user) => user.role === 'CLIENTE').length === 1, 'config.json com quantidade incorreta de clientes');
 assert(seedUsers.some((user) => user.role === 'GERENTE'), 'config.json sem gerente inicial');
 assert(seedUsers.some((user) => user.name === 'Mineração Vale Verde'), 'config.json sem cliente Mineração Vale Verde');
 assert(seedUsers.every((user) => !user.shiftId && !user.shiftName), 'config.json ainda expõe turnos nos usuários iniciais');
+assert(seedActivityTypes.length >= 15, 'config.json sem os códigos iniciais esperados');
 assert(Array.isArray(config?.seed?.equipments) && config.seed.equipments.length === 2, 'config.json com quantidade incorreta de equipamentos iniciais');
 assert(config.seed.equipments.some((equipment) => equipment.code === 'UMR-1072'), 'config.json sem UMR-1072');
 assert(config.seed.equipments.some((equipment) => equipment.code === 'UMR-1123'), 'config.json sem UMR-1123');
-assert(seedActivityTypes.length >= 13, 'config.json sem códigos iniciais');
 assert(seedActivityTypes.some((activity) => activity.code === '04' && activity.name === 'Reabastecimento de Emulsão'), 'config.json sem renomeação do código 04');
 assert(seedActivityTypes.some((activity) => activity.id === 'act-13'), 'config.json sem atividade act-13');
+assert(seedActivityTypes.some((activity) => activity.name === 'Retirada de Material no Paiol'), 'config.json sem Retirada de Material no Paiol');
+assert(seedActivityTypes.some((activity) => activity.name === 'Aguardando Detonação'), 'config.json sem Aguardando Detonação');
 assert(Array.isArray(config?.seed?.shifts) && config.seed.shifts.length === 1, 'config.json deve manter apenas um turno interno');
+assert(Number(backupTemplate?.settings?.catalogVersion) === Number(config?.seed?.catalogVersion), 'backup-template.json fora de sincronia com catalogVersion');
 
 console.log('SMOKE_OK');

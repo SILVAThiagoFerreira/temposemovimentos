@@ -1,4 +1,4 @@
-import { differenceMinutes, endOfDay, formatDate, formatDateTime, formatDuration, formatTime, isSameDay, minutesToHours, parseSafeDate, startOfDay, toDateInputValue, toDateTimeInputValue } from '../utils/dateUtils';
+import { differenceMinutes, endOfDay, formatDate, formatDateTime, formatDuration, formatTime, isSameDay, minutesToHours, parseSafeDate, startOfDay, toDateInputValue, toDateTimeInputValue } from '../utils/dateUtils.js';
 
 export {
   differenceMinutes,

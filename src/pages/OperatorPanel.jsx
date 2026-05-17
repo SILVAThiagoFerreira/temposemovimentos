@@ -7,7 +7,7 @@ import { RecordsTable } from '../components/RecordsTable';
 import { StatusChip } from '../components/StatusChip';
 import { isSameDay } from '../services/timeService';
 
-export function OperatorPanel({ standalone = false, onLogout }) {
+export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate }) {
   const { session, operators, equipments, records, activityTypes, startMovementRecord, closeMovementRecord, logout } = useApp();
   const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
 
@@ -75,44 +75,49 @@ export function OperatorPanel({ standalone = false, onLogout }) {
       {standalone ? (
         <section className="card operator-topbar card--shell">
           <div>
-            <p className="eyebrow">Modo operacional</p>
+            <p className="eyebrow">Operator mode</p>
             <h2>{session.operatorName}</h2>
-            <p>{session.role === 'GERENTE' ? 'Gerente com acesso completo' : 'Acesso somente ao apontamento'}</p>
+            <p>{session.role === 'GERENTE' ? 'Full access' : 'Time entry only'}</p>
           </div>
-          <button
-            className="button button--ghost"
-            type="button"
-            onClick={() => {
-              if (onLogout) {
-                onLogout();
-                return;
-              }
+          <div className="operator-topbar__actions">
+            <button className="button button--secondary" type="button" onClick={() => void onRefreshUpdate?.()}>
+              Refresh system
+            </button>
+            <button
+              className="button button--ghost"
+              type="button"
+              onClick={() => {
+                if (onLogout) {
+                  onLogout();
+                  return;
+                }
 
-              logout();
-            }}
-          >
-            Sair
-          </button>
+                logout();
+              }}
+            >
+              Sign out
+            </button>
+          </div>
         </section>
       ) : null}
 
       <section className="hero-row">
         <article className="card hero-card">
-          <p className="eyebrow">Operador logado</p>
+          <p className="eyebrow">Operator</p>
           <h2>{session.operatorName}</h2>
-          <p>Fluxo operacional ativo</p>
+          <p>Live entry</p>
           <StatusChip tone="info">{session.registration || 'Sem matrícula'}</StatusChip>
         </article>
 
         <article className="card hero-card hero-card--compact">
-          <p className="eyebrow">Equipamento selecionado</p>
+          <p className="eyebrow">Selected UMR</p>
           <h2>{selectedEquipment ? selectedEquipment.code : '-'}</h2>
           <p>{selectedEquipment ? `${selectedEquipment.plate} • ${selectedEquipment.description}` : 'Escolha um equipamento'}</p>
           {selectedEquipmentOpenRecord ? <StatusChip tone="danger">APONTAMENTO EM ABERTO</StatusChip> : <StatusChip tone="success">LIVRE</StatusChip>}
         </article>
 
         <article className="card hero-card hero-card--compact">
-          <p className="eyebrow">Apontamento ativo</p>
+          <p className="eyebrow">Open activity</p>
           <h2>{operatorActiveRecord ? operatorActiveRecord.activityName : 'Nenhum'}</h2>
           <p>{operatorActiveRecord ? operatorActiveRecord.plate : 'Sem movimentação em aberto'}</p>
           {operatorActiveRecord ? <StatusChip tone="warning">ABERTO</StatusChip> : <StatusChip tone="neutral">IDLE</StatusChip>}

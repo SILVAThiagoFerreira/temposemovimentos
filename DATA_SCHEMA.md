@@ -23,7 +23,7 @@
     }
   },
   "seed": {
-    "catalogVersion": 4,
+    "catalogVersion": 5,
     "users": [],
     "equipments": [],
     "activityTypes": [],
@@ -133,7 +133,7 @@
     "storageMode": "ONLINE",
     "defaultShiftId": "shift-1",
     "userCatalogSeeded": true,
-    "catalogVersion": 3,
+    "catalogVersion": 5,
     "updatedAt": "ISO-8601"
   }
 }
@@ -168,7 +168,7 @@
     "storageMode": "ONLINE",
     "defaultShiftId": "shift-1",
     "userCatalogSeeded": true,
-    "catalogVersion": 3,
+    "catalogVersion": 5,
     "updatedAt": "ISO-8601"
   }
 }

@@ -1,4 +1,4 @@
-import { endOfDay, formatDuration, minutesToHours, parseSafeDate, startOfDay } from './timeService';
+import { endOfDay, formatDuration, minutesToHours, parseSafeDate, startOfDay } from './timeService.js';
 
 const MEAL_ACTIVITY_CODE = '05';
 const CRITICAL_GAP_CODES = new Set(['07', '08', '09']);
@@ -72,7 +72,21 @@ function calculateOverlapMinutes(record, periodStart, periodEnd, referenceDate =
     return 0;
   }
 
-  return Math.max(0, Math.round((overlapEnd - overlapStart) / 60000));
+  // Keep a positive overlap visible immediately in live dashboards.
+  return Math.max(1, Math.round((overlapEnd - overlapStart) / 60000));
+}
+
+function parseDashboardDateInput(value, boundary = 'start') {
+  if (!value) {
+    return null;
+  }
+
+  const raw = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    return new Date(`${raw}T${boundary === 'end' ? '23:59:59.999' : '00:00:00'}`);
+  }
+
+  return parseSafeDate(raw);
 }
 
 export function summarizeDashboard({
@@ -85,8 +99,8 @@ export function summarizeDashboard({
   referenceDate = new Date(),
 }) {
   const resolvedReferenceDate = parseSafeDate(referenceDate) || new Date();
-  const resolvedPeriodStart = startOfDay(parseSafeDate(periodStart) || resolvedReferenceDate);
-  const requestedPeriodEnd = parseSafeDate(periodEnd) || resolvedReferenceDate;
+  const resolvedPeriodStart = startOfDay(parseDashboardDateInput(periodStart, 'start') || resolvedReferenceDate);
+  const requestedPeriodEnd = parseDashboardDateInput(periodEnd, 'end') || resolvedReferenceDate;
   const resolvedPeriodEnd = new Date(Math.min(endOfDay(requestedPeriodEnd).getTime(), resolvedReferenceDate.getTime()));
 
   if (resolvedPeriodEnd.getTime() < resolvedPeriodStart.getTime()) {

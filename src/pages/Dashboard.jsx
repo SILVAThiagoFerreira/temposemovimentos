@@ -8,14 +8,21 @@ import { formatDate, toDateInputValue } from '../services/timeService';
 
 export function Dashboard() {
   const { records, equipments, activityTypes, shifts } = useApp();
-  const today = useMemo(() => toDateInputValue(new Date()), []);
+  const today = toDateInputValue(new Date());
   const [period, setPeriod] = useState(() => ({ startDate: today, endDate: today }));
   const [tick, setTick] = useState(() => Date.now());
+  const isTodayRange = period.startDate === today && period.endDate === today;
 
   useEffect(() => {
-    const timer = window.setInterval(() => setTick(Date.now()), 60000);
+    const timer = window.setInterval(() => setTick(Date.now()), isTodayRange ? 1000 : 60000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [isTodayRange]);
+
+  useEffect(() => {
+    if (isTodayRange) {
+      setTick(Date.now());
+    }
+  }, [isTodayRange]);
 
   function updatePeriod(field, value) {
     setPeriod((current) => {
@@ -36,8 +43,6 @@ export function Dashboard() {
   function selectToday() {
     setPeriod({ startDate: today, endDate: today });
   }
-
-  const isTodayRange = period.startDate === today && period.endDate === today;
 
   const periodLabel = useMemo(() => {
     const startLabel = formatDate(`${period.startDate}T00:00:00`);
@@ -73,9 +78,9 @@ export function Dashboard() {
     <div className="page-stack">
       <section className="card page-banner">
         <div>
-          <p className="eyebrow">Supervisão</p>
-          <h2>Dashboard operacional</h2>
-          <p>Escolha um intervalo para analisar disponibilidade, utilização e códigos por UMR.</p>
+          <p className="eyebrow">Live operations</p>
+          <h2>Fleet dashboard</h2>
+          <p>Availability, utilization and downtime.</p>
         </div>
         <StatusChip tone={isTodayRange ? 'success' : 'info'}>{isTodayRange ? 'AO VIVO' : 'INTERVALO'}</StatusChip>
       </section>
@@ -83,10 +88,10 @@ export function Dashboard() {
       <section className="card card--shell dashboard-filters">
         <div className="card__head">
           <div className="dashboard-filters__title">
-            <p className="eyebrow">Período de análise</p>
+            <p className="eyebrow">Analysis window</p>
             <h2>{periodLabel}</h2>
           </div>
-          <StatusChip tone={isTodayRange ? 'success' : 'info'}>{isTodayRange ? 'Dia atual' : 'Intervalo selecionado'}</StatusChip>
+          <StatusChip tone={isTodayRange ? 'success' : 'info'}>{isTodayRange ? 'Today' : 'Range'}</StatusChip>
         </div>
 
         <div className="dashboard-filters__controls">

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'temposemovimentos-v1';
+const CACHE_NAME = 'temposemovimentos-v2';
 const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './favicon.svg'];
 
 self.addEventListener('install', (event) => {

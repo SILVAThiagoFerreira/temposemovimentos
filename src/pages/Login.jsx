@@ -67,36 +67,36 @@ export function Login({ navigate }) {
   return (
     <section className="login-view">
       <div className="login-hero card card--shell">
-        <img className="login-logo" src={enaexLogo} alt="Enaex Brasil" />
-        <p className="eyebrow">Acesso sincronizado</p>
-        <h1>SISTEMA DE TEMPOS E MOVIMENTOS</h1>
-        <p className="login-copy">
-          Selecione um usuário cadastrado e informe a senha para entrar. Operadores lançam apontamentos, clientes acompanham o
-          dashboard e o gerente administra a base.
-        </p>
+        <div className="login-hero__brand">
+          <img className="login-logo" src={enaexLogo} alt="Enaex Brasil" />
+          <span>Operations OS</span>
+        </div>
+        <p className="eyebrow">ENAEX // Field Control</p>
+        <h1>Fleet timing, without the noise.</h1>
+        <p className="login-copy">Select profile. Confirm password. Keep the operation moving.</p>
 
         <div className="login-points">
-          <StatusChip tone="success">Perfis fixos</StatusChip>
-          <StatusChip tone="info">Operação / Dashboard</StatusChip>
-          <StatusChip tone="warning">Acesso por senha</StatusChip>
+          <StatusChip tone="success">Role based</StatusChip>
+          <StatusChip tone="info">Online sync</StatusChip>
+          <StatusChip tone="warning">Offline ready</StatusChip>
         </div>
 
         <div className="login-stats">
           <article>
             <strong>{activeUsers.filter((user) => user.role === 'OPERADOR').length}</strong>
-            <span>operacionais</span>
+            <span>operators</span>
           </article>
           <article>
             <strong>{activeUsers.filter((user) => user.role === 'CLIENTE').length}</strong>
-            <span>clientes</span>
+            <span>clients</span>
           </article>
           <article>
             <strong>{activeUsers.filter((user) => user.role === 'GERENTE').length}</strong>
-            <span>gerentes</span>
+            <span>managers</span>
           </article>
           <article>
             <strong>{activeUsers.length}</strong>
-            <span>ativos</span>
+            <span>active</span>
           </article>
         </div>
       </div>
@@ -104,10 +104,10 @@ export function Login({ navigate }) {
       <form className="card login-form card--shell" onSubmit={handleSubmit}>
         <div className="card__head">
           <div>
-            <p className="eyebrow">Selecionar usuário</p>
-            <h2>Login</h2>
+            <p className="eyebrow">Secure access</p>
+            <h2>Choose profile</h2>
           </div>
-          <StatusChip tone="neutral">Somente usuários criados</StatusChip>
+          <StatusChip tone="neutral">Authorized only</StatusChip>
         </div>
 
         {error ? <div className="alert alert--danger">{error}</div> : null}
@@ -136,18 +136,18 @@ export function Login({ navigate }) {
         </div>
 
         <label>
-          <span>Senha</span>
+          <span>Password</span>
           <input
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            placeholder="Digite a senha"
+            placeholder="Enter password"
             autoComplete="current-password"
           />
         </label>
 
         <button className="button button--primary button--full" type="submit" disabled={!activeUsers.length}>
-          Entrar
+          Enter console
         </button>
       </form>
     </section>

@@ -43,7 +43,7 @@
     }
   },
   "seed": {
-    "catalogVersion": 4,
+    "catalogVersion": 5,
     "users": [
       {
         "id": "usr-paulo",
@@ -135,7 +135,9 @@
       { "id": "act-10", "code": "10", "name": "Falta de Operador", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
       { "id": "act-11", "code": "11", "name": "Condições Climáticas Adversas", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
       { "id": "act-12", "code": "12", "name": "Manutenção", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
-      { "id": "act-13", "code": "13", "name": "Outros", "classification": "OUTROS", "defaultLocation": null, "active": true }
+      { "id": "act-13", "code": "13", "name": "Outros", "classification": "OUTROS", "defaultLocation": null, "active": true },
+      { "id": "act-14", "code": "14", "name": "Retirada de Material no Paiol", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true },
+      { "id": "act-15", "code": "15", "name": "Aguardando Detonação", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true }
     ],
     "shifts": [
       { "id": "shift-1", "name": "Turno único", "startTime": "07:00", "endTime": "15:00", "availableMinutes": 480, "active": true }

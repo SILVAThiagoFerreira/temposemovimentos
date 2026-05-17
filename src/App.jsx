@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
+import { refreshApplicationAssets } from './services/updateService';
 import { getHomeRouteForRole, isClientRole, isManagerRole, isOperatorRole } from './utils/roles';
 
 const LoginPage = lazy(() => import('./pages/Login').then((module) => ({ default: module.Login })));
@@ -11,23 +12,23 @@ const RegistrationsPage = lazy(() => import('./pages/Registrations').then((modul
 const DataExportPage = lazy(() => import('./pages/DataExport').then((module) => ({ default: module.DataExport })));
 const SettingsPage = lazy(() => import('./pages/Settings').then((module) => ({ default: module.Settings })));
 
-const loadingFallback = <div className="empty-state">Carregando...</div>;
+const loadingFallback = <div className="empty-state">Loading console...</div>;
 
 const ROUTES = [
-  { path: '/operador', label: 'Operador', helper: 'Apontamento rápido', roles: ['OPERADOR', 'GERENTE'] },
-  { path: '/dashboard', label: 'Dashboard', helper: 'Supervisão', roles: ['CLIENTE', 'GERENTE'] },
-  { path: '/cadastros', label: 'Cadastros', helper: 'Base sincronizada', roles: ['GERENTE'] },
-  { path: '/dados', label: 'Dados', helper: 'Exportação', roles: ['GERENTE'] },
-  { path: '/configuracoes', label: 'Configurações', helper: 'PWA e fase 2', roles: ['GERENTE'] },
+  { path: '/operador', label: 'Capture', helper: 'Time entry', roles: ['OPERADOR', 'GERENTE'] },
+  { path: '/dashboard', label: 'Live', helper: 'Fleet KPIs', roles: ['CLIENTE', 'GERENTE'] },
+  { path: '/cadastros', label: 'Master', helper: 'Base data', roles: ['GERENTE'] },
+  { path: '/dados', label: 'Data', helper: 'Exports', roles: ['GERENTE'] },
+  { path: '/configuracoes', label: 'Admin', helper: 'System', roles: ['GERENTE'] },
 ];
 
 const ROUTE_TITLES = {
-  '/login': 'Identificação do operador',
-  '/operador': 'Painel do operador',
-  '/dashboard': 'Dashboard de supervisão',
-  '/cadastros': 'Cadastros iniciais',
-  '/dados': 'Dados e exportação',
-  '/configuracoes': 'Configurações',
+  '/login': 'ENAEX Operations OS',
+  '/operador': 'Operator Console',
+  '/dashboard': 'Fleet Dashboard',
+  '/cadastros': 'Master Data',
+  '/dados': 'Data Export',
+  '/configuracoes': 'System Admin',
 };
 
 function normalizeRoute(hash) {
@@ -100,6 +101,7 @@ function AppShell() {
       <div className="app-frame app-frame--operator">
         <OperatorPanelPage
           standalone
+          onRefreshUpdate={refreshApplicationAssets}
           onLogout={() => {
             logout();
             navigate('/login');
@@ -111,10 +113,11 @@ function AppShell() {
     content = (
       <div className="app-frame">
         <Header
-          title="Dashboard de supervisão"
-          subtitle="Apontamento operacional sincronizado para UMBs"
+          title="Fleet Dashboard"
+          subtitle="Live UMB fleet operations"
           session={session}
           canInstallApp={canInstallApp}
+          onRefreshUpdate={refreshApplicationAssets}
           onInstall={installApp}
           onLogout={() => {
             logout();
@@ -158,9 +161,10 @@ function AppShell() {
       <div className="app-frame">
         <Header
           title={title}
-          subtitle="Apontamento operacional sincronizado para UMBs"
+          subtitle="Live UMB fleet operations"
           session={session}
           canInstallApp={canInstallApp}
+          onRefreshUpdate={refreshApplicationAssets}
           onInstall={installApp}
           onLogout={() => {
             logout();
