@@ -4,6 +4,7 @@ import { initialShifts } from '../data/initialShifts';
 import { initialUsers } from '../data/initialUsers';
 import { authConfig, seedConfig, storageConfig } from '../config/runtimeConfig';
 import { DEFAULT_LOCALE, normalizeLocale } from '../i18n/messages.js';
+import { normalizeGpsSnapshot } from './locationService.js';
 import { ensureFirebaseClient, isFirebaseConfigured, readRemoteDatabase, subscribeRemoteDatabase, writeRemoteDatabase } from './firebaseClient';
 import { createId } from '../utils/id';
 import { normalizeUserRole } from '../utils/roles';
@@ -567,6 +568,7 @@ function normalizeRecord(record = {}) {
     plate: String(record.plate || '').trim().toUpperCase(),
     equipmentCode: String(record.equipmentCode || '').trim().toUpperCase(),
     location: record.location || null,
+    gps: normalizeGpsSnapshot(record.gps),
     activityTypeId: record.activityTypeId || null,
     activityCode: String(record.activityCode || '').trim(),
     activityName: String(record.activityName || '').trim(),
@@ -1177,6 +1179,7 @@ export function createMovementRecord(payload) {
     activityName: payload.activityName || activityType.name,
     classification: payload.classification || activityType.classification,
     location: payload.location || null,
+    gps: payload.gps || null,
     startDateTime,
     endDateTime,
     durationMinutes,
@@ -1216,6 +1219,7 @@ export function closeMovementRecord(recordId, payload = {}) {
     status: 'ENCERRADO',
     durationMinutes,
     durationHours: Number(minutesToHours(durationMinutes).toFixed(2)),
+    gps: payload.gps ?? existing.gps ?? null,
     updatedAt: nowIso(),
     editedAt: nowIso(),
     editedBy: payload.editedBy || existing.operatorName,

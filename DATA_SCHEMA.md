@@ -89,6 +89,13 @@
   "activityName": "Checklist",
   "classification": "OPERAÇÃO",
   "notes": "",
+  "gps": {
+    "latitude": -6.123456,
+    "longitude": -35.123456,
+    "accuracyMeters": 12,
+    "capturedAt": "ISO-8601",
+    "source": "browser-geolocation"
+  },
   "startDateTime": "ISO-8601",
   "endDateTime": null,
   "durationMinutes": null,
@@ -109,6 +116,7 @@
 - As durações são calculadas em precisão de minuto; fechamentos automáticos registram ao menos 1 minuto quando a troca ocorre no mesmo instante.
 - O botão `Encerrar a atividade` finaliza o apontamento em aberto no fim do expediente.
 - `shiftId`, `shiftName`, `location`, `failureDescription` e `correctiveAction` são campos legados/históricos e não fazem parte do fluxo visível atual.
+- `gps` guarda o último ponto capturado pelo navegador. Enquanto o apontamento está aberto, o painel pode atualizar esse snapshot; ao encerrar, o último ponto permanece como localização final do caminhão.
 
 ## AuditEvent
 

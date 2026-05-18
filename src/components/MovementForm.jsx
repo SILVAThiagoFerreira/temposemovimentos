@@ -63,6 +63,7 @@ function buildPayload(form, { operators, equipments, activityTypes, record, defa
     activityName: selectedActivity?.name || '',
     classification: selectedActivity?.classification || 'OUTROS',
     location: record ? record.location || null : null,
+    gps: record ? record.gps || null : null,
     failureDescription: record ? record.failureDescription || '' : '',
     correctiveAction: record ? record.correctiveAction || '' : '',
     notes: form.notes,

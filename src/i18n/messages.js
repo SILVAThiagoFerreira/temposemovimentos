@@ -109,6 +109,17 @@ const messages = {
       banner: { eyebrow: 'Operação ao vivo', title: 'Painel da frota', copy: 'Disponibilidade, utilização e paradas.' },
       filters: { eyebrow: 'Janela de análise', today: 'Hoje', live: 'Ao vivo', interval: 'Intervalo', startDate: 'Data inicial', endDate: 'Data final', rangeConnector: 'a' },
       recent: { eyebrow: 'Últimos apontamentos', title: 'Movimentação do período', empty: 'Sem registros para exibir.' },
+      map: {
+        eyebrow: 'Mapa da frota',
+        title: 'Localização dos caminhões',
+        copy: 'O painel usa o último GPS salvo em cada UMR. Apontamentos abertos continuam atualizando a posição; ao encerrar, o último ponto permanece como localização final.',
+        empty: 'Nenhum equipamento com GPS no período selecionado.',
+        count: { one: '{{count}} caminhão com GPS', other: '{{count}} caminhões com GPS' },
+        livePoint: 'Ao vivo',
+        lastPoint: 'Último apontamento',
+        noGps: 'Sem GPS',
+        legend: { live: 'Ao vivo', lastPoint: 'Último apontamento', noGps: 'Sem GPS' },
+      },
       cards: {
         open: 'Apontamentos em aberto', openSub: 'no período selecionado',
         totalHours: 'Total de horas no período', totalHoursSub: { one: '{{count}} registro', other: '{{count}} registros' },

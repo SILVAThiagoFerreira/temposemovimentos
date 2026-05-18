@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { DashboardCards } from '../components/DashboardCards';
+import { FleetMapCard } from '../components/FleetMapCard';
 import { RecordsTable } from '../components/RecordsTable';
 import { StatusChip } from '../components/StatusChip';
 import { summarizeDashboard } from '../services/calculationService';
@@ -113,6 +114,8 @@ export function Dashboard() {
           </button>
         </div>
       </section>
+
+      <FleetMapCard summary={summary} />
 
       <DashboardCards summary={summary} />
 

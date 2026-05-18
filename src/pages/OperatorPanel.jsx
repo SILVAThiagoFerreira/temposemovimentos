@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { EquipmentCard } from '../components/EquipmentCard';
 import { ActiveTimer } from '../components/ActiveTimer';
@@ -6,11 +6,14 @@ import { MovementForm } from '../components/MovementForm';
 import { RecordsTable } from '../components/RecordsTable';
 import { StatusChip } from '../components/StatusChip';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
-import { isSameDay } from '../services/timeService';
+import { isSameDay, nowIso } from '../services/timeService';
+import { useDeviceLocation } from '../hooks/useDeviceLocation';
 
 export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate }) {
-  const { session, operators, equipments, records, activityTypes, startMovementRecord, closeMovementRecord, logout, t } = useApp();
+  const { session, operators, equipments, records, activityTypes, startMovementRecord, closeMovementRecord, saveRecord, logout, t } = useApp();
   const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
+  const { location: deviceLocation } = useDeviceLocation();
+  const lastSyncedLocationKey = useRef('');
 
   useEffect(() => {
     if (!selectedEquipmentId && equipments[0]) {
@@ -27,6 +30,34 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
     () => records.find((record) => record.status === 'ABERTO' && record.operatorId === session?.operatorId) || null,
     [records, session?.operatorId],
   );
+
+  useEffect(() => {
+    lastSyncedLocationKey.current = '';
+  }, [operatorActiveRecord?.id]);
+
+  useEffect(() => {
+    if (!operatorActiveRecord || !deviceLocation) {
+      return;
+    }
+
+    const locationKey = `${deviceLocation.latitude.toFixed(4)}:${deviceLocation.longitude.toFixed(4)}`;
+
+    if (lastSyncedLocationKey.current === locationKey) {
+      return;
+    }
+
+    lastSyncedLocationKey.current = locationKey;
+
+    try {
+      saveRecord({
+        ...operatorActiveRecord,
+        gps: deviceLocation,
+        updatedAt: nowIso(),
+      });
+    } catch {
+      // GPS updates are best effort; the record itself must keep working offline.
+    }
+  }, [deviceLocation, operatorActiveRecord, saveRecord]);
 
   const selectedEquipmentOpenRecord = useMemo(
     () => records.find((record) => record.status === 'ABERTO' && record.equipmentId === selectedEquipmentId) || null,
@@ -52,6 +83,7 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
       equipmentId: equipment.id,
       plate: equipment.plate,
       equipmentCode: equipment.code,
+      gps: deviceLocation || null,
     });
   }
 
@@ -64,7 +96,7 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
       return;
     }
 
-    await closeMovementRecord(operatorActiveRecord.id, { editedBy: session?.operatorName });
+    await closeMovementRecord(operatorActiveRecord.id, { editedBy: session?.operatorName, gps: deviceLocation || null });
   }
 
   if (!session) {
