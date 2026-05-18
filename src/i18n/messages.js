@@ -112,7 +112,7 @@ const messages = {
       map: {
         eyebrow: 'Mapa da frota',
         title: 'Localização dos caminhões',
-        copy: 'O painel usa o último GPS salvo em cada UMR. Apontamentos abertos continuam atualizando a posição; ao encerrar, o último ponto permanece como localização final.',
+        copy: 'O painel usa o último GPS salvo em cada UMR sobre a base satélite do Google Maps. Apontamentos abertos continuam atualizando a posição; ao encerrar, o último ponto permanece como localização final.',
         empty: 'Nenhum equipamento com GPS no período selecionado.',
         count: { one: '{{count}} caminhão com GPS', other: '{{count}} caminhões com GPS' },
         livePoint: 'Ao vivo',

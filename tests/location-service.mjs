@@ -22,16 +22,20 @@ const projected = projectGpsPoints([
   },
 ], {
   padding: 10,
+  locale: 'pt-BR',
 });
 
 assert.equal(projected.markers.length, 2, 'devem existir dois marcadores projetados');
 assert.notEqual(projected.markers[0].x, projected.markers[1].x, 'os marcadores não podem colidir no eixo X');
 assert.notEqual(projected.markers[0].y, projected.markers[1].y, 'os marcadores não podem colidir no eixo Y');
+assert.ok(projected.mapUrl.includes('t=k'), 'a URL deve usar satélite do Google Maps');
+assert.ok(projected.mapUrl.includes('output=embed'), 'a URL deve ser própria para iframe');
 
 const single = projectGpsPoints([snapshot], { padding: 10 });
 
 assert.equal(single.markers[0].x, 50, 'um único ponto deve ficar centralizado no eixo X');
 assert.equal(single.markers[0].y, 50, 'um único ponto deve ficar centralizado no eixo Y');
+assert.ok(Number.isInteger(single.zoom) && single.zoom >= 11, 'o zoom deve ser válido');
 assert.equal(typeof formatGpsCoordinates(snapshot, 'pt-BR'), 'string', 'a formatação deve retornar texto');
 
 console.log('LOCATION_SERVICE_OK');

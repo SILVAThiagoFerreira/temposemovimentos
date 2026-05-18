@@ -29,7 +29,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - O idioma da interface é persistido localmente, com `pt-BR` como padrão, e a troca de idioma não altera dados operacionais.
 - Hora final deve ser maior que hora inicial.
 - Lançamento manual é permitido, mas deve ser identificado.
-- Tablets/dispositivos que acessam o painel operacional podem capturar GPS do navegador; o dashboard usa o último ponto salvo por equipamento para exibir o mapa.
+- Tablets/dispositivos que acessam o painel operacional podem capturar GPS do navegador; o dashboard usa o último ponto salvo por equipamento sobre a base satélite do Google Maps para exibir o mapa.
 - Quando o apontamento é encerrado, o sistema mantém o último GPS como localização final do caminhão.
 - A ausência de GPS não bloqueia o apontamento nem a sincronização online; o registro continua salvo normalmente.
 

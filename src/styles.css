@@ -1795,40 +1795,41 @@ label > span {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 20px;
-  background:
-    radial-gradient(circle at 18% 16%, rgba(237, 0, 22, 0.12), transparent 26%),
-    radial-gradient(circle at 82% 28%, rgba(47, 109, 168, 0.12), transparent 28%),
-    linear-gradient(180deg, #eef3f8 0%, #dfe7ef 100%);
+  background: linear-gradient(180deg, #18222f 0%, #101722 100%);
 }
 
 .fleet-map__canvas::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent 24%);
+  background: linear-gradient(180deg, rgba(12, 18, 26, 0.12), transparent 24%);
   pointer-events: none;
 }
 
-.fleet-map__grid,
-.fleet-map__tracks {
+.fleet-map__frame,
+.fleet-map__veil,
+.fleet-map__overlay {
   position: absolute;
   inset: 0;
+}
+
+.fleet-map__overlay {
   pointer-events: none;
 }
 
-.fleet-map__grid {
-  background-image:
-    linear-gradient(rgba(48, 57, 67, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(48, 57, 67, 0.08) 1px, transparent 1px);
-  background-size: 12% 12%, 12% 12%;
-  opacity: 0.55;
+.fleet-map__frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  filter: saturate(1.06) contrast(1.03) brightness(0.98);
 }
 
-.fleet-map__tracks {
+.fleet-map__veil {
+  pointer-events: none;
   background:
-    linear-gradient(135deg, transparent 0 28%, rgba(237, 0, 22, 0.08) 28% 29%, transparent 29% 52%, rgba(47, 109, 168, 0.08) 52% 53%, transparent 53% 100%),
-    linear-gradient(45deg, transparent 0 52%, rgba(48, 57, 67, 0.05) 52% 53%, transparent 53% 100%);
-  opacity: 0.8;
+    linear-gradient(180deg, rgba(6, 10, 15, 0.14), rgba(6, 10, 15, 0.04) 28%, rgba(6, 10, 15, 0.12) 100%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02), transparent 65%);
 }
 
 .fleet-map__marker {
@@ -1842,6 +1843,7 @@ label > span {
   background: none;
   border: 0;
   cursor: default;
+  pointer-events: none;
   transform: translate(-50%, -100%);
 }
 
@@ -1852,7 +1854,7 @@ label > span {
   background: var(--enaex-red);
   border: 2px solid #ffffff;
   border-radius: 50% 50% 50% 0;
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35), 0 0 0 5px rgba(237, 0, 22, 0.12);
   transform: rotate(-45deg);
 }
 
@@ -1874,16 +1876,16 @@ label > span {
 
 .fleet-map__marker-tag {
   padding: 4px 8px;
-  color: #122033;
+  color: #f8fbff;
   font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(10, 14, 20, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
-  box-shadow: 0 12px 24px rgba(12, 24, 40, 0.12);
+  box-shadow: 0 12px 24px rgba(12, 24, 40, 0.28);
 }
 
 .fleet-map__empty {
@@ -1892,7 +1894,7 @@ label > span {
   display: grid;
   place-items: center;
   padding: 20px;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.88);
   font-weight: 700;
   text-align: center;
 }
@@ -1906,7 +1908,7 @@ label > span {
   display: grid;
   gap: 10px;
   padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.9);
   border: 1px solid var(--line);
   border-radius: 18px;
 }

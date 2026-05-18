@@ -1,5 +1,14 @@
-import { DEFAULT_LOCALE } from '../i18n/messages.js';
+import { DEFAULT_LOCALE, normalizeLocale } from '../i18n/messages.js';
 import { nowIso } from './timeService.js';
+
+const SATELLITE_MAP_CANVAS = Object.freeze({
+  width: 1600,
+  height: 1000,
+  padding: 96,
+  defaultZoom: 16,
+  minZoom: 11,
+  maxZoom: 19,
+});
 
 function toFiniteNumber(value) {
   const numeric = Number(value);
@@ -75,37 +84,127 @@ export function formatGpsAccuracy(snapshot, locale = DEFAULT_LOCALE) {
   return `±${formatter.format(Number(snapshot.accuracyMeters))} m`;
 }
 
-export function projectGpsPoints(points = [], { padding = 8, size = 100 } = {}) {
+function clampNumber(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function toWorldCoordinates(latitude, longitude) {
+  const sinLatitude = Math.sin((Number(latitude) * Math.PI) / 180);
+
+  return {
+    x: (Number(longitude) + 180) / 360,
+    y: 0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * Math.PI),
+  };
+}
+
+function fromWorldCoordinates(x, y) {
+  const longitude = x * 360 - 180;
+  const latitude = (Math.atan(Math.sinh(Math.PI - 2 * Math.PI * y)) * 180) / Math.PI;
+
+  return { latitude, longitude };
+}
+
+export function buildGoogleMapsSatelliteUrl(center, zoom, locale = DEFAULT_LOCALE) {
+  if (!hasGpsSnapshot(center)) {
+    return '';
+  }
+
+  const params = new URLSearchParams({
+    ll: `${Number(center.latitude)},${Number(center.longitude)}`,
+    z: String(Math.max(1, Math.round(Number(zoom) || SATELLITE_MAP_CANVAS.defaultZoom))),
+    t: 'k',
+    output: 'embed',
+    hl: normalizeLocale(locale),
+  });
+
+  return `https://www.google.com/maps?${params.toString()}`;
+}
+
+export function projectGpsPoints(points = [], options = {}) {
   const validPoints = points
     .map((point) => (hasGpsSnapshot(point) ? point : normalizeGpsSnapshot(point)))
     .filter(Boolean);
 
   if (!validPoints.length) {
-    return { bounds: null, markers: [] };
+    return {
+      bounds: null,
+      center: null,
+      zoom: SATELLITE_MAP_CANVAS.defaultZoom,
+      mapUrl: '',
+      markers: [],
+    };
   }
 
-  const latitudes = validPoints.map((point) => Number(point.latitude));
-  const longitudes = validPoints.map((point) => Number(point.longitude));
-  const minLatitude = Math.min(...latitudes);
-  const maxLatitude = Math.max(...latitudes);
-  const minLongitude = Math.min(...longitudes);
-  const maxLongitude = Math.max(...longitudes);
-  const latitudeSpan = maxLatitude - minLatitude;
-  const longitudeSpan = maxLongitude - minLongitude;
-  const innerSize = Math.max(1, size - padding * 2);
-  const center = size / 2;
+  const width = Number.isFinite(Number(options.width)) ? Number(options.width) : SATELLITE_MAP_CANVAS.width;
+  const height = Number.isFinite(Number(options.height)) ? Number(options.height) : SATELLITE_MAP_CANVAS.height;
+  const padding = Number.isFinite(Number(options.padding)) ? Number(options.padding) : SATELLITE_MAP_CANVAS.padding;
+  const defaultZoom = Number.isFinite(Number(options.defaultZoom)) ? Number(options.defaultZoom) : SATELLITE_MAP_CANVAS.defaultZoom;
+  const minZoom = Number.isFinite(Number(options.minZoom)) ? Number(options.minZoom) : SATELLITE_MAP_CANVAS.minZoom;
+  const maxZoom = Number.isFinite(Number(options.maxZoom)) ? Number(options.maxZoom) : SATELLITE_MAP_CANVAS.maxZoom;
+  const locale = options.locale || DEFAULT_LOCALE;
+
+  const worldPoints = validPoints.map((point) => ({
+    ...point,
+    world: toWorldCoordinates(point.latitude, point.longitude),
+  }));
+
+  const xs = worldPoints.map((point) => point.world.x);
+  const ys = worldPoints.map((point) => point.world.y);
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+  const spanX = maxX - minX;
+  const spanY = maxY - minY;
+  const usableWidth = Math.max(1, width - padding * 2);
+  const usableHeight = Math.max(1, height - padding * 2);
+
+  const zoomCandidates = [];
+
+  if (spanX > 0) {
+    zoomCandidates.push(Math.log2(usableWidth / (256 * spanX)));
+  }
+
+  if (spanY > 0) {
+    zoomCandidates.push(Math.log2(usableHeight / (256 * spanY)));
+  }
+
+  let zoom = zoomCandidates.length ? Math.floor(Math.min(...zoomCandidates)) : defaultZoom;
+  if (!Number.isFinite(zoom)) {
+    zoom = defaultZoom;
+  }
+
+  zoom = Math.round(clampNumber(zoom, minZoom, maxZoom));
+
+  const centerWorld = {
+    x: (minX + maxX) / 2,
+    y: (minY + maxY) / 2,
+  };
+
+  const center = fromWorldCoordinates(centerWorld.x, centerWorld.y);
+  const scale = 256 * 2 ** zoom;
+
+  const markers = worldPoints.map((point) => {
+    const pixelX = (point.world.x - centerWorld.x) * scale + width / 2;
+    const pixelY = (point.world.y - centerWorld.y) * scale + height / 2;
+
+    return {
+      ...point,
+      x: Number(clampNumber((pixelX / width) * 100, 0, 100).toFixed(2)),
+      y: Number(clampNumber((pixelY / height) * 100, 0, 100).toFixed(2)),
+    };
+  });
 
   return {
     bounds: {
-      minLatitude,
-      maxLatitude,
-      minLongitude,
-      maxLongitude,
+      minLatitude: Math.min(...validPoints.map((point) => Number(point.latitude))),
+      maxLatitude: Math.max(...validPoints.map((point) => Number(point.latitude))),
+      minLongitude: Math.min(...validPoints.map((point) => Number(point.longitude))),
+      maxLongitude: Math.max(...validPoints.map((point) => Number(point.longitude))),
     },
-    markers: validPoints.map((point) => ({
-      ...point,
-      x: longitudeSpan > 0 ? padding + ((Number(point.longitude) - minLongitude) / longitudeSpan) * innerSize : center,
-      y: latitudeSpan > 0 ? padding + ((maxLatitude - Number(point.latitude)) / latitudeSpan) * innerSize : center,
-    })),
+    center,
+    zoom,
+    mapUrl: buildGoogleMapsSatelliteUrl(center, zoom, locale),
+    markers,
   };
 }

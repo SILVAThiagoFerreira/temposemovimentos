@@ -43,7 +43,7 @@ export function FleetMapCard({ summary }) {
 
   const mapItems = useMemo(() => buildMapItems(summary, language, t), [language, summary, t]);
   const projectedMap = useMemo(
-    () => projectGpsPoints(mapItems.map((item) => ({ ...item.gps, ...item }))),
+    () => projectGpsPoints(mapItems.map((item) => ({ ...item.gps, ...item })), { locale: language }),
     [mapItems],
   );
 
@@ -64,20 +64,31 @@ export function FleetMapCard({ summary }) {
 
       <div className="fleet-map">
         <div className="fleet-map__canvas" role="img" aria-label={t('dashboard.map.title')}>
-          <div className="fleet-map__grid" aria-hidden="true" />
-          <div className="fleet-map__tracks" aria-hidden="true" />
+          {projectedMap.mapUrl ? (
+            <iframe
+              className="fleet-map__frame"
+              title={t('dashboard.map.title')}
+              src={projectedMap.mapUrl}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          ) : null}
 
-          {projectedMap.markers.map((marker) => (
-            <div
-              key={marker.equipmentId}
-              className={`fleet-map__marker fleet-map__marker--${marker.tone}`}
-              style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
-              title={`${marker.code} • ${marker.plate}\n${marker.subtitle}\n${marker.meta}`}
-            >
-              <span className="fleet-map__marker-pin" />
-              <span className="fleet-map__marker-tag">{marker.code}</span>
-            </div>
-          ))}
+          <div className="fleet-map__veil" aria-hidden="true" />
+
+          <div className="fleet-map__overlay" aria-hidden="true">
+            {projectedMap.markers.map((marker) => (
+              <div
+                key={marker.equipmentId}
+                className={`fleet-map__marker fleet-map__marker--${marker.tone}`}
+                style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
+                title={`${marker.code} • ${marker.plate}\n${marker.subtitle}\n${marker.meta}`}
+              >
+                <span className="fleet-map__marker-pin" />
+                <span className="fleet-map__marker-tag">{marker.code}</span>
+              </div>
+            ))}
+          </div>
 
           {!trackedCount ? <div className="fleet-map__empty">{t('dashboard.map.empty')}</div> : null}
         </div>
