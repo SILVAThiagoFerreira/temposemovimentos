@@ -14,7 +14,7 @@
 10. Ao iniciar uma nova atividade, encerrar automaticamente o apontamento anterior do mesmo operador.
 11. Persistir qualquer alteração no cache local e sincronizar com o documento do Firestore.
 12. Permitir exportação/importação JSON e exportação CSV.
-13. Renderizar o dashboard com intervalo selecionável, atualização ao vivo para qualquer intervalo que inclua `Hoje`, mapa da frota com base satélite do Google Maps usando o último `gps` por equipamento e gráficos de pizza por período/UMR.
+13. Renderizar o dashboard com intervalo selecionável, atualização ao vivo para qualquer intervalo que inclua `Hoje`, mapa da frota com base satélite do Google Maps, travado para navegação manual e autoajustado aos apontamentos ativos com GPS, além de gráficos de pizza por período/UMR.
 14. Encerrar manualmente o apontamento em aberto ao fim do expediente pelo botão `Encerrar a atividade` abaixo da tabela `Histórico do dia` no fim do módulo de operação.
 15. Permitir `Recarregar Atualização do Sistema` para buscar a versão mais recente sem tocar em `localStorage` ou `IndexedDB`.
 16. Escutar alterações remotas do Firestore e reaplicar no cache local.

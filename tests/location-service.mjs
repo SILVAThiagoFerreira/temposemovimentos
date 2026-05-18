@@ -28,6 +28,7 @@ const projected = projectGpsPoints([
 assert.equal(projected.markers.length, 2, 'devem existir dois marcadores projetados');
 assert.notEqual(projected.markers[0].x, projected.markers[1].x, 'os marcadores não podem colidir no eixo X');
 assert.notEqual(projected.markers[0].y, projected.markers[1].y, 'os marcadores não podem colidir no eixo Y');
+assert.ok(projected.mapUrl.includes('ll='), 'a URL deve centralizar o mapa');
 assert.ok(projected.mapUrl.includes('t=k'), 'a URL deve usar satélite do Google Maps');
 assert.ok(projected.mapUrl.includes('output=embed'), 'a URL deve ser própria para iframe');
 
