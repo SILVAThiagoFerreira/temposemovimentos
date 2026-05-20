@@ -76,15 +76,8 @@ export function Login({ navigate }) {
           <img className="login-logo" src={enaexLogo} alt="Enaex Brasil" />
           <span>{t('login.hero.brand')}</span>
         </div>
-        <p className="eyebrow">{t('login.hero.eyebrow')}</p>
         <h1>{t('login.hero.title')}</h1>
         <p className="login-copy">{t('login.hero.copy')}</p>
-
-        <div className="login-points">
-          <StatusChip tone="success">{t('login.hero.chips.roles')}</StatusChip>
-          <StatusChip tone="info">{t('login.hero.chips.sync')}</StatusChip>
-          <StatusChip tone="warning">{t('login.hero.chips.offline')}</StatusChip>
-        </div>
 
         <div className="login-stats">
           <article>

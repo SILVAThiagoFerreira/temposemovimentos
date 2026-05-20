@@ -95,11 +95,9 @@ const messages = {
     },
     login: {
       hero: {
-        eyebrow: 'ENAEX // Controle de Campo',
-        title: 'Tempo da frota, sem ruído.',
+        title: 'TEMPOS E MOVIMENTOS',
         copy: 'Selecione o perfil. Confirme a senha. Siga a operação.',
-        chips: { roles: 'Perfis por função', sync: 'Sincronização ativa', offline: 'Opera sem rede' },
-        stats: { operators: 'operadores', clients: 'clientes', managers: 'gerentes', active: 'ativos' },
+        stats: { operators: 'operadores', clients: 'clientes', managers: 'gerenciadores', active: 'ativos' },
         brand: 'Sistema de Operações',
       },
       form: { eyebrow: 'Entrada segura', title: 'Escolha o perfil', status: 'Acesso autorizado', empty: 'Nenhum usuário ativo disponível.', password: 'Senha', passwordPlaceholder: 'Digite a senha', submit: 'Entrar no sistema' },
@@ -165,7 +163,7 @@ const messages = {
       pwa: { eyebrow: 'PWA', title: 'Instalação no tablet', copy: 'O app pode ser instalado como PWA e operar offline com cache básico.', install: 'Instalar app', fallback: 'Instalação será oferecida pelo navegador compatível' },
       storage: { eyebrow: 'Armazenamento', title: 'Base sincronizada', copy: 'Os dados são gravados em cache local, espelhados em IndexedDB e sincronizados com o Firestore. O navegador também é solicitado a manter esse armazenamento como persistente.', currentState: 'Situação atual', browserPersistence: 'Persistência do navegador', secondaryBackup: 'Backup secundário', enablePersistence: 'Ativar armazenamento persistente', activated: 'Armazenamento persistente ativado.', notGranted: 'O navegador não concedeu persistência total, mas o backup em IndexedDB continua ativo.', local: 'LOCAL / SEM REDE', connected: 'CONECTADO', active: 'Ativa', notConfirmed: 'Não confirmada', indexedDbActive: 'IndexedDB ativo', unavailable: 'Indisponível' },
       integrations: { eyebrow: 'Fase 2', title: 'Integrações preparadas', copy: 'Pronto para adaptar a camada de storage.', note: 'Pronto para adaptar a camada de storage.' },
-      summary: { eyebrow: 'Resumo', title: 'Base carregada', activeUsers: 'Usuários ativos', activeManagers: 'Gerentes ativos', localStorage: 'Armazenamento local', yes: 'Sim', no: 'Não' },
+      summary: { eyebrow: 'Resumo', title: 'Base carregada', activeUsers: 'Usuários ativos', activeManagers: 'Gerenciadores ativos', localStorage: 'Armazenamento local', yes: 'Sim', no: 'Não' },
       locale: { eyebrow: 'Idioma', title: 'Tradução da interface', copy: 'Escolha entre português, inglês e chinês. O idioma padrão é português do Brasil.' },
     },
     movement: {
