@@ -43,17 +43,6 @@ function sortByMinutesDesc(items) {
   return [...items].sort((left, right) => right.minutes - left.minutes);
 }
 
-function sortByCountDesc(items, locale = DEFAULT_LOCALE) {
-  return [...items].sort((left, right) => {
-    const countDelta = Number(right.count || 0) - Number(left.count || 0);
-    if (countDelta !== 0) {
-      return countDelta;
-    }
-
-    return String(left.label || left.name || left.code || '').localeCompare(String(right.label || right.name || right.code || ''), locale);
-  });
-}
-
 function isWithinPeriod(date, periodStart, periodEnd) {
   const time = date.getTime();
   return time >= periodStart.getTime() && time <= periodEnd.getTime();
@@ -390,24 +379,29 @@ export function summarizeDashboard({
           code: record.activityCode || '-',
           name: activity?.name || record.activityName || '-',
           count: 0,
+          minutes: 0,
         }));
         byCode.get(key).count += 1;
+        byCode.get(key).minutes += calculateOverlapMinutes(record, resolvedPeriodStart, resolvedPeriodEnd, resolvedReferenceDate);
       });
 
-      const totalCount = recordsForEquipment.length;
+      const totalMinutesForEquipment = [...byCode.values()].reduce((sum, item) => sum + Number(item.minutes || 0), 0);
 
       return {
         key: equipment.id,
         equipmentId: equipment.id,
         label: equipment.code,
         subtitle: equipment.plate,
-        totalCount,
-        segments: sortByCountDesc([...byCode.values()], locale).map((item) => ({
+        totalCount: recordsForEquipment.length,
+        totalMinutes: totalMinutesForEquipment,
+        segments: sortByMinutesDesc([...byCode.values()]).map((item) => ({
           key: item.key,
           label: `${item.code} - ${item.name}`,
-          value: item.count,
-          detail: t('dashboard.labels.records', { count: item.count }),
-          percent: totalCount > 0 ? Number(((item.count / totalCount) * 100).toFixed(1)) : 0,
+          value: item.minutes,
+          minutes: item.minutes,
+          count: item.count,
+          detail: `${formatDuration(item.minutes, locale)} | ${t('dashboard.labels.records', { count: item.count })}`,
+          percent: totalMinutesForEquipment > 0 ? Number(((item.minutes / totalMinutesForEquipment) * 100).toFixed(1)) : 0,
         })),
       };
     })

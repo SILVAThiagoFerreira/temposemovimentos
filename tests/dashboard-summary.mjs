@@ -23,6 +23,15 @@ const baseCatalog = {
       createdAt: '2026-05-15T00:00:00',
       updatedAt: '2026-05-15T00:00:00',
     },
+    {
+      id: 'act-02',
+      code: '02',
+      name: 'Perfuracao',
+      classification: 'OPERAÇÃO',
+      active: true,
+      createdAt: '2026-05-15T00:00:00',
+      updatedAt: '2026-05-15T00:00:00',
+    },
   ],
   shifts: [
     {
@@ -151,5 +160,68 @@ const justStartedLive = buildSummary([
 
 assert.equal(justStartedLive.totalRecords, 1, 'apontamento recém-iniciado deve aparecer imediatamente no ao vivo');
 assert.equal(justStartedLive.totalMinutes, 1, 'apontamento recém-iniciado deve contar pelo menos 1 minuto no ao vivo');
+
+const timeWeightedCodeDistribution = buildSummary([
+  {
+    id: 'mov-short-1',
+    operatorId: 'usr-paulo',
+    operatorName: 'Paulo',
+    equipmentId: 'eq-1',
+    plate: 'BEG-8A40',
+    equipmentCode: 'UMR-1072',
+    activityTypeId: 'act-01',
+    activityCode: '01',
+    activityName: 'Checklist',
+    classification: 'OPERAÇÃO',
+    startDateTime: '2026-05-15T08:00:00',
+    endDateTime: '2026-05-15T08:10:00',
+    durationMinutes: 10,
+    durationHours: 0.17,
+    manualEntry: true,
+    status: 'ENCERRADO',
+  },
+  {
+    id: 'mov-short-2',
+    operatorId: 'usr-paulo',
+    operatorName: 'Paulo',
+    equipmentId: 'eq-1',
+    plate: 'BEG-8A40',
+    equipmentCode: 'UMR-1072',
+    activityTypeId: 'act-01',
+    activityCode: '01',
+    activityName: 'Checklist',
+    classification: 'OPERAÇÃO',
+    startDateTime: '2026-05-15T08:20:00',
+    endDateTime: '2026-05-15T08:30:00',
+    durationMinutes: 10,
+    durationHours: 0.17,
+    manualEntry: true,
+    status: 'ENCERRADO',
+  },
+  {
+    id: 'mov-long-1',
+    operatorId: 'usr-paulo',
+    operatorName: 'Paulo',
+    equipmentId: 'eq-1',
+    plate: 'BEG-8A40',
+    equipmentCode: 'UMR-1072',
+    activityTypeId: 'act-02',
+    activityCode: '02',
+    activityName: 'Perfuracao',
+    classification: 'OPERAÇÃO',
+    startDateTime: '2026-05-15T09:00:00',
+    endDateTime: '2026-05-15T10:20:00',
+    durationMinutes: 80,
+    durationHours: 1.33,
+    manualEntry: true,
+    status: 'ENCERRADO',
+  },
+]);
+
+const codeSegments = timeWeightedCodeDistribution.codeDistributionByEquipment[0]?.segments || [];
+assert.equal(codeSegments[0]?.key, '02', 'distribuição por código deve ordenar pela maior duração coletada');
+assert.equal(codeSegments[0]?.value, 80, 'valor do gráfico por código deve ser o tempo coletado');
+assert.equal(codeSegments[0]?.percent, 80, 'percentual por código deve usar minutos, não quantidade de apontamentos');
+assert.equal(codeSegments[1]?.percent, 20, 'código com dois apontamentos curtos deve representar apenas seu tempo total');
 
 console.log('CALCULATION_SMOKE_OK');
