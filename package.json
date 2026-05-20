@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/smoke.mjs && node tests/dashboard-summary.mjs && node tests/location-service.mjs && node tests/fleet-map.mjs",
+    "test": "node tests/smoke.mjs && node tests/dashboard-summary.mjs && node tests/location-service.mjs && node tests/fleet-map.mjs && node tests/i18n-labels.mjs",
     "validate": "npm test && npm run build"
   },
   "dependencies": {
