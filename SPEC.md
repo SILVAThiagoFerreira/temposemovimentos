@@ -23,6 +23,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - O operador encerra manualmente o apontamento em aberto no fim do expediente pelo botão `Encerrar a atividade`, exibido abaixo da tabela `Histórico do dia` no fim da página.
 - O botão `Recarregar Atualização do Sistema` recarrega a interface sem apagar `localStorage`, `IndexedDB` ou apontamentos já salvos.
 - Os campos `Local`, `Descrição da falha`, `Ação corretiva` e `Tipo / Classificação` deixam de ser editados pelo operador; a classificação passa a ser derivada do código da atividade.
+- O catálogo inicial inclui o código `16 - Em DDS (Diálogo Diário de Segurança)` como ociosidade.
 - O dashboard de `Hoje` contabiliza apontamentos em aberto imediatamente, mesmo antes de completar 1 minuto, para manter o resumo ao vivo.
 - Intervalos que incluem o dia atual atualizam em tempo real; intervalos com data inicial e final iguais consideram o dia completo selecionado.
 - Os filtros de data do dashboard usam o dia local completo, sem deslocamento de fuso.
@@ -43,6 +44,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - As alterações são sincronizadas no documento central do Firestore após cada gravação.
 - O navegador é solicitado a manter o armazenamento como persistente.
 - Apontamentos abertos permanecem salvos no Firestore e podem ser retomados após fechar a aba ou trocar de dispositivo.
+- A PWA verifica atualizações automaticamente em intervalos curtos e troca assets de tela pela versão mais nova sem remover `localStorage`, `IndexedDB` ou documentos do Firestore.
 
 ## Validações
 

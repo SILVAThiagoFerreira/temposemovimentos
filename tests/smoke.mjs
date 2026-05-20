@@ -57,7 +57,7 @@ assert(config?.firebase?.webConfig?.apiKey, 'config.json sem firebase.webConfig.
 assert(config?.firebase?.stateCollection, 'config.json sem firebase.stateCollection');
 assert(config?.firebase?.stateDocument, 'config.json sem firebase.stateDocument');
 assert(config?.auth?.roles?.client === 'CLIENTE', 'config.json sem auth.roles.client');
-assert(Number(config?.seed?.catalogVersion) >= 6, 'config.json sem seed.catalogVersion atualizado');
+assert(Number(config?.seed?.catalogVersion) >= 7, 'config.json sem seed.catalogVersion atualizado');
 assert(seedUsers.length === 6, 'config.json com quantidade incorreta de usuários iniciais');
 assert(seedUsers.filter((user) => user.role === 'OPERADOR').length === 4, 'config.json com quantidade incorreta de operadores');
 assert(seedUsers.filter((user) => user.role === 'CLIENTE').length === 1, 'config.json com quantidade incorreta de clientes');
@@ -76,6 +76,10 @@ assert(seedActivityTypes.some((activity) => activity.code === '04' && activity.n
 assert(seedActivityTypes.some((activity) => activity.id === 'act-13'), 'config.json sem atividade act-13');
 assert(seedActivityTypes.some((activity) => activity.name === 'Retirada de Material no Paiol'), 'config.json sem Retirada de Material no Paiol');
 assert(seedActivityTypes.some((activity) => activity.name === 'Aguardando Detonação'), 'config.json sem Aguardando Detonação');
+assert(
+  seedActivityTypes.some((activity) => activity.id === 'act-16' && activity.code === '16' && activity.name === 'Em DDS (Diálogo Diário de Segurança)'),
+  'config.json sem código 16 Em DDS',
+);
 assert(Array.isArray(config?.seed?.shifts) && config.seed.shifts.length === 1, 'config.json deve manter apenas um turno interno');
 assert(Number(backupTemplate?.settings?.catalogVersion) === Number(config?.seed?.catalogVersion), 'backup-template.json fora de sincronia com catalogVersion');
 

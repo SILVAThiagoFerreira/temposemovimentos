@@ -3,6 +3,7 @@
 ## Sequência de Execução
 
 1. Inicializar aplicação via `src/main.jsx`.
+1.1. Registrar o service worker com bypass de cache de atualização e iniciar verificação periódica de novos assets da PWA.
 2. Executar `bootstrapStorage()`.
 3. Solicitar persistência do navegador.
 4. Inicializar Firebase web SDK e Firestore, sem autenticação anônima obrigatória.
@@ -17,8 +18,9 @@
 13. Renderizar o dashboard com intervalo selecionável, atualização ao vivo para qualquer intervalo que inclua `Hoje`, mapa da frota com base satélite do Google Maps, travado para navegação manual e autoajustado aos apontamentos ativos com GPS, além de gráficos de pizza por período/UMR.
 14. Encerrar manualmente o apontamento em aberto ao fim do expediente pelo botão `Encerrar a atividade` abaixo da tabela `Histórico do dia` no fim do módulo de operação.
 15. Permitir `Recarregar Atualização do Sistema` para buscar a versão mais recente sem tocar em `localStorage` ou `IndexedDB`.
-16. Escutar alterações remotas do Firestore e reaplicar no cache local.
-17. Validar integridade com `tests/smoke.mjs` e build.
+16. Atualizar automaticamente a PWA em intervalo periódico quando houver conexão, usando rede primeiro para HTML/assets e cache apenas como fallback offline.
+17. Escutar alterações remotas do Firestore e reaplicar no cache local.
+18. Validar integridade com `tests/smoke.mjs` e build.
 
 ## Falhas
 
@@ -26,3 +28,4 @@
 - Se `IndexedDB` falhar, o sistema continua com `localStorage`.
 - Se `localStorage` falhar, o espelho em `IndexedDB` preserva a base.
 - Se ambos falharem, o sistema reidrata com seed inicial documentado.
+- Se a rede falhar durante atualização da PWA, o service worker mantém a versão em cache e tenta novamente no próximo ciclo.

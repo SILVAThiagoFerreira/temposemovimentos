@@ -2,7 +2,7 @@
   "meta": {
     "name": "Sistema de Tempos e Movimentos - UMB / Caminhões",
     "shortName": "Tempos UMB",
-    "version": "2.3.0",
+    "version": "2.4.0",
     "entrypoint": "src/main.jsx"
   },
   "storage": {
@@ -44,7 +44,7 @@
     }
   },
   "seed": {
-    "catalogVersion": 6,
+    "catalogVersion": 7,
     "users": [
       {
         "id": "usr-paulo",
@@ -139,7 +139,8 @@
       { "id": "act-12", "code": "12", "name": "Manutenção", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
       { "id": "act-13", "code": "13", "name": "Outros", "classification": "OUTROS", "defaultLocation": null, "active": true },
       { "id": "act-14", "code": "14", "name": "Retirada de Material no Paiol", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true },
-      { "id": "act-15", "code": "15", "name": "Aguardando Detonação", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true }
+      { "id": "act-15", "code": "15", "name": "Aguardando Detonação", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-16", "code": "16", "name": "Em DDS (Diálogo Diário de Segurança)", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true }
     ],
     "shifts": [
       { "id": "shift-1", "name": "Turno único", "startTime": "07:00", "endTime": "15:00", "availableMinutes": 480, "active": true }

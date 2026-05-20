@@ -27,7 +27,7 @@
     }
   },
   "seed": {
-    "catalogVersion": 6,
+    "catalogVersion": 7,
     "users": [],
     "equipments": [],
     "activityTypes": [],
