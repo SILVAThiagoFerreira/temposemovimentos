@@ -7,10 +7,6 @@ import { translateErrorMessage } from '../i18n/errorMessages.js';
 
 const enaexLogo = new URL('../assets/enaex-brasil.png', import.meta.url).href;
 
-function roleTone(role) {
-  return role === 'OPERADOR' ? 'success' : 'info';
-}
-
 export function Login({ navigate }) {
   const { operators, authenticateOperator, loginOperator, language, t } = useApp();
   const [selectedUserId, setSelectedUserId] = useState('');
@@ -110,28 +106,26 @@ export function Login({ navigate }) {
 
         {error ? <div className="alert alert--danger">{error}</div> : null}
 
-        <div className="user-picker">
+        <label className="login-user-select">
+          <span>{t('login.form.title')}</span>
           {activeUsers.length ? (
-            activeUsers.map((user) => (
-              <button
-                key={user.id}
-                type="button"
-                className={`login-user-card ${selectedUserId === user.id ? 'is-selected' : ''}`}
-                onClick={() => {
-                  setSelectedUserId(user.id);
-                  setError('');
-                }}
-              >
-                <div>
-                  <strong>{user.name}</strong>
-                </div>
-                <StatusChip tone={roleTone(user.role)}>{getRoleLabel(user.role, language)}</StatusChip>
-              </button>
-              ))
+            <select
+              value={selectedUserId}
+              onChange={(event) => {
+                setSelectedUserId(event.target.value);
+                setError('');
+              }}
+            >
+              {activeUsers.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name} - {getRoleLabel(user.role, language)}
+                </option>
+              ))}
+            </select>
           ) : (
             <p className="empty-state">{t('login.form.empty')}</p>
           )}
-        </div>
+        </label>
 
         <label>
           <span>{t('login.form.password')}</span>

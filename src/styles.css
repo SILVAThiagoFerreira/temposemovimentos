@@ -2484,6 +2484,17 @@ label > span {
   gap: 10px;
 }
 
+.login-user-select {
+  display: grid;
+  gap: 8px;
+}
+
+.login-user-select select {
+  width: 100%;
+  cursor: pointer;
+  background: #ffffff;
+}
+
 .login-user-card {
   display: flex;
   align-items: center;
