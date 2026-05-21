@@ -10,6 +10,9 @@
     "webContentsDebuggingEnabled": false
   },
   "server": {
+    "url": "https://silvathiagoferreira.github.io/temposemovimentos/",
+    "cleartext": false,
+    "allowNavigation": ["silvathiagoferreira.github.io"],
     "androidScheme": "https"
   }
 }

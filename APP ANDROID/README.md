@@ -4,11 +4,20 @@ Aplicativo Android gerado com Capacitor a partir do mesmo frontend React usado n
 
 ## Funcionamento
 
-- O app carrega os assets locais empacotados em `APP ANDROID/android/app/src/main/assets/public`.
-- Os apontamentos continuam salvos primeiro no dispositivo com `localStorage` e `IndexedDB`.
+- O app abre `https://silvathiagoferreira.github.io/temposemovimentos/` dentro do WebView.
+- Atualizacoes publicadas no GitHub Pages passam a entrar no app Android na proxima abertura com internet.
+- Depois do primeiro carregamento online, a PWA mantem assets em cache para abertura offline.
+- Os apontamentos continuam salvos primeiro no dispositivo com `localStorage` e `IndexedDB` da origem do GitHub Pages.
 - Quando houver internet, a mesma fila de sincronização do sistema web envia o snapshot para o Firestore configurado em `config.json`.
 - O painel web continua acompanhando os dados pelo documento central do Firestore.
 - O app solicita permissão de internet e localização para manter a sincronização e o GPS dos apontamentos.
+
+## Atualizacao remota
+
+- Mudancas de tela, textos, regras web e estilos entram pelo deploy do GitHub Pages.
+- Nao e necessario reinstalar APK para receber essas mudancas depois que este APK com URL remota estiver instalado.
+- Se o tablet nunca abriu o app com internet, ele ainda precisa de uma primeira abertura online para popular o cache da PWA.
+- Mudancas nativas Android, como permissões, icone, nome do pacote ou plugins Capacitor, continuam exigindo novo APK.
 
 ## Comandos
 
