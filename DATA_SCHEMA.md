@@ -57,6 +57,7 @@
 - Os campos de turno deixaram de ser expostos no fluxo atual.
 - `syncPassword` é um campo opcional do seed usado para sobrescrever a senha existente quando o valor do seed deve prevalecer.
 - `storage.keys.uiLanguage` guarda a preferência de idioma da interface no armazenamento local.
+- O aplicativo Android não altera o formato dos dados; ele usa o mesmo snapshot, as mesmas chaves de armazenamento e o mesmo documento Firestore configurados em `config.json`.
 
 ## Session
 

@@ -2,7 +2,7 @@
 
 ## Escopo
 
-Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHub Pages, Firestore direto e suporte offline com sincronização.
+Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHub Pages, aplicativo Android empacotado localmente, Firestore direto e suporte offline com sincronização.
 
 ## Atores
 
@@ -45,6 +45,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - O navegador é solicitado a manter o armazenamento como persistente.
 - Apontamentos abertos permanecem salvos no Firestore e podem ser retomados após fechar a aba ou trocar de dispositivo.
 - A PWA verifica atualizações automaticamente em intervalos curtos e troca assets de tela pela versão mais nova sem remover `localStorage`, `IndexedDB` ou documentos do Firestore.
+- O aplicativo Android usa os mesmos assets web empacotados via Capacitor, preserva `localStorage` e `IndexedDB` no WebView e sincroniza com o Firestore quando houver conexão.
 
 ## Validações
 

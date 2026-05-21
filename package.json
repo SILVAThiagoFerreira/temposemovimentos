@@ -8,9 +8,14 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "node tests/smoke.mjs && node tests/dashboard-summary.mjs && node tests/location-service.mjs && node tests/fleet-map.mjs && node tests/i18n-labels.mjs",
-    "validate": "npm test && npm run build"
+    "validate": "npm test && npm run build",
+    "android:sync": "npm run build && cap sync android",
+    "android:build": "npm run android:sync && cd \"APP ANDROID/android\" && gradlew.bat assembleDebug"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
     "firebase": "^10.14.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

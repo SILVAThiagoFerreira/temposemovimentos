@@ -20,7 +20,9 @@
 15. Permitir `Recarregar Atualização do Sistema` para buscar a versão mais recente sem tocar em `localStorage` ou `IndexedDB`.
 16. Atualizar automaticamente a PWA em intervalo periódico quando houver conexão, usando rede primeiro para HTML/assets e cache apenas como fallback offline.
 17. Escutar alterações remotas do Firestore e reaplicar no cache local.
-18. Validar integridade com `tests/smoke.mjs` e build.
+18. Para entrega Android, executar `npm run android:sync` para copiar o build web atual para `APP ANDROID/android/app/src/main/assets/public`.
+19. Quando houver SDK Android disponível, executar `npm run android:build` para gerar o APK debug instalável.
+20. Validar integridade com `tests/smoke.mjs`, suíte completa de testes e build.
 
 ## Falhas
 
@@ -29,3 +31,4 @@
 - Se `localStorage` falhar, o espelho em `IndexedDB` preserva a base.
 - Se ambos falharem, o sistema reidrata com seed inicial documentado.
 - Se a rede falhar durante atualização da PWA, o service worker mantém a versão em cache e tenta novamente no próximo ciclo.
+- Se a rede falhar no aplicativo Android, o WebView mantém o snapshot local em `localStorage`/`IndexedDB` e a sincronização remota é retomada nas próximas gravações com conexão.
