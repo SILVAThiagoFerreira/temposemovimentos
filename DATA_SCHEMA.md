@@ -59,6 +59,30 @@
 - `storage.keys.uiLanguage` guarda a preferência de idioma da interface no armazenamento local.
 - O aplicativo Android não altera o formato dos dados; ele usa o mesmo snapshot, as mesmas chaves de armazenamento e o mesmo documento Firestore configurados em `config.json`, carregados pela origem do GitHub Pages.
 
+## StorageMeta
+
+```json
+{
+  "persistentStorageGranted": false,
+  "indexedDbAvailable": true,
+  "backendConfigured": true,
+  "backendAvailable": false,
+  "connectionState": "OFFLINE",
+  "lastRemoteSyncAt": "ISO-8601",
+  "lastRemoteSyncError": "string|null",
+  "lastLocalMutationAt": "ISO-8601",
+  "lastSyncAttemptAt": "ISO-8601",
+  "lastSyncReason": "string|null",
+  "syncFailureCount": 0,
+  "syncBackoffMs": 0,
+  "syncPending": false,
+  "bootstrappedAt": "ISO-8601"
+}
+```
+
+- O painel de configurações usa esse bloco apenas para exibir estado operacional.
+- Os campos não alteram o formato dos registros exportados.
+
 ## Session
 
 ```json

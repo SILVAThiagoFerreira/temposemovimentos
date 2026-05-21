@@ -15,6 +15,7 @@
 10. Ao iniciar uma nova atividade, encerrar automaticamente o apontamento anterior do mesmo operador.
 11. Persistir qualquer alteração no cache local e sincronizar com o documento do Firestore.
 11.1. Se a sincronização remota falhar, manter o snapshot local como pendente e tentar reenviar no boot, no evento `online`, no retorno da tela ao primeiro plano e em ciclo periódico.
+11.2. Expor telemetria local de sincronização no painel de configurações, incluindo estado da fila, contagem de falhas e atraso de retentativa.
 12. Permitir exportação/importação JSON e exportação CSV.
 13. Renderizar o dashboard com intervalo selecionável, atualização ao vivo para qualquer intervalo que inclua `Hoje`, mapa da frota com base satélite do Google Maps, travado para navegação manual e autoajustado aos apontamentos ativos com GPS, além de gráficos de pizza por período/UMR.
 14. Encerrar manualmente o apontamento em aberto ao fim do expediente pelo botão `Encerrar a atividade` abaixo da tabela `Histórico do dia` no fim do módulo de operação.

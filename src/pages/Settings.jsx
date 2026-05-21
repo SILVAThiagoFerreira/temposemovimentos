@@ -52,6 +52,9 @@ export function Settings() {
     [isLocalMode, storageLabel],
   );
 
+  const syncStateLabel = storageMeta?.syncPending ? t('settings.sync.pending') : t('settings.sync.idle');
+  const syncBackoffLabel = storageMeta?.syncBackoffMs ? `${Math.round(storageMeta.syncBackoffMs / 1000)}s` : '0s';
+
   async function handleEnablePersistence() {
     const granted = await requestPersistentStorage();
     setNotice(granted ? t('settings.storage.activated') : t('settings.storage.notGranted'));
@@ -334,6 +337,18 @@ export function Settings() {
             <div>
               <span>{t('settings.storage.secondaryBackup')}</span>
               <strong>{storageMeta?.indexedDbAvailable ? t('settings.storage.indexedDbActive') : t('settings.storage.unavailable')}</strong>
+            </div>
+            <div>
+              <span>{t('settings.sync.state')}</span>
+              <strong>{syncStateLabel}</strong>
+            </div>
+            <div>
+              <span>{t('settings.sync.backoff')}</span>
+              <strong>{syncBackoffLabel}</strong>
+            </div>
+            <div>
+              <span>{t('settings.sync.failures')}</span>
+              <strong>{storageMeta?.syncFailureCount || 0}</strong>
             </div>
           </div>
           <div className="form-actions">

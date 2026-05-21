@@ -35,6 +35,12 @@ const storageMeta = {
   connectionState: 'OFFLINE',
   lastRemoteSyncAt: null,
   lastRemoteSyncError: null,
+  lastLocalMutationAt: null,
+  lastSyncAttemptAt: null,
+  lastSyncReason: null,
+  syncFailureCount: 0,
+  syncBackoffMs: 0,
+  syncPending: false,
   bootstrappedAt: null,
 };
 
@@ -234,6 +240,25 @@ function markBackendStatus({ available, error = null, syncedAt = null } = {}) {
   }
 }
 
+function markSyncAttempt(reason) {
+  storageMeta.lastSyncAttemptAt = nowIso();
+  storageMeta.lastSyncReason = reason;
+  storageMeta.syncPending = true;
+}
+
+function markSyncSuccess() {
+  storageMeta.syncFailureCount = 0;
+  storageMeta.syncBackoffMs = 0;
+  storageMeta.syncPending = false;
+}
+
+function markSyncFailure(error) {
+  storageMeta.syncFailureCount += 1;
+  storageMeta.syncPending = true;
+  storageMeta.syncBackoffMs = Math.min(60_000, Math.max(2_000, 2_000 * 2 ** Math.min(storageMeta.syncFailureCount - 1, 5)));
+  storageMeta.lastRemoteSyncError = error?.message || 'Falha ao sincronizar Firebase';
+}
+
 function setDatabaseSettingsMode(database, mode) {
   return {
     ...database,
@@ -266,11 +291,14 @@ async function bootstrapBackendSnapshot(database) {
 
 async function syncBackendSnapshot(database) {
   try {
+    markSyncAttempt('remote-write');
     await writeRemoteDatabase(database);
     markBackendStatus({ available: true, error: null, syncedAt: nowIso() });
+    markSyncSuccess();
     return database;
   } catch (error) {
     markBackendStatus({ available: false, error: error?.message || 'Falha ao sincronizar Firebase' });
+    markSyncFailure(error);
     return null;
   }
 }
@@ -347,7 +375,8 @@ function installConnectivitySyncHandlers() {
   }
 
   periodicSyncTimer = window.setInterval(() => {
-    scheduleConnectivitySync('periodic-sync');
+    const delayMs = storageMeta.syncPending && storageMeta.syncBackoffMs > 0 ? storageMeta.syncBackoffMs : 0;
+    scheduleConnectivitySync('periodic-sync', delayMs);
   }, 60_000);
 }
 
@@ -703,6 +732,7 @@ export async function bootstrapStorage() {
   storageMeta.backendConfigured = isFirebaseConfigured();
   storageMeta.backendAvailable = false;
   storageMeta.lastRemoteSyncError = null;
+  storageMeta.syncPending = false;
   installConnectivitySyncHandlers();
   storageMeta.persistentStorageGranted = storageConfig.requestPersistentStorage
     ? await requestPersistentStoragePermission()
@@ -808,6 +838,8 @@ function writeDatabase(database, reason = 'database-write') {
   memoryDatabaseSnapshot = normalized;
   safeWriteJson(DB_KEY, normalized);
   mirrorDatabaseSnapshot(normalized);
+  storageMeta.lastLocalMutationAt = nowIso();
+  storageMeta.syncPending = true;
   emitChange({ reason, scope: 'database' });
   void queueBackendSync(normalized, reason);
   return normalized;

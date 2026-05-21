@@ -44,6 +44,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - As alterações são sincronizadas no documento central do Firestore após cada gravação.
 - Se uma gravação falhar por falta de internet, o snapshot local permanece preservado e o app tenta reenviar automaticamente ao voltar a conexão, ao retornar para primeiro plano e em retentativas periódicas.
 - O navegador é solicitado a manter o armazenamento como persistente.
+- A tela de configurações expõe telemetria local da sincronização, incluindo fila pendente, falhas e retentativa, para suportar rede oscilante em campo.
 - Apontamentos abertos permanecem salvos no Firestore e podem ser retomados após fechar a aba ou trocar de dispositivo.
 - A PWA verifica atualizações automaticamente em intervalos curtos e troca assets de tela pela versão mais nova sem remover `localStorage`, `IndexedDB` ou documentos do Firestore.
 - O aplicativo Android carrega a interface publicada no GitHub Pages para receber atualizações de tela/regras sem reinstalar APK; após o primeiro carregamento online, o cache da PWA mantém abertura offline e o WebView preserva `localStorage` e `IndexedDB`.
