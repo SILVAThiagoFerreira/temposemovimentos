@@ -24,6 +24,9 @@ let remoteSyncQueue = Promise.resolve();
 let remoteListenerUnsubscribe = null;
 let memoryDatabaseSnapshot = null;
 let memorySessionSnapshot = null;
+let connectivitySyncHandlersInstalled = false;
+let reconnectSyncTimer = null;
+let periodicSyncTimer = null;
 const storageMeta = {
   persistentStorageGranted: false,
   indexedDbAvailable: false,
@@ -295,6 +298,57 @@ function queueBackendSync(database, reason = 'database-sync') {
     .catch(() => null);
 
   return remoteSyncQueue;
+}
+
+function scheduleConnectivitySync(reason = 'connectivity-sync', delayMs = 0) {
+  if (!isFirebaseConfigured() || typeof window === 'undefined') {
+    return;
+  }
+
+  if (reconnectSyncTimer) {
+    window.clearTimeout(reconnectSyncTimer);
+  }
+
+  reconnectSyncTimer = window.setTimeout(() => {
+    reconnectSyncTimer = null;
+
+    if (navigator?.onLine === false) {
+      markBackendStatus({ available: false, error: 'Dispositivo sem conexão com a internet' });
+      emitChange({ reason: `${reason}-offline`, scope: 'database' });
+      return;
+    }
+
+    void queueBackendSync(readDatabase(), reason);
+  }, delayMs);
+}
+
+function installConnectivitySyncHandlers() {
+  if (connectivitySyncHandlersInstalled || typeof window === 'undefined') {
+    return;
+  }
+
+  connectivitySyncHandlersInstalled = true;
+
+  window.addEventListener('online', () => {
+    scheduleConnectivitySync('network-online', 250);
+  });
+
+  window.addEventListener('offline', () => {
+    markBackendStatus({ available: false, error: 'Dispositivo sem conexão com a internet' });
+    emitChange({ reason: 'network-offline', scope: 'database' });
+  });
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        scheduleConnectivitySync('app-visible', 250);
+      }
+    });
+  }
+
+  periodicSyncTimer = window.setInterval(() => {
+    scheduleConnectivitySync('periodic-sync');
+  }, 60_000);
 }
 
 async function attachRemoteListener() {
@@ -649,6 +703,7 @@ export async function bootstrapStorage() {
   storageMeta.backendConfigured = isFirebaseConfigured();
   storageMeta.backendAvailable = false;
   storageMeta.lastRemoteSyncError = null;
+  installConnectivitySyncHandlers();
   storageMeta.persistentStorageGranted = storageConfig.requestPersistentStorage
     ? await requestPersistentStoragePermission()
     : false;
@@ -718,10 +773,13 @@ export async function bootstrapStorage() {
     if (storageMeta.backendConfigured && !remoteListenerUnsubscribe) {
       await attachRemoteListener();
     }
+
+    scheduleConnectivitySync('bootstrap-sync', 500);
   } catch {
     const fallback = normalizeDatabase(safeReadJson(DB_KEY));
     memoryDatabaseSnapshot = fallback;
     setLocalSnapshot(DB_KEY, fallback);
+    scheduleConnectivitySync('bootstrap-fallback-sync', 1_000);
   }
 
   return getStorageMeta();

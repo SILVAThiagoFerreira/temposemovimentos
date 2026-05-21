@@ -169,6 +169,8 @@
 }
 ```
 
+- `connectionState`, `lastRemoteSyncAt` e `lastRemoteSyncError` refletem as tentativas automáticas de sincronização do snapshot local com o Firestore.
+
 ## Snapshot
 
 ```json

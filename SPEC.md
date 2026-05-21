@@ -42,6 +42,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - Espelho local: `localStorage` e `IndexedDB`, usados como cache e fila offline.
 - No boot, o sistema inicializa o Firebase e restaura o snapshot mais recente entre Firestore e cache local.
 - As alterações são sincronizadas no documento central do Firestore após cada gravação.
+- Se uma gravação falhar por falta de internet, o snapshot local permanece preservado e o app tenta reenviar automaticamente ao voltar a conexão, ao retornar para primeiro plano e em retentativas periódicas.
 - O navegador é solicitado a manter o armazenamento como persistente.
 - Apontamentos abertos permanecem salvos no Firestore e podem ser retomados após fechar a aba ou trocar de dispositivo.
 - A PWA verifica atualizações automaticamente em intervalos curtos e troca assets de tela pela versão mais nova sem remover `localStorage`, `IndexedDB` ou documentos do Firestore.
