@@ -87,6 +87,7 @@ function useHashRoute(session) {
 function AppShell() {
   const { session, logout, canInstallApp, installApp, isLocalMode, language, t } = useApp();
   const [route, navigate] = useHashRoute(session);
+  const [navOpen, setNavOpen] = useState(false);
   const isManager = isManagerRole(session?.role);
   const isOperator = isOperatorRole(session?.role);
   const isClient = isClientRole(session?.role);
@@ -95,6 +96,10 @@ function AppShell() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  useEffect(() => {
+    setNavOpen(false);
+  }, [session?.role]);
 
   useEffect(() => {
     const currentTitleKey = ROUTE_TITLES[route === '/login' ? '/login' : route] || 'routeTitles.default';
@@ -187,7 +192,14 @@ function AppShell() {
         />
 
         <div className="app-body">
-          <Navigation items={accessibleRoutes} currentPath={currentRoute} onNavigate={navigate} session={session} />
+          <Navigation
+            items={accessibleRoutes}
+            currentPath={currentRoute}
+            onNavigate={navigate}
+            session={session}
+            isOpen={navOpen}
+            onToggle={() => setNavOpen((current) => !current)}
+          />
           <main className="app-main">{page}</main>
         </div>
       </div>

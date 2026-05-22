@@ -257,6 +257,52 @@ h2 {
   box-shadow: 0 22px 58px rgba(0, 0, 0, 0.18);
 }
 
+.side-nav.is-collapsed {
+  max-height: 126px;
+}
+
+.side-nav.is-collapsed .nav-list {
+  display: none;
+}
+
+.nav-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.nav-toggle {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav-meta {
+  margin-top: 12px;
+}
+
+.nav-collapsed-note {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.nav-collapsed-note small {
+  color: rgba(255, 255, 255, 0.56);
+}
+
 .nav-title {
   color: rgba(255, 255, 255, 0.56);
 }
