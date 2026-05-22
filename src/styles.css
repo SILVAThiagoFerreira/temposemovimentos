@@ -2792,6 +2792,25 @@ label > span {
   font-size: 1rem;
 }
 
+.settings-warning-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.settings-warning-grid span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.settings-warning-grid strong {
+  font-size: 0.95rem;
+}
+
 .dashboard-recent,
 .table-section {
   overflow: hidden;

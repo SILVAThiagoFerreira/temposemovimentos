@@ -13,6 +13,9 @@ import { differenceMinutes, minutesToHours, nowIso } from './timeService';
 const DB_KEY = storageConfig.keys.database;
 const SESSION_KEY = storageConfig.keys.session;
 const UI_LANGUAGE_KEY = storageConfig.keys.uiLanguage;
+const BACKUP_META_KEY = `${storageConfig.keys.database}-backup-meta`;
+const BACKUP_PREFIX = `${storageConfig.keys.database}-backup-`;
+const MAX_LOCAL_BACKUPS = 8;
 const DB_VERSION = 1;
 const PERSISTENCE_DB_NAME = storageConfig.persistence.dbName;
 const PERSISTENCE_DB_VERSION = storageConfig.persistence.version;
@@ -27,6 +30,7 @@ let memorySessionSnapshot = null;
 let connectivitySyncHandlersInstalled = false;
 let reconnectSyncTimer = null;
 let periodicSyncTimer = null;
+let lastBackupVersion = 0;
 const storageMeta = {
   persistentStorageGranted: false,
   indexedDbAvailable: false,
@@ -42,6 +46,9 @@ const storageMeta = {
   syncBackoffMs: 0,
   syncPending: false,
   bootstrappedAt: null,
+  localBackupCount: 0,
+  lastLocalBackupAt: null,
+  localBackupLatestKey: null,
 };
 
 function cloneItems(items) {
@@ -224,6 +231,81 @@ function mirrorDatabaseSnapshot(database) {
 
 function mirrorSessionSnapshot(session) {
   persistSnapshot(SESSION_KEY, session);
+}
+
+function getBackupKey(version) {
+  return `${BACKUP_PREFIX}${String(version).padStart(4, '0')}`;
+}
+
+function readBackupMeta() {
+  return safeReadJson(BACKUP_META_KEY) || { latestVersion: 0, history: [] };
+}
+
+function writeBackupMeta(meta) {
+  safeWriteJson(BACKUP_META_KEY, meta);
+}
+
+function writeLocalBackup(database) {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const meta = readBackupMeta();
+  const version = Math.max(Number(meta.latestVersion || 0) + 1, lastBackupVersion + 1);
+  const backupKey = getBackupKey(version);
+  const payload = {
+    version,
+    backedUpAt: nowIso(),
+    database,
+  };
+
+  safeWriteJson(backupKey, payload);
+
+  const history = [...(Array.isArray(meta.history) ? meta.history : []), { version, backedUpAt: payload.backedUpAt, key: backupKey }];
+  const trimmedHistory = history.slice(-MAX_LOCAL_BACKUPS);
+
+  for (const entry of history.slice(0, Math.max(0, history.length - MAX_LOCAL_BACKUPS))) {
+    try {
+      window.localStorage.removeItem(entry.key);
+    } catch {
+      // Ignore backup cleanup failures.
+    }
+  }
+
+  const nextMeta = {
+    latestVersion: version,
+    latestKey: backupKey,
+    history: trimmedHistory,
+    updatedAt: payload.backedUpAt,
+  };
+
+  writeBackupMeta(nextMeta);
+  lastBackupVersion = version;
+  storageMeta.localBackupCount = trimmedHistory.length;
+  storageMeta.lastLocalBackupAt = payload.backedUpAt;
+  storageMeta.localBackupLatestKey = backupKey;
+  return payload;
+}
+
+function loadLocalBackups() {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  const meta = readBackupMeta();
+  const history = Array.isArray(meta.history) ? meta.history : [];
+  return history
+    .map((entry) => {
+      const payload = safeReadJson(entry.key);
+      return payload?.database ? { ...payload, key: entry.key } : null;
+    })
+    .filter(Boolean)
+    .sort((left, right) => Number(right.version || 0) - Number(left.version || 0));
+}
+
+function restoreFromBackups() {
+  const backups = loadLocalBackups();
+  return backups.length ? normalizeDatabase(backups[0].database) : null;
 }
 
 function markBackendStatus({ available, error = null, syncedAt = null } = {}) {
@@ -749,9 +831,10 @@ export async function bootstrapStorage() {
     const freshDatabase = createInitialDatabase();
     const localSnapshot = localDatabase ? normalizeDatabase(localDatabase) : null;
     const indexedSnapshot = indexedDatabase ? normalizeDatabase(indexedDatabase) : null;
+    const backupSnapshot = restoreFromBackups();
     const hasLocalSnapshot = Boolean(localSnapshot || indexedSnapshot);
 
-    let resolvedDatabase = chooseNewestSnapshot(localSnapshot, indexedSnapshot, null, 'updatedAt');
+    let resolvedDatabase = chooseNewestSnapshot(localSnapshot, indexedSnapshot, backupSnapshot, 'updatedAt');
 
     let resolvedSession = chooseNewestSnapshot(localSession, indexedSession, null, 'loggedAt');
 
@@ -794,7 +877,7 @@ export async function bootstrapStorage() {
     }
 
     if (!resolvedDatabase) {
-      const fresh = setDatabaseSettingsMode(createInitialDatabase(), storageMeta.backendAvailable ? 'ONLINE' : 'LOCAL');
+      const fresh = setDatabaseSettingsMode(backupSnapshot || freshDatabase, storageMeta.backendAvailable ? 'ONLINE' : 'LOCAL');
       memoryDatabaseSnapshot = cloneSnapshot(fresh);
       setLocalSnapshot(DB_KEY, fresh);
       persistSnapshot(DB_KEY, fresh);
@@ -838,6 +921,7 @@ function writeDatabase(database, reason = 'database-write') {
   memoryDatabaseSnapshot = normalized;
   safeWriteJson(DB_KEY, normalized);
   mirrorDatabaseSnapshot(normalized);
+  writeLocalBackup(normalized);
   storageMeta.lastLocalMutationAt = nowIso();
   storageMeta.syncPending = true;
   emitChange({ reason, scope: 'database' });

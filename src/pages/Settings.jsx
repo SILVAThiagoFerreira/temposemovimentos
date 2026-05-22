@@ -54,6 +54,9 @@ export function Settings() {
 
   const syncStateLabel = storageMeta?.syncPending ? t('settings.sync.pending') : t('settings.sync.idle');
   const syncBackoffLabel = storageMeta?.syncBackoffMs ? `${Math.round(storageMeta.syncBackoffMs / 1000)}s` : '0s';
+  const backupCount = storageMeta?.localBackupCount || 0;
+  const backupLabel = storageMeta?.lastLocalBackupAt ? new Date(storageMeta.lastLocalBackupAt).toLocaleString(language) : t('common.none');
+  const persistenceWarning = !storageMeta?.persistentStorageGranted ? t('settings.storage.warningPersistence') : t('settings.storage.persistenceGranted');
 
   async function handleEnablePersistence() {
     const granted = await requestPersistentStorage();
@@ -184,6 +187,15 @@ export function Settings() {
       </section>
 
       {notice ? <div className="alert alert--info">{notice}</div> : null}
+      <div className={`alert ${storageMeta?.persistentStorageGranted ? 'alert--info' : 'alert--warning'}`}>
+        <strong>{persistenceWarning}</strong>
+        <div className="settings-warning-grid">
+          <span>{t('settings.storage.backupCount')}</span>
+          <strong>{backupCount}</strong>
+          <span>{t('settings.storage.backupLatest')}</span>
+          <strong>{backupLabel}</strong>
+        </div>
+      </div>
 
       <section className="settings-grid">
         <article className="card settings-card settings-card--wide">
