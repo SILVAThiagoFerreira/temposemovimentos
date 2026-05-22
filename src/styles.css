@@ -837,6 +837,12 @@ label > span {
   color: rgba(255, 255, 255, 0.64);
 }
 
+@media (max-width: 1180px) {
+  .operator-live-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .operator-topbar .button--secondary,
 .operator-topbar .button--ghost {
   color: #ffffff;
@@ -2630,6 +2636,52 @@ label > span {
   gap: 12px;
 }
 
+.operator-live-bar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(237, 0, 22, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.9)),
+    linear-gradient(90deg, rgba(237, 0, 22, 0.12), transparent 38%);
+  box-shadow: var(--shadow-soft);
+  border-radius: var(--radius-xl);
+}
+
+.operator-live-bar div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.operator-live-bar span {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.operator-live-bar strong {
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.form-status-line {
+  margin-top: 6px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.form-status-line strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
 .operator-topbar__actions {
   display: flex;
   align-items: center;
@@ -2889,6 +2941,10 @@ label > span {
 
   .button {
     min-height: 46px;
+  }
+
+  .operator-live-bar {
+    grid-template-columns: 1fr;
   }
 
   .operator-actions-footer {

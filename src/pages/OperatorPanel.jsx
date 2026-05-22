@@ -10,7 +10,7 @@ import { isSameDay, nowIso } from '../services/timeService';
 import { useDeviceLocation } from '../hooks/useDeviceLocation';
 
 export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate }) {
-  const { session, operators, equipments, records, activityTypes, startMovementRecord, closeMovementRecord, saveRecord, logout, t } = useApp();
+  const { session, operators, equipments, records, activityTypes, storageMeta, startMovementRecord, closeMovementRecord, saveRecord, logout, t } = useApp();
   const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
   const { location: deviceLocation } = useDeviceLocation();
   const lastSyncedLocationKey = useRef('');
@@ -68,6 +68,9 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
     () => records.filter((record) => isSameDay(record.startDateTime, new Date()) || isSameDay(record.endDateTime, new Date()) || record.status === 'ABERTO'),
     [records],
   );
+
+  const syncLabel = storageMeta?.syncPending ? t('settings.sync.pending') : t('settings.sync.idle');
+  const syncDelayLabel = storageMeta?.syncBackoffMs ? `${Math.round(storageMeta.syncBackoffMs / 1000)}s` : '0s';
 
   async function handleStart(payload) {
     const equipment = equipments.find((item) => item.id === selectedEquipmentId) || selectedEquipment;
@@ -156,6 +159,25 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
           <p>{operatorActiveRecord ? operatorActiveRecord.plate : t('operator.hero.noOpenMovement')}</p>
           {operatorActiveRecord ? <StatusChip tone="warning">{t('common.open')}</StatusChip> : <StatusChip tone="neutral">{t('operator.hero.noActivity')}</StatusChip>}
         </article>
+      </section>
+
+      <section className="card operator-live-bar">
+        <div>
+          <span>{t('settings.sync.state')}</span>
+          <strong>{syncLabel}</strong>
+        </div>
+        <div>
+          <span>{t('settings.sync.failures')}</span>
+          <strong>{storageMeta?.syncFailureCount || 0}</strong>
+        </div>
+        <div>
+          <span>{t('settings.sync.backoff')}</span>
+          <strong>{syncDelayLabel}</strong>
+        </div>
+        <div>
+          <span>{t('settings.storage.currentState')}</span>
+          <strong>{storageMeta?.connectionState || 'OFFLINE'}</strong>
+        </div>
       </section>
 
       <section className="equipment-grid">

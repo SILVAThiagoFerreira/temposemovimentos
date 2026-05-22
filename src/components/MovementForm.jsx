@@ -76,6 +76,14 @@ function buildPayload(form, { operators, equipments, activityTypes, record, defa
   };
 }
 
+function getDraftStorageKey({ operatorId, equipmentId, activityTypeId, recordId }) {
+  if (recordId) {
+    return `temposemovimentos:draft:record:${recordId}`;
+  }
+
+  return `temposemovimentos:draft:${operatorId || 'operator'}:${equipmentId || 'equipment'}:${activityTypeId || 'activity'}`;
+}
+
 export function MovementForm({
   title = '',
   submitLabel = '',
@@ -110,11 +118,75 @@ export function MovementForm({
   const [form, setForm] = useState(initialState);
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  const [draftState, setDraftState] = useState({ status: '', savedAt: '' });
 
   useEffect(() => {
+    const draftKey = getDraftStorageKey({
+      operatorId: initialState.operatorId,
+      equipmentId: initialState.equipmentId,
+      activityTypeId: initialState.activityTypeId,
+      recordId: record?.id,
+    });
+
+    if (typeof window !== 'undefined' && !record) {
+      try {
+        const rawDraft = window.localStorage.getItem(draftKey);
+        if (rawDraft) {
+          const parsedDraft = JSON.parse(rawDraft);
+          setForm((current) => ({
+            ...current,
+            ...parsedDraft,
+            operatorId: parsedDraft.operatorId || initialState.operatorId,
+            equipmentId: parsedDraft.equipmentId || initialState.equipmentId,
+            activityTypeId: parsedDraft.activityTypeId || initialState.activityTypeId,
+          }));
+          setDraftState({ status: 'restored', savedAt: parsedDraft.savedAt || '' });
+          setErrors({});
+          return;
+        }
+      } catch {
+        // Fallback to clean form if the draft cannot be parsed.
+      }
+    }
+
     setForm(initialState);
     setErrors({});
   }, [initialState]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || record) {
+      return undefined;
+    }
+
+    const draftKey = getDraftStorageKey({
+      operatorId: form.operatorId || initialState.operatorId,
+      equipmentId: form.equipmentId || initialState.equipmentId,
+      activityTypeId: form.activityTypeId || initialState.activityTypeId,
+      recordId: record?.id,
+    });
+
+    const draftPayload = {
+      operatorId: form.operatorId,
+      equipmentId: form.equipmentId,
+      activityTypeId: form.activityTypeId,
+      notes: form.notes,
+      manualEntry: form.manualEntry,
+      startDateTime: form.startDateTime,
+      endDateTime: form.endDateTime,
+      savedAt: new Date().toISOString(),
+    };
+
+    const timer = window.setTimeout(() => {
+      try {
+        window.localStorage.setItem(draftKey, JSON.stringify(draftPayload));
+        setDraftState({ status: 'saved', savedAt: draftPayload.savedAt });
+      } catch {
+        setDraftState({ status: 'error', savedAt: '' });
+      }
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [form.activityTypeId, form.endDateTime, form.equipmentId, form.manualEntry, form.notes, form.operatorId, form.startDateTime, initialState.activityTypeId, initialState.equipmentId, initialState.operatorId, record]);
 
   const selectedOperator = useMemo(
     () => operators.find((item) => item.id === form.operatorId) || operators.find((item) => item.id === defaultOperatorId) || operators[0] || null,
@@ -169,6 +241,20 @@ export function MovementForm({
       await onSubmit(payload);
 
       if (!record) {
+        if (typeof window !== 'undefined') {
+          try {
+            window.localStorage.removeItem(
+              getDraftStorageKey({
+                operatorId: payload.operatorId,
+                equipmentId: payload.equipmentId,
+                activityTypeId: payload.activityTypeId,
+                recordId: record?.id,
+              }),
+            );
+          } catch {
+            // Ignore draft cleanup failures.
+          }
+        }
         setForm((current) => ({
           ...current,
           notes: '',
@@ -187,6 +273,12 @@ export function MovementForm({
   const resolvedTitle = title || (record ? t('movement.editTitle') : t('movement.newTitle'));
   const resolvedSubmitLabel = submitLabel || t('movement.submit');
   const resolvedCancelLabel = cancelLabel || t('movement.cancel');
+  const draftMessage =
+    draftState.status === 'restored'
+      ? t('movement.draftRestored')
+      : draftState.status === 'saved'
+        ? t('movement.draftSaved')
+        : t('movement.draftReady');
 
   return (
     <form className="card form-card" onSubmit={handleSubmit}>
@@ -194,6 +286,12 @@ export function MovementForm({
         <div>
           <p className="eyebrow">{t('movement.title')}</p>
           <h2>{resolvedTitle}</h2>
+          {!record ? (
+            <p className="form-status-line">
+              <span>{draftMessage}</span>
+              {draftState.savedAt ? <strong>{new Date(draftState.savedAt).toLocaleString(language)}</strong> : <strong>{t('common.none')}</strong>}
+            </p>
+          ) : null}
         </div>
         <StatusChip tone={form.manualEntry || record ? 'warning' : 'success'}>
           {form.manualEntry || record ? t('movement.manual') : t('movement.automatic')}
