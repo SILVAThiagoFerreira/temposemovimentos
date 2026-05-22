@@ -13,6 +13,7 @@
 8. Renderizar login ou painel conforme papel do usuário, com cliente em dashboard-only, operação sem seleção de turno e idioma da interface persistido localmente.
 9. No painel operacional, capturar GPS do navegador quando disponível e sincronizar o último ponto do apontamento aberto.
 10. Ao iniciar uma nova atividade, encerrar automaticamente o apontamento anterior do mesmo operador.
+10.1. Executar o auto-encerramento noturno configurado em `config.json`, fechando em lote os apontamentos em aberto cujo limite 19:00/03:00 já venceu.
 11. Persistir qualquer alteração no cache local e sincronizar com o documento do Firestore.
 11.1. Se a sincronização remota falhar, manter o snapshot local como pendente e tentar reenviar no boot, no evento `online`, no retorno da tela ao primeiro plano e em ciclo periódico.
 11.2. Expor telemetria local de sincronização no painel de configurações, incluindo estado da fila, contagem de falhas e atraso de retentativa.

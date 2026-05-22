@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import { metaConfig } from './config/runtimeConfig';
 import { bootstrapStorage } from './services/storageService';
+import { startNightAutoCloseMonitor } from './services/nightAutoCloseService';
 import { startApplicationUpdateMonitor } from './services/updateService';
 import './styles.css';
 
@@ -27,6 +28,7 @@ if ('serviceWorker' in navigator) {
 
 async function start() {
   await bootstrapStorage().catch(() => undefined);
+  startNightAutoCloseMonitor();
 
   createRoot(document.getElementById('root')).render(
     <React.StrictMode>

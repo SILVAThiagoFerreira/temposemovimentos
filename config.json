@@ -2,7 +2,7 @@
   "meta": {
     "name": "Sistema de Tempos e Movimentos - UMB / Caminhões",
     "shortName": "Tempos UMB",
-    "version": "2.4.0",
+    "version": "2.5.0",
     "entrypoint": "src/main.jsx"
   },
   "storage": {
@@ -18,6 +18,13 @@
     },
     "defaultMode": "ONLINE",
     "requestPersistentStorage": true
+  },
+  "automation": {
+    "nightAutoClose": {
+      "enabled": true,
+      "startTime": "19:00",
+      "endTime": "03:00"
+    }
   },
   "firebase": {
     "webConfig": {
@@ -44,7 +51,7 @@
     }
   },
   "seed": {
-    "catalogVersion": 7,
+    "catalogVersion": 8,
     "users": [
       {
         "id": "usr-paulo",
@@ -140,7 +147,8 @@
       { "id": "act-13", "code": "13", "name": "Outros", "classification": "OUTROS", "defaultLocation": null, "active": true },
       { "id": "act-14", "code": "14", "name": "Retirada de Material no Paiol", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true },
       { "id": "act-15", "code": "15", "name": "Aguardando Detonação", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-16", "code": "16", "name": "Em DDS (Diálogo Diário de Segurança)", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true }
+      { "id": "act-16", "code": "16", "name": "Em DDS (Diálogo Diário de Segurança)", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-17", "code": "17", "name": "Devolução de Material no Paiol", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true }
     ],
     "shifts": [
       { "id": "shift-1", "name": "Turno único", "startTime": "07:00", "endTime": "15:00", "availableMinutes": 480, "active": true }

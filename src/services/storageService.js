@@ -2,10 +2,11 @@ import { initialActivityTypes } from '../data/initialActivityTypes';
 import { initialEquipments } from '../data/initialEquipments';
 import { initialShifts } from '../data/initialShifts';
 import { initialUsers } from '../data/initialUsers';
-import { authConfig, seedConfig, storageConfig } from '../config/runtimeConfig';
+import { automationConfig, authConfig, seedConfig, storageConfig } from '../config/runtimeConfig';
 import { DEFAULT_LOCALE, normalizeLocale } from '../i18n/messages.js';
 import { normalizeGpsSnapshot } from './locationService.js';
 import { ensureFirebaseClient, isFirebaseConfigured, readRemoteDatabase, subscribeRemoteDatabase, writeRemoteDatabase } from './firebaseClient';
+import { getNightAutoCloseDeadline, normalizeNightAutoCloseWindow } from '../utils/nightAutoCloseWindow.js';
 import { createId } from '../utils/id';
 import { normalizeUserRole } from '../utils/roles';
 import { differenceMinutes, minutesToHours, nowIso } from './timeService';
@@ -1019,7 +1020,7 @@ function upsertById(collection, entity, normalizer) {
   };
 }
 
-function saveSection(section, value) {
+function saveSection(section, value, reason = `${section}-save`) {
   const database = readDatabase();
   const next = {
     ...database,
@@ -1027,7 +1028,7 @@ function saveSection(section, value) {
     updatedAt: nowIso(),
   };
 
-  return writeDatabase(next, `${section}-save`);
+  return writeDatabase(next, reason);
 }
 
 function updateRecordTimestamps(record, patch = {}) {
@@ -1045,6 +1046,26 @@ function updateRecordTimestamps(record, patch = {}) {
   }
 
   return next;
+}
+
+function buildClosedRecord(record, { endDateTime = nowIso(), gps = null, editedBy = record.operatorName, mutationAt = nowIso() } = {}) {
+  const durationMinutes = calculateStoredDurationMinutes(record.startDateTime, endDateTime);
+
+  if (durationMinutes <= 0) {
+    throw new Error('Hora final deve ser maior que a inicial');
+  }
+
+  return {
+    ...record,
+    endDateTime,
+    status: 'ENCERRADO',
+    durationMinutes,
+    durationHours: Number(minutesToHours(durationMinutes).toFixed(2)),
+    gps: gps ?? record.gps ?? null,
+    updatedAt: mutationAt,
+    editedAt: mutationAt,
+    editedBy: editedBy || record.operatorName,
+  };
 }
 
 export function loadAppState() {
@@ -1381,27 +1402,67 @@ export function closeMovementRecord(recordId, payload = {}) {
   }
 
   const endDateTime = payload.endDateTime || nowIso();
-  const durationMinutes = calculateStoredDurationMinutes(existing.startDateTime, endDateTime);
-
-  if (durationMinutes <= 0) {
-    throw new Error('Hora final deve ser maior que a inicial');
-  }
-
-  const updated = {
-    ...existing,
+  const mutationAt = nowIso();
+  const updated = buildClosedRecord(existing, {
     endDateTime,
-    status: 'ENCERRADO',
-    durationMinutes,
-    durationHours: Number(minutesToHours(durationMinutes).toFixed(2)),
     gps: payload.gps ?? existing.gps ?? null,
-    updatedAt: nowIso(),
-    editedAt: nowIso(),
     editedBy: payload.editedBy || existing.operatorName,
-  };
+    mutationAt,
+  });
 
   const next = database.movementRecords.map((record) => (record.id === recordId ? updated : record));
   saveSection('movementRecords', next);
   return updated;
+}
+
+export function closeOverdueOpenRecords({ now = new Date(), schedule = automationConfig?.nightAutoClose, reason = 'night-auto-close' } = {}) {
+  const normalizedSchedule = normalizeNightAutoCloseWindow(schedule);
+
+  if (!normalizedSchedule.enabled) {
+    return 0;
+  }
+
+  const referenceDate = now instanceof Date ? now : new Date(now);
+
+  if (Number.isNaN(referenceDate.getTime())) {
+    return 0;
+  }
+
+  const database = readDatabase();
+  const mutationAt = nowIso();
+  let closedCount = 0;
+
+  const nextRecords = database.movementRecords.map((record) => {
+    if (record.status !== 'ABERTO') {
+      return record;
+    }
+
+    const deadline = getNightAutoCloseDeadline(record.startDateTime, normalizedSchedule);
+
+    if (!deadline || deadline.getTime() > referenceDate.getTime()) {
+      return record;
+    }
+
+    try {
+      const closedRecord = buildClosedRecord(record, {
+        endDateTime: deadline.toISOString(),
+        editedBy: 'SISTEMA',
+        mutationAt,
+      });
+
+      closedCount += 1;
+      return closedRecord;
+    } catch {
+      return record;
+    }
+  });
+
+  if (!closedCount) {
+    return 0;
+  }
+
+  saveSection('movementRecords', nextRecords, reason);
+  return closedCount;
 }
 
 export function getOpenRecordByOperator(operatorId) {

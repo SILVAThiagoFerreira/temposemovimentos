@@ -15,6 +15,13 @@
       "uiLanguage": "temposemovimentos-ui-language"
     }
   },
+  "automation": {
+    "nightAutoClose": {
+      "enabled": true,
+      "startTime": "19:00",
+      "endTime": "03:00"
+    }
+  },
   "firebase": {},
   "auth": {
     "defaultPassword": "1234",
@@ -27,7 +34,7 @@
     }
   },
   "seed": {
-    "catalogVersion": 7,
+    "catalogVersion": 8,
     "users": [],
     "equipments": [],
     "activityTypes": [],
@@ -37,6 +44,20 @@
   "exports": {}
 }
 ```
+
+## Automation
+
+```json
+{
+  "nightAutoClose": {
+    "enabled": true,
+    "startTime": "19:00",
+    "endTime": "03:00"
+  }
+}
+```
+
+- `nightAutoClose` define a janela local usada para encerrar em lote apontamentos em aberto sem apagar histórico.
 
 ## User
 
@@ -138,6 +159,7 @@
 
 - Quando uma nova atividade é iniciada para o mesmo operador, o apontamento anterior aberto é encerrado automaticamente.
 - O encerramento preenche `endDateTime`, `durationMinutes`, `durationHours`, `editedAt` e `editedBy`.
+- O auto-encerramento noturno usa `editedBy = "SISTEMA"` e fecha os apontamentos em aberto no horário-limite configurado entre 19:00 e 03:00.
 - As durações são calculadas em precisão de minuto; fechamentos automáticos registram ao menos 1 minuto quando a troca ocorre no mesmo instante.
 - O botão `Encerrar a atividade` finaliza o apontamento em aberto no fim do expediente.
 - `shiftId`, `shiftName`, `location`, `failureDescription` e `correctiveAction` são campos legados/históricos e não fazem parte do fluxo visível atual.
@@ -172,7 +194,7 @@
     "storageMode": "ONLINE",
     "defaultShiftId": "shift-1",
     "userCatalogSeeded": true,
-    "catalogVersion": 6,
+    "catalogVersion": 8,
     "updatedAt": "ISO-8601"
   }
 }
@@ -209,7 +231,7 @@
     "storageMode": "ONLINE",
     "defaultShiftId": "shift-1",
     "userCatalogSeeded": true,
-    "catalogVersion": 6,
+    "catalogVersion": 8,
     "updatedAt": "ISO-8601"
   }
 }

@@ -8,6 +8,7 @@ export const runtimeConfig = Object.freeze(clone(rawConfig));
 
 export const metaConfig = runtimeConfig.meta;
 export const storageConfig = runtimeConfig.storage;
+export const automationConfig = runtimeConfig.automation;
 export const firebaseConfig = runtimeConfig.firebase;
 export const authConfig = runtimeConfig.auth;
 export const seedConfig = runtimeConfig.seed;

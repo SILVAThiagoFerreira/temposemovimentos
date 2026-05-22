@@ -19,11 +19,12 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - Cada usuário pode ter no máximo um apontamento aberto.
 - Cada equipamento pode ter no máximo um apontamento aberto.
 - Ao iniciar uma nova atividade, o sistema encerra automaticamente o apontamento aberto anterior do mesmo operador.
+- O sistema encerra automaticamente os apontamentos em aberto na janela noturna configurada em `config.json` (19:00-03:00), preservando o histórico e a sincronização.
 - O módulo operacional trabalha com um único turno implícito; não há seleção nem gestão de turnos na interface.
 - O operador encerra manualmente o apontamento em aberto no fim do expediente pelo botão `Encerrar a atividade`, exibido abaixo da tabela `Histórico do dia` no fim da página.
 - O botão `Recarregar Atualização do Sistema` recarrega a interface sem apagar `localStorage`, `IndexedDB` ou apontamentos já salvos.
 - Os campos `Local`, `Descrição da falha`, `Ação corretiva` e `Tipo / Classificação` deixam de ser editados pelo operador; a classificação passa a ser derivada do código da atividade.
-- O catálogo inicial inclui o código `16 - Em DDS (Diálogo Diário de Segurança)` como ociosidade.
+- O catálogo inicial inclui o código `16 - Em DDS (Diálogo Diário de Segurança)` como ociosidade e o código `17 - Devolução de Material no Paiol` como operação.
 - O dashboard de `Hoje` contabiliza apontamentos em aberto imediatamente, mesmo antes de completar 1 minuto, para manter o resumo ao vivo.
 - Intervalos que incluem o dia atual atualizam em tempo real; intervalos com data inicial e final iguais consideram o dia completo selecionado.
 - Os filtros de data do dashboard usam o dia local completo, sem deslocamento de fuso.
