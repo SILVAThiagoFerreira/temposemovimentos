@@ -3,7 +3,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
 import { refreshApplicationAssets } from './services/updateService';
-import { getHomeRouteForRole, isClientRole, isManagerRole, isOperatorRole } from './utils/roles';
+import { getHomeRouteForRole, isClientRole, isOperatorRole } from './utils/roles';
 import { metaConfig } from './config/runtimeConfig';
 
 const LoginPage = lazy(() => import('./pages/Login').then((module) => ({ default: module.Login })));
@@ -87,8 +87,6 @@ function useHashRoute(session) {
 function AppShell() {
   const { session, logout, canInstallApp, installApp, isLocalMode, language, t } = useApp();
   const [route, navigate] = useHashRoute(session);
-  const [navOpen, setNavOpen] = useState(false);
-  const isManager = isManagerRole(session?.role);
   const isOperator = isOperatorRole(session?.role);
   const isClient = isClientRole(session?.role);
   const loadingFallback = <div className="empty-state">{t('common.loading')}</div>;
@@ -96,10 +94,6 @@ function AppShell() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
-
-  useEffect(() => {
-    setNavOpen(false);
-  }, [session?.role]);
 
   useEffect(() => {
     const currentTitleKey = ROUTE_TITLES[route === '/login' ? '/login' : route] || 'routeTitles.default';
@@ -197,8 +191,6 @@ function AppShell() {
             currentPath={currentRoute}
             onNavigate={navigate}
             session={session}
-            isOpen={navOpen}
-            onToggle={() => setNavOpen((current) => !current)}
           />
           <main className="app-main">{page}</main>
         </div>

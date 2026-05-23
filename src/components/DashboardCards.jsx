@@ -159,6 +159,34 @@ export function DashboardCards({ summary }) {
 
   return (
     <div className="dashboard-layout">
+      <section className="card dashboard-block">
+        <div className="card__head">
+          <div>
+            <p className="eyebrow">{t('dashboard.sections.codesByEquipment')}</p>
+            <h2>{t('dashboard.sections.quantityAndPercent')}</h2>
+          </div>
+        </div>
+
+        {!summary.codeDistributionByEquipment.length ? <p className="empty-state">{t('dashboard.empty.selectedPeriod')}</p> : null}
+
+        <div className="dashboard-pie-grid dashboard-pie-grid--dense">
+          {summary.codeDistributionByEquipment.map((item) => (
+            <PieChartCard
+              key={item.key}
+              eyebrow={`UMR ${item.label}`}
+              title={item.label}
+              subtitle={item.subtitle}
+              centerValue={String(item.totalCount)}
+              centerLabel={t('common.recordsLabel')}
+              segments={item.segments}
+              emptyMessage={t('dashboard.empty.selectedPeriod')}
+              footnote={t('dashboard.sections.quantityAndPercent')}
+              className="pie-chart-card--compact"
+            />
+          ))}
+        </div>
+      </section>
+
       <section className="stats-grid">
         <article className="card stat-card stat-card--success">
           <p>{t('dashboard.cards.open')}</p>
@@ -261,34 +289,6 @@ export function DashboardCards({ summary }) {
             segments={summary.physicalUtilizationSegments}
             footnote={`${summary.periodDays} d · ${formatDuration(summary.periodAvailableMinutes, language)}`}
           />
-        </div>
-      </section>
-
-      <section className="card dashboard-block">
-        <div className="card__head">
-          <div>
-            <p className="eyebrow">{t('dashboard.sections.codesByEquipment')}</p>
-            <h2>{t('dashboard.sections.quantityAndPercent')}</h2>
-          </div>
-        </div>
-
-        {!summary.codeDistributionByEquipment.length ? <p className="empty-state">{t('dashboard.empty.selectedPeriod')}</p> : null}
-
-        <div className="dashboard-pie-grid">
-          {summary.codeDistributionByEquipment.map((item) => (
-            <PieChartCard
-              key={item.key}
-              eyebrow={`UMR ${item.label}`}
-              title={item.label}
-              subtitle={item.subtitle}
-              centerValue={String(item.totalCount)}
-              centerLabel={t('common.recordsLabel')}
-              segments={item.segments}
-              emptyMessage={t('dashboard.empty.selectedPeriod')}
-              footnote={t('dashboard.sections.quantityAndPercent')}
-              className="pie-chart-card--compact"
-            />
-          ))}
         </div>
       </section>
 
