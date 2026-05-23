@@ -1,7 +1,20 @@
 import { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 
-const DEFAULT_COLORS = ['#245f9e', '#1f8a57', '#c28a15', '#bf3d3d', '#6b7280', '#8b5cf6', '#0ea5e9', '#f97316'];
+const DEFAULT_COLORS = ['#303943', '#2f6da8', '#168255', '#b97909', '#ed0016', '#6e7d8d', '#8fa1b3', '#cfd7df'];
+
+const SEGMENT_COLORS = {
+  operation: '#303943',
+  available: '#cfd7df',
+  maintenance: '#ed0016',
+  meal: '#b97909',
+  gaps: '#c4162a',
+  idle: '#2f6da8',
+  other: '#6e7d8d',
+  rest: '#dbe2e8',
+  active: '#168255',
+  closed: '#2f6da8',
+};
 
 function getNumericValue(segment) {
   return Number(segment?.value ?? segment?.count ?? segment?.minutes ?? 0);
@@ -23,7 +36,7 @@ export function PieChartCard({
     const values = segments.map((segment, index) => ({
       ...segment,
       value: getNumericValue(segment),
-      color: segment?.color || DEFAULT_COLORS[index % DEFAULT_COLORS.length],
+      color: segment?.color || SEGMENT_COLORS[segment?.key] || DEFAULT_COLORS[index % DEFAULT_COLORS.length],
     }));
     const total = values.reduce((sum, segment) => sum + segment.value, 0);
 

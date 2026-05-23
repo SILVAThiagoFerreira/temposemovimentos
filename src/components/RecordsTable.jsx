@@ -5,6 +5,18 @@ import { useApp } from '../context/AppContext';
 export function RecordsTable({ records, onEdit, onDelete, onClose, emptyMessage = '' }) {
   const { language, t } = useApp();
   const resolvedEmptyMessage = emptyMessage || t('table.empty');
+  const headers = {
+    date: t('table.headers.date'),
+    equipment: t('table.headers.equipment'),
+    code: t('table.headers.code'),
+    activity: t('table.headers.activity'),
+    operator: t('table.headers.operator'),
+    start: t('table.headers.start'),
+    end: t('table.headers.end'),
+    duration: t('table.headers.duration'),
+    status: t('table.headers.status'),
+    actions: t('table.headers.actions'),
+  };
 
   return (
     <div className="card table-card">
@@ -12,16 +24,16 @@ export function RecordsTable({ records, onEdit, onDelete, onClose, emptyMessage 
         <table className="records-table">
           <thead>
             <tr>
-              <th>{t('table.headers.date')}</th>
-              <th>{t('table.headers.equipment')}</th>
-              <th>{t('table.headers.code')}</th>
-              <th>{t('table.headers.activity')}</th>
-              <th>{t('table.headers.operator')}</th>
-              <th>{t('table.headers.start')}</th>
-              <th>{t('table.headers.end')}</th>
-              <th>{t('table.headers.duration')}</th>
-              <th>{t('table.headers.status')}</th>
-              <th>{t('table.headers.actions')}</th>
+              <th scope="col">{headers.date}</th>
+              <th scope="col">{headers.equipment}</th>
+              <th scope="col">{headers.code}</th>
+              <th scope="col">{headers.activity}</th>
+              <th scope="col">{headers.operator}</th>
+              <th scope="col">{headers.start}</th>
+              <th scope="col">{headers.end}</th>
+              <th scope="col">{headers.duration}</th>
+              <th scope="col">{headers.status}</th>
+              <th scope="col">{headers.actions}</th>
             </tr>
           </thead>
           <tbody>
@@ -35,37 +47,37 @@ export function RecordsTable({ records, onEdit, onDelete, onClose, emptyMessage 
 
             {records.map((record) => (
               <tr key={record.id}>
-                <td>{formatDate(record.startDateTime, language)}</td>
-                <td>
+                <td data-label={headers.date}>{formatDate(record.startDateTime, language)}</td>
+                <td data-label={headers.equipment}>
                   <strong>{record.plate}</strong>
                   <small>{record.equipmentCode}</small>
                 </td>
-                <td>{record.activityCode}</td>
-                <td>
+                <td data-label={headers.code}>{record.activityCode}</td>
+                <td data-label={headers.activity}>
                   <strong>{record.activityName}</strong>
                 </td>
-                <td>
+                <td data-label={headers.operator}>
                   <strong>{record.operatorName}</strong>
                 </td>
-                <td>
+                <td data-label={headers.start}>
                   <strong>{formatDate(record.startDateTime, language)}</strong>
                   <small>{formatTime(record.startDateTime, language)}</small>
                 </td>
-                <td>
+                <td data-label={headers.end}>
                   <strong>{record.endDateTime ? formatDate(record.endDateTime, language) : '-'}</strong>
                   <small>{record.endDateTime ? formatTime(record.endDateTime, language) : '-'}</small>
                 </td>
-                <td>
+                <td data-label={headers.duration}>
                   <strong>{record.durationMinutes != null ? formatDuration(record.durationMinutes, language) : '-'}</strong>
                   <small>{record.durationHours != null ? `${record.durationHours.toFixed(2)} ${t('common.hoursLabel').toLowerCase()}` : '-'}</small>
                 </td>
-                <td>
+                <td data-label={headers.status}>
                   <StatusChip tone={record.status === 'ABERTO' ? 'danger' : 'neutral'}>
                     {record.status === 'ABERTO' ? t('table.open') : t('table.closed')}
                   </StatusChip>
                   {record.manualEntry ? <small>{t('table.manual')}</small> : null}
                 </td>
-                <td>
+                <td data-label={headers.actions}>
                   <div className="table-actions">
                     {onEdit ? (
                       <button type="button" className="button button--ghost button--tiny" onClick={() => onEdit(record)}>
