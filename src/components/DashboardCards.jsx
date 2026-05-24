@@ -51,7 +51,7 @@ function EquipmentKpiTable({ summary, t }) {
       <div className="table-wrap">
         <table className="records-table dashboard-kpi-table">
           <thead>
-            <tr className="dashboard-kpi-table__total">
+            <tr>
               <th scope="col">{headers.equipment}</th>
               <th scope="col">{headers.plate}</th>
               <th scope="col">{headers.open}</th>
@@ -103,7 +103,7 @@ function EquipmentKpiTable({ summary, t }) {
               );
             })}
 
-            <tr>
+            <tr className="dashboard-kpi-table__total">
               <td data-label={headers.equipment}>
                 <strong>{t('dashboard.labels.total')}</strong>
               </td>

@@ -234,6 +234,24 @@ const messages = {
   },
 };
 
+Object.assign(messages['en-US'].dashboard.sections, {
+  kpisOverview: 'Overall KPIs',
+  kpisByEquipment: 'KPIs by UMR',
+});
+
+Object.assign(messages['en-US'].dashboard.labels, {
+  total: 'Total',
+});
+
+Object.assign(messages['zh-CN'].dashboard.sections, {
+  kpisOverview: '总体 KPI',
+  kpisByEquipment: '按 UMR 的 KPI',
+});
+
+Object.assign(messages['zh-CN'].dashboard.labels, {
+  total: '总计',
+});
+
 function resolvePath(source, key) {
   return key.split('.').reduce((value, part) => (value && typeof value === 'object' ? value[part] : undefined), source);
 }
