@@ -236,3 +236,10 @@
   }
 }
 ```
+
+## DashboardSummary (derived)
+
+- `physicalAvailabilitySegments[]` e `physicalUtilizationSegments[]` são segmentos de rosca em tempo de execução usados pelo dashboard.
+- Cada segmento pode expor `key`, `label`, `value`, `detail` e `color`.
+- `codeDistributionByEquipment[].segments[]` pode expor `classification` e `color` como pistas visuais derivadas da atividade.
+- Esses campos são apenas de UI e não alteram o formato persistido do Firestore, `localStorage` ou `IndexedDB`.

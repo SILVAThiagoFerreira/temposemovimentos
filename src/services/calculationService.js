@@ -1,5 +1,6 @@
 import { createTranslator, DEFAULT_LOCALE } from '../i18n/messages.js';
 import { endOfDay, formatDuration, minutesToHours, parseSafeDate, startOfDay } from './timeService.js';
+import { getManagementChartColor } from '../constants/chartPalette.js';
 
 const MEAL_ACTIVITY_CODE = '05';
 const CRITICAL_GAP_CODES = new Set(['07', '08', '09']);
@@ -373,16 +374,19 @@ export function summarizeDashboard({
       recordsForEquipment.forEach((record) => {
         const activity = activityByCode.get(record.activityCode);
         const key = record.activityCode || record.activityName || 'SEM CÓDIGO';
+        const classification = normalizeClassification(record.classification || activity?.classification || 'OUTROS');
 
         ensureStat(byCode, key, () => ({
           key,
           code: record.activityCode || '-',
           name: activity?.name || record.activityName || '-',
+          classification,
           count: 0,
           minutes: 0,
         }));
         byCode.get(key).count += 1;
         byCode.get(key).minutes += calculateOverlapMinutes(record, resolvedPeriodStart, resolvedPeriodEnd, resolvedReferenceDate);
+        byCode.get(key).classification = byCode.get(key).classification || classification;
       });
 
       const totalMinutesForEquipment = [...byCode.values()].reduce((sum, item) => sum + Number(item.minutes || 0), 0);
@@ -400,6 +404,8 @@ export function summarizeDashboard({
           value: item.minutes,
           minutes: item.minutes,
           count: item.count,
+          classification: item.classification,
+          color: getManagementChartColor(item.classification, item.count),
           detail: `${formatDuration(item.minutes, locale)} | ${t('dashboard.labels.records', { count: item.count })}`,
           percent: totalMinutesForEquipment > 0 ? Number(((item.minutes / totalMinutesForEquipment) * 100).toFixed(1)) : 0,
         })),
@@ -464,12 +470,36 @@ export function summarizeDashboard({
     physicalAvailabilityPercent,
     physicalUtilizationPercent,
     physicalAvailabilitySegments: [
-      { key: 'available', label: t('dashboard.series.available'), value: availabilityMinutes, detail: formatDuration(availabilityMinutes, locale) },
-      { key: 'maintenance', label: t('dashboard.series.maintenance'), value: maintenanceBoundMinutes, detail: formatDuration(maintenanceBoundMinutes, locale) },
+      {
+        key: 'available',
+        label: t('dashboard.series.available'),
+        value: availabilityMinutes,
+        detail: formatDuration(availabilityMinutes, locale),
+        color: getManagementChartColor('available'),
+      },
+      {
+        key: 'maintenance',
+        label: t('dashboard.series.maintenance'),
+        value: maintenanceBoundMinutes,
+        detail: formatDuration(maintenanceBoundMinutes, locale),
+        color: getManagementChartColor('maintenance'),
+      },
     ],
     physicalUtilizationSegments: [
-      { key: 'operation', label: t('dashboard.series.inOperation'), value: operationBoundMinutes, detail: formatDuration(operationBoundMinutes, locale) },
-      { key: 'rest', label: t('dashboard.series.rest'), value: nonUtilizationMinutes, detail: formatDuration(nonUtilizationMinutes, locale) },
+      {
+        key: 'operation',
+        label: t('dashboard.series.inOperation'),
+        value: operationBoundMinutes,
+        detail: formatDuration(operationBoundMinutes, locale),
+        color: getManagementChartColor('operation'),
+      },
+      {
+        key: 'rest',
+        label: t('dashboard.series.rest'),
+        value: nonUtilizationMinutes,
+        detail: formatDuration(nonUtilizationMinutes, locale),
+        color: getManagementChartColor('rest'),
+      },
     ],
     totalMinutes,
     totalHours: minutesToHours(totalMinutes),

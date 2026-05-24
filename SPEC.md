@@ -61,7 +61,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 
 - Tela de login por usuário.
 - Tela operacional.
-- Dashboard com intervalo selecionável e gráficos de rosca para KPIs gerais, por UMR e para disponibilidade/utilização por UMR, além de gráficos de pizza de códigos por UMR; os percentuais dos gráficos de códigos por UMR são calculados pelo tempo coletado no período, não pela quantidade de apontamentos.
+- Dashboard com intervalo selecionável e gráficos de rosca para KPIs gerais, por UMR e para disponibilidade/utilização por UMR, além de gráficos de pizza de códigos por UMR; os percentuais dos gráficos de códigos por UMR são calculados pelo tempo coletado no período, não pela quantidade de apontamentos. A leitura visual dos gráficos segue a lógica de gestão com verde = bom, amarelo = médio e vermelho = ruim.
 - Botão de recarga do sistema nas telas logadas.
 - Backups JSON e CSV.
 - Administração restrita de usuários.

@@ -223,5 +223,10 @@ assert.equal(codeSegments[0]?.key, '02', 'distribuição por código deve ordena
 assert.equal(codeSegments[0]?.value, 80, 'valor do gráfico por código deve ser o tempo coletado');
 assert.equal(codeSegments[0]?.percent, 80, 'percentual por código deve usar minutos, não quantidade de apontamentos');
 assert.equal(codeSegments[1]?.percent, 20, 'código com dois apontamentos curtos deve representar apenas seu tempo total');
+assert.equal(timeWeightedCodeDistribution.physicalAvailabilitySegments[0]?.color, '#168255', 'disponibilidade deve usar verde para o lado bom');
+assert.equal(timeWeightedCodeDistribution.physicalAvailabilitySegments[1]?.color, '#c4162a', 'manutenção deve usar vermelho para o lado ruim');
+assert.equal(timeWeightedCodeDistribution.physicalUtilizationSegments[0]?.color, '#168255', 'operação deve usar verde no gráfico de utilização');
+assert.equal(timeWeightedCodeDistribution.physicalUtilizationSegments[1]?.color, '#b97909', 'tempo restante deve usar amarelo como atenção');
+assert.equal(codeSegments[0]?.color, '#168255', 'códigos de operação devem cair na cor de gestão positiva');
 
 console.log('CALCULATION_SMOKE_OK');

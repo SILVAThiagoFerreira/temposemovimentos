@@ -2,34 +2,9 @@ import { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { formatDuration } from '../services/timeService';
 import { formatUtilization } from '../services/calculationService';
+import { getManagementChartColor } from '../constants/chartPalette';
 import { StatusChip } from './StatusChip';
 import { PieChartCard } from './PieChartCard';
-
-const ENAEX_COLORS = {
-  red: '#E20613',
-  redAlt: '#E3001B',
-  graphite: '#38424B',
-  graphiteMedium: '#3D434C',
-  graphiteDark: '#283138',
-  gray: '#6B6F75',
-  light: '#EDEFF2',
-  white: '#FFFFFF',
-};
-
-const SEGMENT_COLORS = {
-  OPERAÇÃO: ENAEX_COLORS.red,
-  MANUTENÇÃO: ENAEX_COLORS.graphite,
-  OCIOSIDADE: ENAEX_COLORS.gray,
-  OUTROS: ENAEX_COLORS.graphiteMedium,
-  operation: ENAEX_COLORS.red,
-  maintenance: ENAEX_COLORS.graphite,
-  meal: ENAEX_COLORS.redAlt,
-  gaps: ENAEX_COLORS.graphiteDark,
-  idle: ENAEX_COLORS.gray,
-  other: ENAEX_COLORS.graphiteMedium,
-  available: ENAEX_COLORS.red,
-  rest: ENAEX_COLORS.graphiteMedium,
-};
 
 function formatHours(value, t) {
   return `${Number(value || 0).toFixed(2)} ${t('common.hoursLabel').toLowerCase()}`;
@@ -59,7 +34,7 @@ function buildTotalSegments(summary, t, language) {
   ];
 
   const segments = orderedKeys
-    .map(([classification, label]) => {
+    .map(([classification, label], index) => {
       const item = byClassification.get(classification);
 
       if (!item || !Number(item.minutes || 0)) {
@@ -71,7 +46,7 @@ function buildTotalSegments(summary, t, language) {
         label,
         value: item.minutes,
         detail: `${formatDuration(item.minutes, language)} · ${t('dashboard.labels.events', { count: item.count || 0 })}`,
-        color: SEGMENT_COLORS[classification],
+        color: getManagementChartColor(classification, index),
       };
     })
     .filter(Boolean);
@@ -86,7 +61,7 @@ function buildTotalSegments(summary, t, language) {
       label: item.classification,
       value: item.minutes,
       detail: `${formatDuration(item.minutes, language)} · ${t('dashboard.labels.events', { count: item.count || 0 })}`,
-      color: SEGMENT_COLORS[item.classification],
+      color: getManagementChartColor(item.classification, segments.length),
     });
   });
 
@@ -94,9 +69,9 @@ function buildTotalSegments(summary, t, language) {
 }
 
 function buildEquipmentSegments(item, language, t) {
-  return item.segments.map((segment) => ({
+  return item.segments.map((segment, index) => ({
     ...segment,
-    color: SEGMENT_COLORS[segment.key],
+    color: segment.color || getManagementChartColor(segment.key, index),
     detail: `${formatDuration(segment.minutes, language)} · ${t('dashboard.labels.events', { count: segment.count || 0 })}`,
   }));
 }
@@ -141,14 +116,14 @@ function buildAvailabilitySegments(item, summary, language, t) {
       label: t('dashboard.series.available'),
       value: availableMinutes,
       detail: formatDuration(availableMinutes, language),
-      color: SEGMENT_COLORS.available,
+      color: getManagementChartColor('available'),
     },
     {
       key: 'maintenance',
       label: t('dashboard.series.maintenance'),
       value: maintenanceMinutes,
       detail: formatDuration(maintenanceMinutes, language),
-      color: SEGMENT_COLORS.maintenance,
+      color: getManagementChartColor('maintenance'),
     },
   ];
 }
@@ -163,14 +138,14 @@ function buildUtilizationSegments(item, summary, language, t) {
       label: t('dashboard.series.operation'),
       value: operationMinutes,
       detail: formatDuration(operationMinutes, language),
-      color: SEGMENT_COLORS.operation,
+      color: getManagementChartColor('operation'),
     },
     {
       key: 'rest',
       label: t('dashboard.series.rest'),
       value: restMinutes,
       detail: formatDuration(restMinutes, language),
-      color: SEGMENT_COLORS.rest,
+      color: getManagementChartColor('rest'),
     },
   ];
 }

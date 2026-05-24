@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { MANAGEMENT_CHART_PALETTE } from '../constants/chartPalette';
 
-const DEFAULT_COLORS = ['#E20613', '#E3001B', '#38424B', '#3D434C', '#283138', '#6B6F75', '#E20613', '#E3001B'];
+const DEFAULT_COLORS = MANAGEMENT_CHART_PALETTE;
 
 function getNumericValue(segment) {
   return Number(segment?.value ?? segment?.count ?? segment?.minutes ?? 0);
