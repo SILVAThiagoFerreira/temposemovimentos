@@ -3,140 +3,10 @@ import { formatDuration } from '../services/timeService';
 import { formatUtilization } from '../services/calculationService';
 import { PieChartCard } from './PieChartCard';
 import { useApp } from '../context/AppContext';
+import { DashboardKpiCharts } from './DashboardKpiCharts';
 
 function formatHours(value, t) {
   return `${Number(value || 0).toFixed(2)} ${t('common.hoursLabel').toLowerCase()}`;
-}
-
-function calculateStopMinutes(item) {
-  return Number(item.maintenanceMinutes || 0) + Number(item.idleMinutes || 0) + Number(item.otherMinutes || 0);
-}
-
-function calculateAvailabilityPercent(availableMinutes, maintenanceMinutes) {
-  const totalMinutes = Number(availableMinutes || 0);
-
-  if (!totalMinutes) {
-    return 0;
-  }
-
-  return Number((((totalMinutes - Number(maintenanceMinutes || 0)) / totalMinutes) * 100).toFixed(1));
-}
-
-function calculateClosedCount(item) {
-  return Math.max(0, Number(item.count || 0) - Number(item.openCount || 0));
-}
-
-function EquipmentKpiTable({ summary, t }) {
-  const headers = {
-    equipment: t('registrations.equipment.code'),
-    plate: t('registrations.equipment.plate'),
-    open: t('dashboard.cards.open'),
-    totalHours: t('dashboard.cards.totalHours'),
-    stop: t('dashboard.cards.stop'),
-    maintenance: t('dashboard.cards.maintenance'),
-    closed: t('dashboard.cards.closed'),
-    availability: t('dashboard.cards.physicalAvailability'),
-    utilization: t('dashboard.cards.fleetIU'),
-  };
-
-  return (
-    <section className="card table-card dashboard-block">
-      <div className="card__head">
-        <div>
-          <p className="eyebrow">{t('dashboard.sections.kpisByEquipment')}</p>
-          <h2>{t('dashboard.sections.kpisByEquipment')}</h2>
-        </div>
-      </div>
-
-      <div className="table-wrap">
-        <table className="records-table dashboard-kpi-table">
-          <thead>
-            <tr>
-              <th scope="col">{headers.equipment}</th>
-              <th scope="col">{headers.plate}</th>
-              <th scope="col">{headers.open}</th>
-              <th scope="col">{headers.totalHours}</th>
-              <th scope="col">{headers.stop}</th>
-              <th scope="col">{headers.maintenance}</th>
-              <th scope="col">{headers.closed}</th>
-              <th scope="col">{headers.availability}</th>
-              <th scope="col">{headers.utilization}</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {summary.equipmentMetrics.map((item) => {
-              const stopMinutes = calculateStopMinutes(item);
-              const availabilityPercent = calculateAvailabilityPercent(item.availableMinutes || summary.periodAvailableMinutes, item.maintenanceMinutes);
-
-              return (
-                <tr key={item.equipmentId}>
-                  <td data-label={headers.equipment}>
-                    <strong>{item.code}</strong>
-                    <small>{item.description}</small>
-                  </td>
-                  <td data-label={headers.plate}>
-                    <strong>{item.plate}</strong>
-                  </td>
-                  <td data-label={headers.open}>
-                    <strong>{item.openCount}</strong>
-                  </td>
-                  <td data-label={headers.totalHours}>
-                    <strong>{formatHours((item.totalMinutes || 0) / 60, t)}</strong>
-                  </td>
-                  <td data-label={headers.stop}>
-                    <strong>{formatHours(stopMinutes / 60, t)}</strong>
-                  </td>
-                  <td data-label={headers.maintenance}>
-                    <strong>{formatHours((item.maintenanceMinutes || 0) / 60, t)}</strong>
-                  </td>
-                  <td data-label={headers.closed}>
-                    <strong>{calculateClosedCount(item)}</strong>
-                  </td>
-                  <td data-label={headers.availability}>
-                    <strong>{availabilityPercent.toFixed(1)}%</strong>
-                  </td>
-                  <td data-label={headers.utilization}>
-                    <strong>{formatUtilization(item.utilizationPercent)}</strong>
-                  </td>
-                </tr>
-              );
-            })}
-
-            <tr className="dashboard-kpi-table__total">
-              <td data-label={headers.equipment}>
-                <strong>{t('dashboard.labels.total')}</strong>
-              </td>
-              <td data-label={headers.plate}>
-                <strong>-</strong>
-              </td>
-              <td data-label={headers.open}>
-                <strong>{summary.openCount}</strong>
-              </td>
-              <td data-label={headers.totalHours}>
-                <strong>{formatHours(summary.totalHours, t)}</strong>
-              </td>
-              <td data-label={headers.stop}>
-                <strong>{formatHours(summary.stopHours, t)}</strong>
-              </td>
-              <td data-label={headers.maintenance}>
-                <strong>{formatHours(summary.maintenanceHours, t)}</strong>
-              </td>
-              <td data-label={headers.closed}>
-                <strong>{summary.closedCount}</strong>
-              </td>
-              <td data-label={headers.availability}>
-                <strong>{formatUtilization(summary.physicalAvailabilityPercent)}</strong>
-              </td>
-              <td data-label={headers.utilization}>
-                <strong>{formatUtilization(summary.physicalUtilizationPercent)}</strong>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  );
 }
 
 function BarList({ title, items, emptyMessage, locale, t }) {
@@ -344,7 +214,7 @@ export function DashboardCards({ summary }) {
         </div>
       </section>
 
-      <EquipmentKpiTable summary={summary} t={t} />
+      <DashboardKpiCharts summary={summary} />
 
       <section className="card dashboard-block">
         <div className="card__head">

@@ -16,6 +16,7 @@ export function PieChartCard({
   segments = [],
   emptyMessage = '',
   footnote = '',
+  metrics = [],
   className = '',
 }) {
   const { t } = useApp();
@@ -87,6 +88,18 @@ export function PieChartCard({
           </div>
         </div>
       )}
+
+      {metrics.length ? (
+        <div className="pie-chart-card__metrics">
+          {metrics.map((metric) => (
+            <div key={metric.key || metric.label} className="pie-chart-card__metric">
+              <span>{metric.label}</span>
+              <strong>{metric.value}</strong>
+              {metric.detail ? <small>{metric.detail}</small> : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       {footnote ? <p className="pie-chart-card__footnote">{footnote}</p> : null}
     </section>
