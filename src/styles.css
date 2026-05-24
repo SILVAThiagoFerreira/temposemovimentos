@@ -3916,3 +3916,11 @@ label > span {
 .app-header.card .subtitle {
   color: rgba(255, 255, 255, 0.68);
 }
+
+.dashboard-kpi-table__total td {
+  background: rgba(237, 0, 22, 0.04);
+}
+
+.dashboard-kpi-table__total td strong {
+  color: var(--text);
+}

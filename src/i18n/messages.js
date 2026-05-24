@@ -131,12 +131,13 @@ const messages = {
         fleetIU: 'IU médio da frota', fleetIUSub: 'no período selecionado', periodFootnote: 'Base de {{days}} dia(s) e {{minutes}} min disponíveis.',
       },
       sections: {
+        kpisOverview: 'KPIs gerais', kpisByEquipment: 'KPIs por UMR',
         equipmentAndActivity: 'Equipamentos e atividade', activityByEquipment: 'Atividade por UMR', physicalIndicators: 'Indicadores físicos', availabilityAndUtilization: 'Disponibilidade e utilização',
         codesByEquipment: 'Códigos por UMR', quantityAndPercent: 'Quantidade e percentual por código', maintenanceByEquipment: 'Manutenção por UMR', maintenanceByActivity: 'Manutenção por atividade', mealDaily: 'Refeição diária (1h)', criticalIntervals: 'Intervalos críticos', detailByEquipment: 'Detalhe por UMR', mealAdherence: 'Aderência à refeição',
       },
       empty: { available: 'Sem dados disponíveis.', selectedPeriod: 'Sem dados no período selecionado.', maintenance: 'Sem manutenção registrada.', meal: 'Sem refeição registrada no período.', critical: 'Sem intervalos críticos no período.' },
       series: { operation: 'Operação', maintenance: 'Manutenção', meal: 'Refeição', gaps: 'Intervalos críticos', idle: 'Horas ociosas', other: 'Outros', available: 'Disponível', inOperation: 'Em operação', rest: 'Demais tempos' },
-      labels: { mainInterval: 'Principal intervalo: {{value}}', noCriticalIntervals: 'Sem intervalos críticos', noCode: 'Sem código', noPlate: 'Sem placa', records: { one: '{{count}} registro', other: '{{count}} registros' }, events: { one: '{{count}} evento', other: '{{count}} eventos' } },
+      labels: { total: 'Total', mainInterval: 'Principal intervalo: {{value}}', noCriticalIntervals: 'Sem intervalos críticos', noCode: 'Sem código', noPlate: 'Sem placa', records: { one: '{{count}} registro', other: '{{count}} registros' }, events: { one: '{{count}} evento', other: '{{count}} eventos' } },
     },
     operator: {
       topbar: { eyebrow: 'Modo operacional', accessTotal: 'Acesso total', pointingOnly: 'Somente apontamento' },
