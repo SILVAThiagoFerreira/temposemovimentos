@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 
-const DEFAULT_COLORS = ['#245f9e', '#1f8a57', '#c28a15', '#bf3d3d', '#6b7280', '#8b5cf6', '#0ea5e9', '#f97316'];
+const DEFAULT_COLORS = ['#E20613', '#E3001B', '#38424B', '#3D434C', '#283138', '#6B6F75', '#E20613', '#E3001B'];
 
 function getNumericValue(segment) {
   return Number(segment?.value ?? segment?.count ?? segment?.minutes ?? 0);
@@ -17,6 +17,7 @@ export function PieChartCard({
   emptyMessage = '',
   footnote = '',
   metrics = [],
+  showLegend = true,
   className = '',
 }) {
   const { t } = useApp();
@@ -74,18 +75,20 @@ export function PieChartCard({
             </div>
           </div>
 
-          <div className="pie-chart-card__legend">
-            {normalized.map((segment) => (
-              <div key={segment.key || segment.label || segment.name} className="pie-chart-card__legend-item">
-                <span className="pie-chart-card__swatch" style={{ background: segment.color }} />
-                <div className="pie-chart-card__legend-meta">
-                  <strong>{segment.label || segment.name || segment.code || t('chart.noTitle')}</strong>
-                  <small>{segment.detail || segment.subtitle || `${segment.value}`}</small>
+          {showLegend ? (
+            <div className="pie-chart-card__legend">
+              {normalized.map((segment) => (
+                <div key={segment.key || segment.label || segment.name} className="pie-chart-card__legend-item">
+                  <span className="pie-chart-card__swatch" style={{ background: segment.color }} />
+                  <div className="pie-chart-card__legend-meta">
+                    <strong>{segment.label || segment.name || segment.code || t('chart.noTitle')}</strong>
+                    <small>{segment.detail || segment.subtitle || `${segment.value}`}</small>
+                  </div>
+                  <span className="pie-chart-card__percent">{Number(segment.percent || 0).toFixed(1)}%</span>
                 </div>
-                <span className="pie-chart-card__percent">{Number(segment.percent || 0).toFixed(1)}%</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       )}
 

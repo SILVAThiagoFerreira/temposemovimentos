@@ -237,19 +237,37 @@ const messages = {
 Object.assign(messages['en-US'].dashboard.sections, {
   kpisOverview: 'Overall KPIs',
   kpisByEquipment: 'KPIs by UMR',
+  availabilityAndUtilizationByEquipment: 'Availability and utilization by UMR',
 });
 
 Object.assign(messages['en-US'].dashboard.labels, {
   total: 'Total',
 });
 
+Object.assign(messages['en-US'].dashboard.cards, {
+  utilization: 'Utilization',
+});
+
+Object.assign(messages['pt-BR'].dashboard.sections, {
+  availabilityAndUtilizationByEquipment: 'Disponibilidade e utilização por UMR',
+});
+
+Object.assign(messages['pt-BR'].dashboard.cards, {
+  utilization: 'Utilização',
+});
+
 Object.assign(messages['zh-CN'].dashboard.sections, {
   kpisOverview: '总体 KPI',
   kpisByEquipment: '按 UMR 的 KPI',
+  availabilityAndUtilizationByEquipment: '按 UMR 的可用率与利用率',
 });
 
 Object.assign(messages['zh-CN'].dashboard.labels, {
   total: '总计',
+});
+
+Object.assign(messages['zh-CN'].dashboard.cards, {
+  utilization: '利用率',
 });
 
 function resolvePath(source, key) {

@@ -2,19 +2,33 @@ import { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { formatDuration } from '../services/timeService';
 import { formatUtilization } from '../services/calculationService';
+import { StatusChip } from './StatusChip';
 import { PieChartCard } from './PieChartCard';
 
+const ENAEX_COLORS = {
+  red: '#E20613',
+  redAlt: '#E3001B',
+  graphite: '#38424B',
+  graphiteMedium: '#3D434C',
+  graphiteDark: '#283138',
+  gray: '#6B6F75',
+  light: '#EDEFF2',
+  white: '#FFFFFF',
+};
+
 const SEGMENT_COLORS = {
-  OPERAÇÃO: '#ed0016',
-  MANUTENÇÃO: '#b97909',
-  OCIOSIDADE: '#6e7d92',
-  OUTROS: '#2f6da8',
-  operation: '#ed0016',
-  maintenance: '#b97909',
-  meal: '#168255',
-  gaps: '#9e0012',
-  idle: '#6e7d92',
-  other: '#2f6da8',
+  OPERAÇÃO: ENAEX_COLORS.red,
+  MANUTENÇÃO: ENAEX_COLORS.graphite,
+  OCIOSIDADE: ENAEX_COLORS.gray,
+  OUTROS: ENAEX_COLORS.graphiteMedium,
+  operation: ENAEX_COLORS.red,
+  maintenance: ENAEX_COLORS.graphite,
+  meal: ENAEX_COLORS.redAlt,
+  gaps: ENAEX_COLORS.graphiteDark,
+  idle: ENAEX_COLORS.gray,
+  other: ENAEX_COLORS.graphiteMedium,
+  available: ENAEX_COLORS.red,
+  rest: ENAEX_COLORS.graphiteMedium,
 };
 
 function formatHours(value, t) {
@@ -105,6 +119,147 @@ function getActivityFootnote(activityName, t) {
   return value && value !== '-' ? value : t('common.noActivity');
 }
 
+function getAvailabilityMinutes(item, summary) {
+  const availableMinutes = Number(item?.availableMinutes || summary.periodAvailableMinutes || 0);
+  const maintenanceMinutes = Number(item?.maintenanceMinutes || 0);
+  return Math.max(0, availableMinutes - maintenanceMinutes);
+}
+
+function getRestMinutes(item, summary) {
+  const availableMinutes = Number(item?.availableMinutes || summary.periodAvailableMinutes || 0);
+  const operationMinutes = Number(item?.operationMinutes || 0);
+  return Math.max(0, availableMinutes - operationMinutes);
+}
+
+function buildAvailabilitySegments(item, summary, language, t) {
+  const availableMinutes = getAvailabilityMinutes(item, summary);
+  const maintenanceMinutes = Number(item?.maintenanceMinutes || 0);
+
+  return [
+    {
+      key: 'available',
+      label: t('dashboard.series.available'),
+      value: availableMinutes,
+      detail: formatDuration(availableMinutes, language),
+      color: SEGMENT_COLORS.available,
+    },
+    {
+      key: 'maintenance',
+      label: t('dashboard.series.maintenance'),
+      value: maintenanceMinutes,
+      detail: formatDuration(maintenanceMinutes, language),
+      color: SEGMENT_COLORS.maintenance,
+    },
+  ];
+}
+
+function buildUtilizationSegments(item, summary, language, t) {
+  const operationMinutes = Number(item?.operationMinutes || 0);
+  const restMinutes = getRestMinutes(item, summary);
+
+  return [
+    {
+      key: 'operation',
+      label: t('dashboard.series.operation'),
+      value: operationMinutes,
+      detail: formatDuration(operationMinutes, language),
+      color: SEGMENT_COLORS.operation,
+    },
+    {
+      key: 'rest',
+      label: t('dashboard.series.rest'),
+      value: restMinutes,
+      detail: formatDuration(restMinutes, language),
+      color: SEGMENT_COLORS.rest,
+    },
+  ];
+}
+
+function buildAvailabilityMetrics(item, summary, t) {
+  return [
+    { label: t('dashboard.series.available'), value: formatHours(getAvailabilityMinutes(item, summary) / 60, t) },
+    { label: t('dashboard.series.maintenance'), value: formatHours(Number(item?.maintenanceMinutes || 0) / 60, t) },
+  ];
+}
+
+function buildUtilizationMetrics(item, summary, t) {
+  return [
+    { label: t('dashboard.series.operation'), value: formatHours(Number(item?.operationMinutes || 0) / 60, t) },
+    { label: t('dashboard.series.rest'), value: formatHours(getRestMinutes(item, summary) / 60, t) },
+  ];
+}
+
+function AvailabilityUtilizationByEquipment({ summary }) {
+  const { language, t } = useApp();
+  const equipmentCards = useMemo(
+    () => summary.equipmentMetrics.filter((item) => Number(item.totalMinutes || 0) > 0),
+    [summary.equipmentMetrics],
+  );
+
+  return (
+    <section className="card dashboard-block dashboard-kpi-graphs__group dashboard-availability-group">
+      <div className="card__head">
+        <div>
+          <p className="eyebrow">{t('dashboard.sections.availabilityAndUtilizationByEquipment')}</p>
+          <h2>{t('dashboard.sections.availabilityAndUtilizationByEquipment')}</h2>
+        </div>
+      </div>
+
+      {!equipmentCards.length ? <p className="empty-state">{t('dashboard.empty.available')}</p> : null}
+
+      <div className="dashboard-availability-grid">
+        {equipmentCards.map((item) => {
+          const availableMinutes = Number(item.availableMinutes || summary.periodAvailableMinutes || 0);
+          const availabilityMinutes = getAvailabilityMinutes(item, summary);
+          const availabilityPercent = availableMinutes > 0 ? Number(((availabilityMinutes / availableMinutes) * 100).toFixed(1)) : 0;
+          const utilizationPercent = Number(item.utilizationPercent || 0);
+          const utilizationTone = utilizationPercent >= 75 ? 'success' : utilizationPercent >= 50 ? 'warning' : 'danger';
+
+          return (
+            <article key={item.equipmentId} className="card dashboard-block dashboard-availability-card">
+              <div className="dashboard-availability-card__head">
+                <div>
+                  <p className="eyebrow">{item.code}</p>
+                  <h3>{item.plate}</h3>
+                </div>
+                <StatusChip tone={utilizationTone}>{formatUtilization(utilizationPercent)}</StatusChip>
+              </div>
+
+              <p className="dashboard-availability-card__copy">{item.currentActivityName || t('common.noActivity')}</p>
+
+              <div className="dashboard-availability-card__charts">
+                <PieChartCard
+                  eyebrow={t('dashboard.sections.physicalIndicators')}
+                  title={t('dashboard.cards.physicalAvailability')}
+                  subtitle={`${t('dashboard.series.available')} x ${t('dashboard.series.maintenance')}`}
+                  centerValue={formatUtilization(availabilityPercent)}
+                  centerLabel={item.code}
+                  segments={buildAvailabilitySegments(item, summary, language, t)}
+                  metrics={buildAvailabilityMetrics(item, summary, t)}
+                  showLegend={false}
+                  className="pie-chart-card--compact pie-chart-card--micro"
+                />
+
+                <PieChartCard
+                  eyebrow={t('dashboard.sections.availabilityAndUtilization')}
+                  title={t('dashboard.cards.utilization')}
+                  subtitle={`${t('dashboard.series.operation')} x ${t('dashboard.series.rest')}`}
+                  centerValue={formatUtilization(utilizationPercent)}
+                  centerLabel={item.code}
+                  segments={buildUtilizationSegments(item, summary, language, t)}
+                  metrics={buildUtilizationMetrics(item, summary, t)}
+                  showLegend={false}
+                  className="pie-chart-card--compact pie-chart-card--micro"
+                />
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function DashboardKpiCharts({ summary }) {
   const { language, t } = useApp();
   const equipmentById = useMemo(
@@ -192,6 +347,8 @@ export function DashboardKpiCharts({ summary }) {
           })}
         </div>
       </section>
+
+      <AvailabilityUtilizationByEquipment summary={summary} />
     </div>
   );
 }
