@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "name": "Sistema de Tempos e Movimentos - UMB / Caminhões",
+    "shortName": "Tempos UMB",
+    "version": "2.5.0",
+    "entrypoint": "src/main.jsx"
+  },
+  "storage": {
+    "keys": {
+      "database": "temposemovimentos-db",
+      "session": "temposemovimentos-session",
+      "uiLanguage": "temposemovimentos-ui-language"
+    },
+    "persistence": {
+      "dbName": "temposemovimentos-persistence",
+      "storeName": "kv",
+      "version": 1
+    },
+    "defaultMode": "ONLINE",
+    "requestPersistentStorage": true
+  },
+  "automation": {
+    "nightAutoClose": {
+      "enabled": true,
+      "startTime": "19:00",
+      "endTime": "03:00"
+    }
+  },
+  "firebase": {
+    "webConfig": {
+      "apiKey": "AIzaSyD3phWlKAFuioxm7-0OVViqFRv7C25i7Bw",
+      "authDomain": "tempos-e-movimentos-1b9b9.firebaseapp.com",
+      "projectId": "tempos-e-movimentos-1b9b9",
+      "storageBucket": "tempos-e-movimentos-1b9b9.firebasestorage.app",
+      "messagingSenderId": "790028516575",
+      "appId": "1:790028516575:web:bbc2c06281c3144c33fd6a"
+    },
+    "stateCollection": "appState",
+    "stateDocument": "current",
+    "anonymousAuth": false,
+    "enableIndexedDbPersistence": true
+  },
+  "auth": {
+    "defaultPassword": "1234",
+    "passwordSaltRounds": 10,
+    "sessionTtlHours": 24,
+    "roles": {
+      "operational": "OPERADOR",
+      "client": "CLIENTE",
+      "manager": "GERENTE"
+    }
+  },
+  "seed": {
+    "catalogVersion": 8,
+    "users": [
+      {
+        "id": "usr-paulo",
+        "name": "Paulo",
+        "registration": "",
+        "role": "OPERADOR",
+        "password": "1234",
+        "shiftId": null,
+        "shiftName": "",
+        "active": true
+      },
+      {
+        "id": "usr-deyvis",
+        "name": "Deyvis",
+        "registration": "",
+        "role": "OPERADOR",
+        "password": "1234",
+        "shiftId": null,
+        "shiftName": "",
+        "active": true
+      },
+      {
+        "id": "usr-gilmar",
+        "name": "Gilmar",
+        "registration": "",
+        "role": "OPERADOR",
+        "password": "1234",
+        "shiftId": null,
+        "shiftName": "",
+        "active": true
+      },
+      {
+        "id": "usr-thiago-gama",
+        "name": "Thiago Gama",
+        "registration": "",
+        "role": "OPERADOR",
+        "password": "1234",
+        "shiftId": null,
+        "shiftName": "",
+        "active": true
+      },
+      {
+        "id": "usr-jose-wilkinson",
+        "name": "Administrador - US Vale Verde",
+        "registration": "",
+        "role": "GERENTE",
+        "password": "0987",
+        "syncPassword": true,
+        "shiftId": null,
+        "shiftName": "",
+        "active": true
+      },
+      {
+        "id": "usr-felipe-dantas",
+        "name": "Mineração Vale Verde",
+        "registration": "",
+        "role": "CLIENTE",
+        "password": "1234",
+        "shiftId": null,
+        "shiftName": "",
+        "active": true
+      }
+    ],
+    "equipments": [
+      {
+        "id": "eq-beg-8a40",
+        "plate": "BEG-8A40",
+        "code": "UMR-1072",
+        "description": "Caminhão UMB 1072",
+        "active": true
+      },
+      {
+        "id": "eq-sfo6d18",
+        "plate": "SFO6D18",
+        "code": "UMR-1123",
+        "description": "Caminhão UMB 1123",
+        "active": true
+      }
+    ],
+    "activityTypes": [
+      { "id": "act-01", "code": "01", "name": "Checklist", "classification": "OPERAÇÃO", "defaultLocation": "CHASSI", "active": true },
+      { "id": "act-02", "code": "02", "name": "Deslocamento", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true },
+      { "id": "act-03", "code": "03", "name": "Carregamento", "classification": "OPERAÇÃO", "defaultLocation": "UNIDADE", "active": true },
+      { "id": "act-04", "code": "04", "name": "Reabastecimento de Emulsão", "classification": "OPERAÇÃO", "defaultLocation": "UNIDADE", "active": true },
+      { "id": "act-05", "code": "05", "name": "Refeição", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-06", "code": "06", "name": "Abastecimento de Diesel", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
+      { "id": "act-07", "code": "07", "name": "Aguardando Frente / Horas Ociosas", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-08", "code": "08", "name": "Aguardando Término da Perfuração", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-09", "code": "09", "name": "Aguardando Liberação de Acesso", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-10", "code": "10", "name": "Falta de Operador", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-11", "code": "11", "name": "Condições Climáticas Adversas", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-12", "code": "12", "name": "Manutenção", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
+      { "id": "act-13", "code": "13", "name": "Outros", "classification": "OUTROS", "defaultLocation": null, "active": true },
+      { "id": "act-14", "code": "14", "name": "Retirada de Material no Paiol", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true },
+      { "id": "act-15", "code": "15", "name": "Aguardando Detonação", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-16", "code": "16", "name": "Em DDS (Diálogo Diário de Segurança)", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
+      { "id": "act-17", "code": "17", "name": "Devolução de Material no Paiol", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true }
+    ],
+    "shifts": [
+      { "id": "shift-1", "name": "Turno único", "startTime": "07:00", "endTime": "15:00", "availableMinutes": 480, "active": true }
+    ]
+  },
+  "validation": {
+    "oneOpenRecordPerOperator": true,
+    "oneOpenRecordPerEquipment": true,
+    "requireEndAfterStart": true,
+    "allowManualEntry": true,
+    "managerRequiredForUserAdmin": true
+  },
+  "exports": {
+    "csvDelimiter": ",",
+    "backupFilenamePrefix": "temposemovimentos-backup",
+    "recordsFilenamePrefix": "temposemovimentos-registros"
+  }
+}

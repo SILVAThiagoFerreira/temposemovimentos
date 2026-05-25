@@ -1,0 +1,27 @@
+{
+  "name": "temposemovimentos",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node tests/smoke.mjs && node tests/draft-storage.mjs && node tests/night-auto-close.mjs && node tests/dashboard-summary.mjs && node tests/location-service.mjs && node tests/fleet-map.mjs && node tests/i18n-labels.mjs",
+    "validate": "npm test && npm run build",
+    "android:sync": "npm run build && cap sync android",
+    "android:build": "npm run android:sync && cd \"APP ANDROID/android\" && gradlew.bat assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "firebase": "^10.14.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.8"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "exportedAt": "YYYY-MM-DDTHH:mm:ss.sssZ",
+  "operators": [],
+  "equipments": [],
+  "activityTypes": [],
+  "shifts": [],
+  "movementRecords": [],
+  "settings": {
+    "storageMode": "LOCAL",
+    "defaultShiftId": null,
+    "userCatalogSeeded": true,
+    "catalogVersion": 8,
+    "updatedAt": "YYYY-MM-DDTHH:mm:ss.sssZ"
+  }
+}
