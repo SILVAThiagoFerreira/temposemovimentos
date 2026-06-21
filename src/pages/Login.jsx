@@ -5,7 +5,7 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { getHomeRouteForRole, getRoleLabel, getRoleOrder } from '../utils/roles';
 import { translateErrorMessage } from '../i18n/errorMessages.js';
 
-const enaexLogo = new URL('../assets/enaex-brasil.png', import.meta.url).href;
+const openblastLogo = new URL('../assets/openblast-logo.png', import.meta.url).href;
 
 export function Login({ navigate }) {
   const { operators, authenticateOperator, loginOperator, language, t } = useApp();
@@ -69,7 +69,7 @@ export function Login({ navigate }) {
           <LanguageSwitcher />
         </div>
         <div className="login-hero__brand">
-          <img className="login-logo" src={enaexLogo} alt="Enaex Brasil" />
+          <img className="login-logo" src={openblastLogo} alt="OpenBlast" />
           <span>{t('login.hero.brand')}</span>
         </div>
         <h1>{t('login.hero.title')}</h1>

@@ -1,5 +1,5 @@
 {
-  "appId": "br.com.enaex.temposemovimentos",
+  "appId": "br.com.openblast.temposemovimentos",
   "appName": "Tempos e Movimentos",
   "webDir": "dist",
   "bundledWebRuntime": false,

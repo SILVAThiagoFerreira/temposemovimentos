@@ -1,4 +1,4 @@
-package br.com.enaex.temposemovimentos;
+package br.com.openblast.temposemovimentos;
 
 import com.getcapacitor.BridgeActivity;
 

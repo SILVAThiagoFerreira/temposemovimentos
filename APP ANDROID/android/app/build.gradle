@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "br.com.enaex.temposemovimentos"
+    namespace = "br.com.openblast.temposemovimentos"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "br.com.enaex.temposemovimentos"
+        applicationId "br.com.openblast.temposemovimentos"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

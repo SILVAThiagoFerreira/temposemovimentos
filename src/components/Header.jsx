@@ -3,7 +3,7 @@ import { getRoleLabel } from '../utils/roles';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useApp } from '../context/AppContext';
 
-const enaexLogo = new URL('../assets/enaex-brasil.png', import.meta.url).href;
+const openblastLogo = new URL('../assets/openblast-logo.png', import.meta.url).href;
 
 export function Header({
   title,
@@ -22,7 +22,7 @@ export function Header({
     <header className="app-header card card--shell">
       <div className="brand-lockup">
         <div className="brand-mark">
-          <img src={enaexLogo} alt="Enaex Brasil" />
+          <img src={openblastLogo} alt="OpenBlast" />
         </div>
         <div>
           <p className="eyebrow">{t('header.eyebrow')}</p>
