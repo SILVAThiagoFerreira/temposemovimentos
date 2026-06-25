@@ -22,7 +22,7 @@ export function Header({
   return (
     <header className="app-header">
       <div className="brand-lockup">
-        <img className="brand-logo" src={`${base}enaex-logo-white.png`} alt="Enaex Brasil" />
+        <img className="brand-logo" src={`${base}enaex-logo-white.png`} alt="Enaex" />
       </div>
 
       <div className="header-center">

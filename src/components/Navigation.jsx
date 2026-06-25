@@ -1,4 +1,3 @@
-import { StatusChip } from './StatusChip';
 import { getRoleLabel } from '../utils/roles';
 import { useApp } from '../context/AppContext';
 
@@ -6,13 +5,11 @@ export function Navigation({ items, currentPath, onNavigate, session }) {
   const { language, t } = useApp();
   const currentItem = items.find((item) => item.path === currentPath) || items[0] || null;
   const currentTitle = currentItem?.label || t('navigation.title');
-  const currentHelper = currentItem?.helper || '';
 
   return (
     <nav className="side-nav">
       <div className="nav-top">
         <div className="nav-brand-block">
-          <p className="nav-title">{t('navigation.title')}</p>
           <strong>{currentTitle}</strong>
         </div>
       </div>
