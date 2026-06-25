@@ -64,7 +64,7 @@ export function Login({ navigate }) {
 
   return (
     <section className="login-view">
-      <div className="login-hero card card--shell">
+      <div className="login-hero">
         <div className="login-hero__toolbar">
           <LanguageSwitcher />
         </div>
@@ -95,7 +95,7 @@ export function Login({ navigate }) {
         </div>
       </div>
 
-      <form className="card login-form card--shell" onSubmit={handleSubmit}>
+      <form className="card login-form" onSubmit={handleSubmit}>
         <div className="card__head">
           <div>
             <p className="eyebrow">{t('login.form.eyebrow')}</p>

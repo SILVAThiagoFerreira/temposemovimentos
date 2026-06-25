@@ -121,8 +121,8 @@ function AppShell() {
     content = (
       <div className="app-frame">
         <Header
-          title={t('routeTitles.dashboard')}
-          subtitle={t('header.subtitle')}
+          title={t('header.subtitle')}
+          subtitle=""
           session={session}
           canInstallApp={canInstallApp}
           onRefreshUpdate={refreshApplicationAssets}
@@ -172,8 +172,8 @@ function AppShell() {
     content = (
       <div className="app-frame">
         <Header
-          title={title}
-          subtitle={t('header.subtitle')}
+          title={t('header.subtitle')}
+          subtitle=""
           session={session}
           canInstallApp={canInstallApp}
           onRefreshUpdate={refreshApplicationAssets}

@@ -109,7 +109,7 @@ export function OperatorPanel({ standalone = false, onLogout, onRefreshUpdate })
   return (
     <div className="page-stack">
       {standalone ? (
-        <section className="card operator-topbar card--shell">
+        <section className="card operator-topbar">
           <div>
             <p className="eyebrow">{t('operator.topbar.eyebrow')}</p>
             <h2>{session.operatorName}</h2>

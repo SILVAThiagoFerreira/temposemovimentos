@@ -9,20 +9,11 @@ export function Navigation({ items, currentPath, onNavigate, session }) {
   const currentHelper = currentItem?.helper || '';
 
   return (
-    <nav className="side-nav card card--shell">
+    <nav className="side-nav">
       <div className="nav-top">
         <div className="nav-brand-block">
           <p className="nav-title">{t('navigation.title')}</p>
           <strong>{currentTitle}</strong>
-          <small>{currentHelper || t('navigation.login')}</small>
-        </div>
-
-        <div className="nav-meta">
-          {session ? (
-            <StatusChip tone="success">{t('navigation.active', { role: getRoleLabel(session.role, language).toUpperCase() })}</StatusChip>
-          ) : (
-            <StatusChip tone="warning">{t('navigation.login')}</StatusChip>
-          )}
         </div>
       </div>
 
