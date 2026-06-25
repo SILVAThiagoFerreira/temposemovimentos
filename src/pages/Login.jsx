@@ -5,6 +5,8 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { getHomeRouteForRole, getRoleLabel, getRoleOrder } from '../utils/roles';
 import { translateErrorMessage } from '../i18n/errorMessages.js';
 
+const base = import.meta.env.BASE_URL;
+
 export function Login({ navigate }) {
   const { operators, authenticateOperator, loginOperator, language, t } = useApp();
   const [selectedUserId, setSelectedUserId] = useState('');
@@ -67,7 +69,7 @@ export function Login({ navigate }) {
           <LanguageSwitcher />
         </div>
         <div className="login-hero__brand">
-          <img className="login-logo" src="/enaex-logo-full.png" alt="Enaex Brasil" />
+          <img className="login-logo" src={`${base}enaex-logo-full.png`} alt="Enaex Brasil" />
         </div>
         <h1>{t('login.hero.title')}</h1>
         <p className="login-copy">{t('login.hero.copy')}</p>

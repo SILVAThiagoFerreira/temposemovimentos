@@ -3,6 +3,8 @@ import { getRoleLabel } from '../utils/roles';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useApp } from '../context/AppContext';
 
+const base = import.meta.env.BASE_URL;
+
 export function Header({
   title,
   subtitle,
@@ -20,7 +22,7 @@ export function Header({
   return (
     <header className="app-header">
       <div className="brand-lockup">
-        <img className="brand-logo" src="/enaex-logo-white.png" alt="Enaex Brasil" />
+        <img className="brand-logo" src={`${base}enaex-logo-white.png`} alt="Enaex Brasil" />
       </div>
 
       <div className="header-center">
