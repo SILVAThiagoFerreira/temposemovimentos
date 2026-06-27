@@ -68,7 +68,7 @@ assert(seedUsers.filter((user) => user.role === 'CLIENTE').length === 1, 'config
 assert(seedUsers.some((user) => user.role === 'GERENTE'), 'config.json sem gerente inicial');
 assert(seedUsers.some((user) => user.name === 'Mineração Vale Verde'), 'config.json sem cliente Mineração Vale Verde');
 assert(
-  seedUsers.some((user) => user.id === 'usr-jose-wilkinson' && user.name === 'Administrador - US Vale Verde' && user.password === '0987' && user.syncPassword === true),
+  seedUsers.some((user) => user.id === 'usr-jose-wilkinson' && user.name === 'Administrador' && user.password === '0987' && user.syncPassword === true),
   'config.json sem gerente sincronizado atualizado',
 );
 assert(seedUsers.every((user) => !user.shiftId && !user.shiftName), 'config.json ainda expõe turnos nos usuários iniciais');

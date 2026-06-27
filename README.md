@@ -30,6 +30,14 @@ Registrar atividades, paradas e duração por equipamento em campo, com acesso p
 - Backup JSON.
 - Dados persistidos entre reinícios de navegador, troca de dispositivo e reabertura da aba.
 
+## Padrao visual
+
+- Interface clean com predominio de branco e off-white.
+- Fundo com grade quadrada sutil, sem efeitos escuros ou promocionais.
+- Cartoes com borda fina, sombra leve e cantos contidos.
+- Logo OpenBlast pequena e discreta nas areas de marca.
+- Contraste alto no texto e uso minimo de cores fora dos estados de status.
+
 ## Validação
 
 - Build do projeto: `npm run build`.
