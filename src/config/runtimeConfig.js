@@ -9,6 +9,7 @@ export const runtimeConfig = Object.freeze(clone(rawConfig));
 export const metaConfig = runtimeConfig.meta;
 export const storageConfig = runtimeConfig.storage;
 export const automationConfig = runtimeConfig.automation;
+export const dashboardConfig = runtimeConfig.dashboard || {};
 export const firebaseConfig = runtimeConfig.firebase;
 export const authConfig = runtimeConfig.auth;
 export const seedConfig = runtimeConfig.seed;
@@ -29,4 +30,8 @@ export function getSeedActivityTypes() {
 
 export function getSeedShifts() {
   return clone(seedConfig.shifts || []);
+}
+
+export function getSeedPurchases() {
+  return clone(seedConfig.purchases || []);
 }

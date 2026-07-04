@@ -28,6 +28,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - O dashboard de `Hoje` contabiliza apontamentos em aberto imediatamente, mesmo antes de completar 1 minuto, para manter o resumo ao vivo.
 - Intervalos que incluem o dia atual atualizam em tempo real; intervalos com data inicial e final iguais consideram o dia completo selecionado.
 - Os filtros de data do dashboard usam o dia local completo, sem deslocamento de fuso.
+- O dashboard também consolida a coleção `purchases` para mostrar compras mensais, quantidade de blastbags e composição de compras por tipo.
 - O idioma da interface é persistido localmente, com `pt-BR` como padrão, e a troca de idioma não altera dados operacionais.
 - Hora final deve ser maior que hora inicial.
 - Lançamento manual é permitido, mas deve ser identificado.
@@ -43,6 +44,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - Espelho local: `localStorage` e `IndexedDB`, usados como cache, fila offline e rascunhos do formulário.
 - No boot, o sistema inicializa o Firebase e restaura o snapshot mais recente entre Firestore e cache local.
 - As alterações são sincronizadas no documento central do Firestore após cada gravação.
+- Backup, exportação e importação passam a incluir a coleção `purchases` além dos registros operacionais.
 - Se uma gravação falhar por falta de internet, o snapshot local permanece preservado e o app tenta reenviar automaticamente ao voltar a conexão, ao retornar para primeiro plano e em retentativas periódicas.
 - Os rascunhos do formulário operacional ficam preservados em `localStorage` e `IndexedDB`, com restauração automática no mesmo contexto do catálogo, para evitar perda ao recarregar a página.
 - O navegador é solicitado a manter o armazenamento como persistente.
@@ -54,7 +56,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 ## Validações
 
 - Configuração deve existir e estar íntegra.
-- Seeds devem conter usuários, equipamentos, turnos e códigos válidos.
+- Seeds devem conter usuários, equipamentos, turnos, compras e códigos válidos.
 - O sistema não pode iniciar sem restaurar um snapshot válido do Firestore ou do seed inicial.
 - O gerente continua sendo o único administrador de usuários.
 
@@ -63,6 +65,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - Tela de login por usuário.
 - Tela operacional.
 - Dashboard com intervalo selecionável e gráficos de pizza de disponibilidade, utilização e códigos por UMR; os percentuais dos gráficos de códigos por UMR são calculados pelo tempo coletado no período, não pela quantidade de apontamentos.
+- Gráficos de compras mensais, blastbags e composição de compras.
 - Botão de recarga do sistema nas telas logadas.
 - Backups JSON e CSV.
 - Administração restrita de usuários.

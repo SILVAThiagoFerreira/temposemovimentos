@@ -1,3 +1,4 @@
+import { dashboardConfig } from '../config/runtimeConfig.js';
 import { createTranslator, DEFAULT_LOCALE } from '../i18n/messages.js';
 import { endOfDay, formatDuration, minutesToHours, parseSafeDate, startOfDay } from './timeService.js';
 
@@ -96,11 +97,165 @@ function parseDashboardDateInput(value, boundary = 'start') {
   return parseSafeDate(raw);
 }
 
+function normalizePurchaseText(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function getMonthKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
+function formatMonthLabel(date, locale) {
+  return new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' }).format(date);
+}
+
+function resolvePurchaseDate(purchase, referenceDate) {
+  const parsedDate = parseSafeDate(purchase?.purchaseDate || purchase?.createdAt || purchase?.updatedAt || referenceDate);
+
+  return parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate : null;
+}
+
+function isBlastbagPurchase(purchase, keywords = []) {
+  const haystack = normalizePurchaseText(
+    [purchase?.category, purchase?.itemName, purchase?.notes, purchase?.invoiceNumber].filter(Boolean).join(' '),
+  );
+
+  return keywords.some((keyword) => keyword && haystack.includes(normalizePurchaseText(keyword)));
+}
+
+function buildPurchaseWindow(referenceDate, windowMonths) {
+  const resolvedReferenceDate = parseSafeDate(referenceDate) || new Date();
+  const windowEnd = endOfDay(resolvedReferenceDate);
+  const windowStart = startOfDay(new Date(windowEnd.getFullYear(), windowEnd.getMonth() - (windowMonths - 1), 1));
+
+  return { windowStart, windowEnd };
+}
+
+function buildMonthlyPurchaseBuckets(windowStart, windowMonths, locale) {
+  const buckets = [];
+  const bucketByKey = new Map();
+
+  for (let offset = 0; offset < windowMonths; offset += 1) {
+    const monthDate = new Date(windowStart.getFullYear(), windowStart.getMonth() + offset, 1);
+    const bucket = {
+      key: getMonthKey(monthDate),
+      label: formatMonthLabel(monthDate, locale),
+      count: 0,
+      quantity: 0,
+      blastbagCount: 0,
+      blastbagQuantity: 0,
+    };
+
+    buckets.push(bucket);
+    bucketByKey.set(bucket.key, bucket);
+  }
+
+  return { buckets, bucketByKey };
+}
+
+function summarizePurchases({
+  purchases = [],
+  referenceDate = new Date(),
+  locale = DEFAULT_LOCALE,
+  t = createTranslator(locale),
+  analyticsConfig = {},
+} = {}) {
+  const windowMonths = Math.max(1, Number(analyticsConfig.windowMonths || 6));
+  const keywords = Array.isArray(analyticsConfig.blastbagKeywords)
+    ? analyticsConfig.blastbagKeywords.filter(Boolean)
+    : [];
+  const { windowStart, windowEnd } = buildPurchaseWindow(referenceDate, windowMonths);
+  const { buckets, bucketByKey } = buildMonthlyPurchaseBuckets(windowStart, windowMonths, locale);
+
+  let purchaseCount = 0;
+  let purchaseQuantity = 0;
+  let blastbagCount = 0;
+  let blastbagQuantity = 0;
+
+  purchases.forEach((purchase) => {
+    const purchaseDate = resolvePurchaseDate(purchase, referenceDate);
+
+    if (!purchaseDate) {
+      return;
+    }
+
+    if (purchaseDate.getTime() < windowStart.getTime() || purchaseDate.getTime() > windowEnd.getTime()) {
+      return;
+    }
+
+    const bucket = bucketByKey.get(getMonthKey(purchaseDate));
+
+    if (!bucket) {
+      return;
+    }
+
+    const quantity = Number(purchase.quantity || 0);
+    const isBlastbag = isBlastbagPurchase(purchase, keywords);
+
+    purchaseCount += 1;
+    purchaseQuantity += quantity;
+    bucket.count += 1;
+    bucket.quantity += quantity;
+
+    if (isBlastbag) {
+      blastbagCount += 1;
+      blastbagQuantity += quantity;
+      bucket.blastbagCount += 1;
+      bucket.blastbagQuantity += quantity;
+    }
+  });
+
+  const otherCount = Math.max(0, purchaseCount - blastbagCount);
+  const otherQuantity = Math.max(0, purchaseQuantity - blastbagQuantity);
+
+  return {
+    windowMonths,
+    purchaseWindowStart: windowStart.toISOString(),
+    purchaseWindowEnd: windowEnd.toISOString(),
+    purchaseCount,
+    purchaseQuantity,
+    blastbagCount,
+    blastbagQuantity,
+    otherCount,
+    otherQuantity,
+    monthlyPurchaseCount: buckets.map((bucket) => ({
+      key: bucket.key,
+      label: bucket.label,
+      value: bucket.count,
+      count: bucket.count,
+    })),
+    monthlyBlastbagQuantity: buckets.map((bucket) => ({
+      key: bucket.key,
+      label: bucket.label,
+      value: bucket.blastbagQuantity,
+      count: bucket.blastbagCount,
+      unit: 'UN',
+    })),
+    purchaseComposition: [
+      {
+        key: 'blastbag',
+        label: t('dashboard.purchases.blastbags'),
+        value: blastbagCount,
+        detail: t('dashboard.purchases.blastbagDetail', { count: blastbagCount }),
+      },
+      {
+        key: 'other',
+        label: t('dashboard.purchases.otherPurchases'),
+        value: otherCount,
+        detail: t('dashboard.purchases.otherDetail', { count: otherCount }),
+      },
+    ].filter((segment) => segment.value > 0),
+  };
+}
+
 export function summarizeDashboard({
   records = [],
   equipments = [],
   activityTypes = [],
   shifts = [],
+  purchases = [],
   periodStart = null,
   periodEnd = null,
   referenceDate = new Date(),
@@ -127,6 +282,14 @@ export function summarizeDashboard({
   const primaryShift = shifts.find((shift) => shift.active !== false) || shifts[0] || null;
   const shiftMinutesPerDay = Number(primaryShift?.availableMinutes || 480);
   const periodAvailableMinutes = periodDays * shiftMinutesPerDay;
+  const purchaseAnalyticsConfig = dashboardConfig?.purchaseAnalytics || {};
+  const purchaseAnalytics = summarizePurchases({
+    purchases,
+    referenceDate: resolvedReferenceDate,
+    locale,
+    t,
+    analyticsConfig: purchaseAnalyticsConfig,
+  });
 
   const equipmentById = new Map(equipments.map((equipment) => [equipment.id, equipment]));
   const activityByCode = new Map(activityTypes.map((activity) => [activity.code, activity]));
@@ -486,6 +649,18 @@ export function summarizeDashboard({
     openCount: openRecords.length,
     closedCount: closedRecords.length,
     activeEquipmentCount: openRecords.length ? new Set(openRecords.map((record) => record.equipmentId)).size : 0,
+    purchaseWindowMonths: purchaseAnalytics.windowMonths,
+    purchaseWindowStart: purchaseAnalytics.purchaseWindowStart,
+    purchaseWindowEnd: purchaseAnalytics.purchaseWindowEnd,
+    purchaseCount: purchaseAnalytics.purchaseCount,
+    purchaseQuantity: purchaseAnalytics.purchaseQuantity,
+    blastbagCount: purchaseAnalytics.blastbagCount,
+    blastbagQuantity: purchaseAnalytics.blastbagQuantity,
+    otherPurchaseCount: purchaseAnalytics.otherCount,
+    otherPurchaseQuantity: purchaseAnalytics.otherQuantity,
+    monthlyPurchaseCount: purchaseAnalytics.monthlyPurchaseCount,
+    monthlyBlastbagQuantity: purchaseAnalytics.monthlyBlastbagQuantity,
+    purchaseComposition: purchaseAnalytics.purchaseComposition,
     hoursByEquipment: sortByMinutesDesc(
       equipmentMetrics.map((equipment) => ({
         key: equipment.id,

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { getSeedPurchases } from '../src/config/runtimeConfig.js';
 import { summarizeDashboard } from '../src/services/calculationService.js';
 
 const baseCatalog = {
@@ -223,5 +224,30 @@ assert.equal(codeSegments[0]?.key, '02', 'distribuição por código deve ordena
 assert.equal(codeSegments[0]?.value, 80, 'valor do gráfico por código deve ser o tempo coletado');
 assert.equal(codeSegments[0]?.percent, 80, 'percentual por código deve usar minutos, não quantidade de apontamentos');
 assert.equal(codeSegments[1]?.percent, 20, 'código com dois apontamentos curtos deve representar apenas seu tempo total');
+
+const purchaseSummary = summarizeDashboard({
+  ...baseCatalog,
+  records: [],
+  purchases: getSeedPurchases(),
+  periodStart: '2026-07-31',
+  periodEnd: '2026-07-31',
+  referenceDate: '2026-07-31T12:00:00Z',
+});
+
+assert.equal(purchaseSummary.purchaseWindowMonths, 6, 'o resumo de compras deve usar a janela configurada');
+assert.equal(purchaseSummary.purchaseCount, 12, 'todas as compras seed devem entrar no resumo');
+assert.equal(purchaseSummary.blastbagCount, 6, 'as compras blastbag devem ser classificadas corretamente');
+assert.deepEqual(
+  purchaseSummary.monthlyPurchaseCount.map((item) => item.value),
+  [2, 2, 2, 2, 2, 2],
+  'as compras mensais devem ser agregadas por mês',
+);
+assert.deepEqual(
+  purchaseSummary.monthlyBlastbagQuantity.map((item) => item.value),
+  [120, 140, 160, 100, 180, 150],
+  'a quantidade mensal de blastbags deve seguir os seeds',
+);
+assert.equal(purchaseSummary.purchaseComposition[0]?.key, 'blastbag', 'o mix de compras deve destacar blastbags primeiro');
+assert.equal(purchaseSummary.purchaseComposition[0]?.value, 6, 'o mix de compras deve contar blastbags');
 
 console.log('CALCULATION_SMOKE_OK');

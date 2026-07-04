@@ -22,6 +22,17 @@
       "endTime": "03:00"
     }
   },
+  "dashboard": {
+    "purchaseAnalytics": {
+      "windowMonths": 6,
+      "blastbagKeywords": [
+        "blastbag",
+        "blastbags",
+        "bolsa de ar",
+        "air bag"
+      ]
+    }
+  },
   "firebase": {},
   "auth": {
     "defaultPassword": "1234",
@@ -34,11 +45,12 @@
     }
   },
   "seed": {
-    "catalogVersion": 8,
+    "catalogVersion": 9,
     "users": [],
     "equipments": [],
     "activityTypes": [],
-    "shifts": []
+    "shifts": [],
+    "purchases": []
   },
   "validation": {},
   "exports": {}
@@ -79,6 +91,28 @@
 - `syncPassword` é um campo opcional do seed usado para sobrescrever a senha existente quando o valor do seed deve prevalecer.
 - `storage.keys.uiLanguage` guarda a preferência de idioma da interface no armazenamento local.
 - O aplicativo Android não altera o formato dos dados; ele usa o mesmo snapshot, as mesmas chaves de armazenamento e o mesmo documento Firestore configurados em `config.json`, carregados pela origem do GitHub Pages.
+
+## Purchase
+
+```json
+{
+  "id": "pur-...",
+  "purchaseDate": "ISO-8601",
+  "supplierName": "Enaex Supply",
+  "itemName": "Blastbag 90 mm",
+  "category": "BLASTBAG",
+  "quantity": 120,
+  "unit": "UN",
+  "invoiceNumber": "NF-2026-0203-01",
+  "notes": "Texto livre",
+  "createdAt": "ISO-8601",
+  "updatedAt": "ISO-8601"
+}
+```
+
+- `purchaseDate` define o mês usado pelos gráficos de compras do dashboard.
+- `category` e `itemName` são normalizados para localizar blastbags pela lista de palavras-chave definida em `config.json`.
+- A coleção `purchases` entra no snapshot, no backup JSON e na importação/exportação.
 
 ## StorageMeta
 
@@ -207,12 +241,13 @@
   "equipments": [],
   "activityTypes": [],
   "shifts": [],
+  "purchases": [],
   "movementRecords": [],
   "settings": {
     "storageMode": "ONLINE",
     "defaultShiftId": "shift-1",
     "userCatalogSeeded": true,
-    "catalogVersion": 8,
+    "catalogVersion": 9,
     "updatedAt": "ISO-8601"
   }
 }
@@ -244,12 +279,13 @@
   "equipments": [],
   "activityTypes": [],
   "shifts": [],
+  "purchases": [],
   "movementRecords": [],
   "settings": {
     "storageMode": "ONLINE",
     "defaultShiftId": "shift-1",
     "userCatalogSeeded": true,
-    "catalogVersion": 8,
+    "catalogVersion": 9,
     "updatedAt": "ISO-8601"
   }
 }

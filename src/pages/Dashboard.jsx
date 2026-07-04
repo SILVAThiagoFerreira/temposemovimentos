@@ -8,7 +8,7 @@ import { summarizeDashboard } from '../services/calculationService';
 import { formatDate, toDateInputValue } from '../services/timeService';
 
 export function Dashboard() {
-  const { records, equipments, activityTypes, shifts, language, t } = useApp();
+  const { records, equipments, activityTypes, shifts, purchases, language, t } = useApp();
   const today = toDateInputValue(new Date());
   const [period, setPeriod] = useState(() => ({ startDate: today, endDate: today }));
   const [tick, setTick] = useState(() => Date.now());
@@ -65,12 +65,13 @@ export function Dashboard() {
         equipments,
         activityTypes,
         shifts,
+        purchases,
         periodStart: period.startDate,
         periodEnd: period.endDate,
         referenceDate: new Date(tick),
         locale: language,
       }),
-    [activityTypes, equipments, language, period.endDate, period.startDate, records, shifts, tick],
+    [activityTypes, equipments, language, period.endDate, period.startDate, purchases, records, shifts, tick],
   );
 
   const recentRecords = useMemo(
@@ -113,6 +114,23 @@ export function Dashboard() {
             {t('dashboard.filters.today')}
           </button>
         </div>
+
+        {!isTodayRange ? (
+          <div className="filter-chips" aria-label={t('dashboard.filters.eyebrow')}>
+            <span className="filter-chip">
+              <strong>{t('dashboard.filters.eyebrow')}</strong>
+              {periodLabel}
+              <button
+                type="button"
+                className="filter-chip__clear"
+                onClick={selectToday}
+                aria-label={t('dashboard.filters.today')}
+              >
+                ×
+              </button>
+            </span>
+          </div>
+        ) : null}
       </section>
 
       <FleetMapCard summary={summary} />

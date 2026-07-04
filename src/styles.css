@@ -32,6 +32,15 @@
   --border-light: #E3E6EA;
   --radius: 4px;
   --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+
+  /* Chart palette — apenas cinza Enaex + acento vermelho */
+  --enaex-chart-neutral: #38424B;
+  --enaex-chart-neutral-soft: #8B949E;
+  --enaex-chart-neutral-quiet: #B7BCC2;
+  --enaex-chart-accent: #E20613;
+
+  /* Tipografia hero para KPIs de destaque */
+  --enaex-hero-value: 2rem;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -76,11 +85,12 @@ h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 2px solid var(--enaex-red);
 }
 .brand-lockup { display: flex; align-items: center; }
 .brand-logo { height: 22px; width: auto; }
 .header-center { flex: 1; text-align: center; }
-.header-center h1 { font-size: 0.85rem; font-weight: 400; color: rgba(255,255,255,0.7); letter-spacing: 0.03em; }
+.header-center h1 { font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.85); letter-spacing: 0.03em; }
 .header-actions { display: flex; align-items: center; gap: 12px; }
 .header-session { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: rgba(255,255,255,0.6); }
 .header-role { padding: 1px 8px; border-radius: 3px; background: rgba(255,255,255,0.1); font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.5); }
@@ -179,7 +189,27 @@ h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
 .nav-item.is-active small { color: rgba(255,255,255,0.5); }
 
 /* ── PAGE ──────────────────────────────────────── */
-.page-stack { display: grid; gap: 16px; }
+.page-stack { display: grid; gap: 18px; }
+
+/* Assinatura Enaex: barra vermelha fina abaixo do título das seções */
+.card__head h2,
+.page-banner h2,
+.operator-topbar h2 {
+  position: relative;
+  padding-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+.card__head h2::after,
+.page-banner h2::after,
+.operator-topbar h2::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  height: 2px;
+  background: var(--enaex-red);
+}
 
 /* ── CARDS ─────────────────────────────────────── */
 .card {
@@ -197,7 +227,7 @@ h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
   gap: 20px;
   padding: 18px 22px;
 }
-.page-banner h2, .operator-topbar h2 { font-size: 1.05rem; font-weight: 600; }
+.page-banner h2, .operator-topbar h2 { font-size: 1.1rem; font-weight: 600; }
 .page-banner p:not(.eyebrow), .operator-topbar p:not(.eyebrow),
 .dashboard-map-card__copy, .login-copy { color: var(--gray-500); font-size: 0.85rem; }
 .operator-topbar__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -398,14 +428,63 @@ input::placeholder, textarea::placeholder { color: var(--gray-400); }
 .export-actions { margin-top: 10px; }
 .hidden-input { display: none; }
 
+/* Chips de filtros ativos (padrão Sismografia) */
+.filter-chips { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 4px 0 8px;
+  border: 1px solid var(--enaex-line);
+  border-radius: 3px;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.filter-chip strong { color: var(--gray-500); font-weight: 600; font-size: 0.62rem; letter-spacing: 0.08em; }
+.filter-chip__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--gray-500);
+  font-size: 0.75rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.filter-chip__clear:hover { background: var(--white); color: var(--enaex-red); }
+
 /* ── STAT CARDS ────────────────────────────────── */
 .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 .stats-grid--compact { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
-.stat-card { display: grid; gap: 3px; border-radius: var(--radius); border-top: 2px solid var(--gray-200); background: var(--white); padding: 14px 16px; }
-.stat-card--success { border-color: var(--green); }
-.stat-card--warning { border-color: var(--amber); }
-.stat-card--danger { border-color: var(--enaex-red); }
-.stat-card--info { border-color: var(--blue); }
+.stat-card {
+  display: grid;
+  gap: 3px;
+  border-radius: var(--radius);
+  border-top: 2px solid var(--enaex-line);
+  background: var(--white);
+  padding: 14px 16px;
+}
+.stat-card strong { color: var(--enaex-gray); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+.stat-card p { color: var(--gray-500); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+/* Hero: KPI principal, valor grande em vermelho Enaex (padrão Sismografia) */
+.stat-card--hero { border-top-color: var(--enaex-red); }
+.stat-card--hero strong { color: var(--enaex-red); font-size: var(--enaex-hero-value); font-weight: 700; }
+/* Danger: mantém acento vermelho como sinalização (ex.: parada) */
+.stat-card--danger { border-top-color: var(--enaex-red); }
+.stat-card--danger strong { color: var(--enaex-red); }
+/* Variantes legadas viram neutras — semântica passa a viver só nos StatusChip */
+.stat-card--success,
+.stat-card--warning,
+.stat-card--info { border-top-color: var(--enaex-line); }
 
 /* ── REGISTRATIONS / SETTINGS ──────────────────── */
 .registrations-grid, .settings-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -446,7 +525,10 @@ input::placeholder, textarea::placeholder { color: var(--gray-400); }
 .bar-list, .stacked-list, .target-list { display: grid; gap: 4px; }
 .bar-list__item, .target-list__item { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(120px, 1fr) auto auto; align-items: center; gap: 10px; }
 .bar-list__track, .target-list__track, .stacked-list__track { overflow: hidden; position: relative; min-height: 5px; border-radius: 999px; background: var(--gray-200); }
-.bar-list__track span, .target-list__track span { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: var(--enaex-red); }
+.bar-list__track span, .target-list__track span { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: var(--enaex-chart-neutral); }
+/* Primeiro item da lista sempre em vermelho — foco visual no maior valor */
+.bar-list__item:first-child .bar-list__track span,
+.target-list__item:first-child .target-list__track span { background: var(--enaex-red); }
 .bar-list__value, .target-list__value { text-align: right; }
 .stacked-list__item { display: grid; gap: 6px; }
 .stacked-list__head { grid-template-columns: 1fr auto; align-items: start; }

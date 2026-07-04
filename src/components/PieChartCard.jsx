@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 
-const DEFAULT_COLORS = ['#245f9e', '#1f8a57', '#c28a15', '#bf3d3d', '#6b7280', '#8b5cf6', '#0ea5e9', '#f97316'];
+// Paleta Enaex — vermelho como destaque do maior segmento, degradê cinza para os demais
+const DEFAULT_COLORS = ['#E20613', '#38424B', '#6C7680', '#8B949E', '#B7BCC2', '#D2D6DB', '#E3E6EA', '#F5F6F7'];
 
 function getNumericValue(segment) {
   return Number(segment?.value ?? segment?.count ?? segment?.minutes ?? 0);

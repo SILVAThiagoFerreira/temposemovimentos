@@ -11,12 +11,13 @@ Registrar atividades, paradas e duração por equipamento em campo, com acesso p
 - Usuário selecionado e senha.
 - Apontamentos operacionais.
 - Cadastros de equipamentos, atividades e turnos.
+- Compras/notas fiscais seedadas ou importadas para analytics de dashboard.
 - Arquivos JSON de backup/importação.
 
 ## Processamento
 
 - `src/main.jsx` inicia o bootstrap do armazenamento.
-- `src/services/storageService.js` restaura o snapshot local, sincroniza com o Firestore, encerra automaticamente o apontamento anterior quando uma nova atividade inicia e mantém o espelho em `localStorage` e `IndexedDB`.
+- `src/services/storageService.js` restaura o snapshot local, sincroniza com o Firestore, encerra automaticamente o apontamento anterior quando uma nova atividade inicia e mantém o espelho em `localStorage` e `IndexedDB`, incluindo a coleção `purchases`.
 - `src/services/firebaseClient.js` inicializa o Firebase web SDK sem exigir sessão anônima.
 - `src/pages/Login.jsx` autentica por usuário e recupera a sessão, roteando clientes para o dashboard.
 - `src/pages/OperatorPanel.jsx` executa o fluxo operacional.
@@ -26,6 +27,7 @@ Registrar atividades, paradas e duração por equipamento em campo, com acesso p
 
 - Tela operacional.
 - Dashboard de supervisão para clientes e gerentes.
+- Dashboard com gráficos de compras mensais, blastbags e composição de compras.
 - Exportação CSV.
 - Backup JSON.
 - Dados persistidos entre reinícios de navegador, troca de dispositivo e reabertura da aba.

@@ -139,8 +139,11 @@ function EquipmentKpiTable({ summary, t }) {
   );
 }
 
-function BarList({ title, items, emptyMessage, locale, t }) {
-  const max = Math.max(...items.map((item) => item.minutes || 0), 0);
+function BarList({ title, items, emptyMessage, locale, t, formatValue = null, formatDetail = null }) {
+  const max = Math.max(
+    ...items.map((item) => Number(item.value ?? item.minutes ?? item.count ?? item.quantity ?? 0)),
+    0,
+  );
 
   return (
     <section className="card dashboard-block">
@@ -154,25 +157,85 @@ function BarList({ title, items, emptyMessage, locale, t }) {
 
       <div className="bar-list">
         {items.map((item) => {
-          const width = max > 0 ? Math.max(8, Math.round(((item.minutes || 0) / max) * 100)) : 8;
+          const numericValue = Number(item.value ?? item.minutes ?? item.count ?? item.quantity ?? 0);
+          const width = max > 0 ? Math.max(8, Math.round((numericValue / max) * 100)) : 8;
+          const usesDuration = item.minutes != null && item.value == null && item.quantity == null && item.unit == null;
+          const labelDetail = item.subtitle || item.code || item.classification || item.name || '';
+          const valueText =
+            typeof formatValue === 'function'
+              ? formatValue(item, numericValue, { locale, t, usesDuration })
+              : usesDuration
+                ? formatHours(numericValue / 60, t)
+                : String(numericValue);
+          const detailText =
+            typeof formatDetail === 'function'
+              ? formatDetail(item, numericValue, { locale, t, usesDuration })
+              : item.detail || (usesDuration ? (item.count ? t('dashboard.labels.events', { count: item.count }) : formatDuration(item.minutes || 0, locale)) : item.subtitle || '');
 
           return (
             <div key={item.key || item.label} className="bar-list__item">
-            <div className="bar-list__label">
+              <div className="bar-list__label">
                 <strong>{item.label || item.classification || item.name || item.code || t('common.noTitle')}</strong>
-                <small>{item.subtitle || item.code || item.classification || item.name || ''}</small>
+                {labelDetail ? <small>{labelDetail}</small> : null}
               </div>
               <div className="bar-list__track">
                 <span style={{ width: `${width}%` }} />
               </div>
               <div className="bar-list__value">
-                <strong>{formatHours(item.hours ?? (item.minutes || 0) / 60, t)}</strong>
-                <small>{item.count ? t('dashboard.labels.events', { count: item.count }) : formatDuration(item.minutes || 0, locale)}</small>
+                <strong>{valueText}</strong>
+                {detailText ? <small>{detailText}</small> : null}
               </div>
             </div>
           );
         })}
       </div>
+    </section>
+  );
+}
+
+function PurchaseAnalyticsSection({ summary, locale, t }) {
+  return (
+    <section className="card dashboard-block dashboard-block--wide">
+      <div className="card__head">
+        <div>
+          <p className="eyebrow">{t('dashboard.sections.purchases')}</p>
+          <h2>{t('dashboard.sections.purchaseTrends')}</h2>
+        </div>
+      </div>
+
+      {!summary.monthlyPurchaseCount.length ? <p className="empty-state">{t('dashboard.empty.purchases')}</p> : null}
+
+      <div className="dashboard-columns">
+        <BarList
+          title={t('dashboard.sections.monthlyPurchases')}
+          items={summary.monthlyPurchaseCount}
+          emptyMessage={t('dashboard.empty.purchases')}
+          locale={locale}
+          t={t}
+          formatValue={(_item, value) => t('dashboard.labels.purchases', { count: value })}
+        />
+
+        <BarList
+          title={t('dashboard.sections.monthlyBlastbagQuantity')}
+          items={summary.monthlyBlastbagQuantity}
+          emptyMessage={t('dashboard.empty.purchases')}
+          locale={locale}
+          t={t}
+          formatValue={(item, value) => `${Number(value || 0).toLocaleString(locale)} ${item.unit || 'UN'}`}
+          formatDetail={(item) => (item.count > 0 ? t('dashboard.purchases.blastbagDetail', { count: item.count }) : '')}
+        />
+      </div>
+
+      <PieChartCard
+        eyebrow={t('dashboard.sections.purchaseMix')}
+        title={t('dashboard.sections.purchaseComposition')}
+        subtitle={t('dashboard.purchases.mixSubtitle')}
+        centerValue={String(summary.purchaseCount)}
+        centerLabel={t('dashboard.purchases.totalPurchases')}
+        segments={summary.purchaseComposition}
+        emptyMessage={t('dashboard.empty.purchases')}
+        footnote={t('dashboard.purchases.windowFootnote', { count: summary.purchaseWindowMonths })}
+      />
     </section>
   );
 }
@@ -300,7 +363,7 @@ export function DashboardCards({ summary }) {
         </div>
 
         <div className="stats-grid">
-          <article className="card stat-card stat-card--success">
+          <article className="card stat-card stat-card--hero">
             <p>{t('dashboard.cards.open')}</p>
             <strong>{summary.activeEquipmentCount}</strong>
             <small>{t('dashboard.cards.openSub')}</small>
@@ -318,7 +381,7 @@ export function DashboardCards({ summary }) {
             <small>{t('dashboard.cards.stopSub')}</small>
           </article>
 
-          <article className="card stat-card stat-card--warning">
+          <article className="card stat-card">
             <p>{t('dashboard.cards.maintenance')}</p>
             <strong>{summary.maintenanceHours.toFixed(2)} h</strong>
             <small>{t('dashboard.cards.maintenanceSub')}</small>
@@ -336,7 +399,7 @@ export function DashboardCards({ summary }) {
             <small>{t('dashboard.cards.physicalAvailabilitySub')}</small>
           </article>
 
-          <article className="card stat-card stat-card--info">
+          <article className="card stat-card">
             <p>{t('dashboard.cards.fleetIU')}</p>
             <strong>{utilizationAverage.toFixed(1)}%</strong>
             <small>{t('dashboard.cards.fleetIUSub')}</small>
@@ -345,6 +408,8 @@ export function DashboardCards({ summary }) {
       </section>
 
       <EquipmentKpiTable summary={summary} t={t} />
+
+      <PurchaseAnalyticsSection summary={summary} locale={language} t={t} />
 
       <section className="card dashboard-block">
         <div className="card__head">

@@ -18,8 +18,8 @@
 11.1. Se a sincronização remota falhar, manter o snapshot local como pendente e tentar reenviar no boot, no evento `online`, no retorno da tela ao primeiro plano e em ciclo periódico.
 11.2. Expor telemetria local de sincronização no painel de configurações, incluindo estado da fila, contagem de falhas e atraso de retentativa.
 11.3. Salvar o rascunho do formulário operacional em uma chave estável, espelhada em `localStorage` e `IndexedDB`, e reidratá-lo antes de o operador continuar ou recarregar a página.
-12. Permitir exportação/importação JSON e exportação CSV.
-13. Renderizar o dashboard com intervalo selecionável, atualização ao vivo para qualquer intervalo que inclua `Hoje`, mapa da frota com base satélite do Google Maps, travado para navegação manual e autoajustado aos apontamentos ativos com GPS, além de gráficos de pizza por período/UMR.
+12. Permitir exportação/importação JSON e exportação CSV, preservando também a coleção `purchases` usada pelos gráficos de compras.
+13. Renderizar o dashboard com intervalo selecionável, atualização ao vivo para qualquer intervalo que inclua `Hoje`, mapa da frota com base satélite do Google Maps, travado para navegação manual e autoajustado aos apontamentos ativos com GPS, além de gráficos de pizza por período/UMR e gráficos de compras mensais, blastbags e composição de compras.
 14. Encerrar manualmente o apontamento em aberto ao fim do expediente pelo botão `Encerrar a atividade` abaixo da tabela `Histórico do dia` no fim do módulo de operação.
 15. Permitir `Recarregar Atualização do Sistema` para buscar a versão mais recente sem tocar em `localStorage` ou `IndexedDB`.
 16. Atualizar automaticamente a PWA em intervalo periódico quando houver conexão, usando rede primeiro para HTML/assets e cache apenas como fallback offline.
@@ -27,6 +27,7 @@
 18. Para entrega Android, executar `npm run android:sync` para atualizar a configuração nativa que abre `https://silvathiagoferreira.github.io/temposemovimentos/`.
 19. Quando houver SDK Android disponível, executar `npm run android:build` para gerar o APK debug instalável.
 20. Validar integridade com `tests/smoke.mjs`, suíte completa de testes e build.
+21. Publicar a versão validada no GitHub Pages via `push` em `main`.
 
 ## Falhas
 
