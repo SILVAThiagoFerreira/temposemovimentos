@@ -40,7 +40,7 @@ function EquipmentKpiTable({ summary, t }) {
   };
 
   return (
-    <section className="card table-card dashboard-block">
+    <section className="card table-card dashboard-block dashboard-block--kpi-table">
       <div className="card__head">
         <div>
           <p className="eyebrow">{t('dashboard.sections.kpisByEquipment')}</p>
@@ -306,7 +306,7 @@ export function DashboardCards({ summary }) {
 
   return (
     <div className="dashboard-layout">
-      <section className="card dashboard-block">
+      <section className="card dashboard-block dashboard-block--overview">
         <div className="card__head">
           <div>
             <p className="eyebrow">{t('dashboard.sections.kpisOverview')}</p>
@@ -362,7 +362,7 @@ export function DashboardCards({ summary }) {
 
       <EquipmentKpiTable summary={summary} t={t} />
 
-      <section className="card dashboard-block">
+      <section className="card dashboard-block dashboard-block--codes">
         <div className="card__head">
           <div>
             <p className="eyebrow">{t('dashboard.sections.codesByEquipment')}</p>
@@ -390,7 +390,7 @@ export function DashboardCards({ summary }) {
         </div>
       </section>
 
-      <section className="card dashboard-block">
+      <section className="card dashboard-block dashboard-block--activity">
         <div className="card__head">
           <div>
             <p className="eyebrow">{t('dashboard.sections.equipmentAndActivity')}</p>
@@ -426,7 +426,7 @@ export function DashboardCards({ summary }) {
         </div>
       </section>
 
-      <section className="card dashboard-block">
+      <section className="card dashboard-block dashboard-block--physical">
         <div className="card__head">
           <div>
             <p className="eyebrow">{t('dashboard.sections.physicalIndicators')}</p>
@@ -457,7 +457,7 @@ export function DashboardCards({ summary }) {
         </div>
       </section>
 
-      <div className="dashboard-columns">
+      <div className="dashboard-columns dashboard-columns--maintenance">
         <BarList
           title={t('dashboard.sections.maintenanceByEquipment')}
           items={summary.maintenanceByEquipment}
@@ -475,7 +475,7 @@ export function DashboardCards({ summary }) {
         />
       </div>
 
-      <div className="dashboard-columns">
+      <div className="dashboard-columns dashboard-columns--operations">
         <TargetBarList
           title={t('dashboard.sections.mealDaily')}
           items={summary.mealAdherenceByEquipment}
