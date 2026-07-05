@@ -240,97 +240,30 @@ Object.assign(messages['en-US'].dashboard.sections, {
 });
 
 Object.assign(messages['pt-BR'].dashboard.sections, {
-  purchases: 'Compras e blastbags',
-  purchaseTrends: 'Tendência mensal de compras',
-  monthlyPurchases: 'Compras por mês',
-  monthlyBlastbagQuantity: 'Blastbags por mês',
-  purchaseMix: 'Mix de compras',
-  purchaseComposition: 'Composição por tipo',
+  kpisOverview: 'KPIs gerais',
+  kpisByEquipment: 'KPIs por UMR',
 });
 
 Object.assign(messages['pt-BR'].dashboard.labels, {
   total: 'Total',
-  purchases: { one: '{{count}} compra', other: '{{count}} compras' },
-});
-
-Object.assign(messages['pt-BR'].dashboard, {
-  purchases: {
-    totalPurchases: 'Compras no período',
-    mixSubtitle: 'Distribuição por tipo de compra',
-    blastbags: 'Blastbags',
-    otherPurchases: 'Outras compras',
-    blastbagDetail: { one: '{{count}} compra registrada', other: '{{count}} compras registradas' },
-    otherDetail: { one: '{{count}} compra registrada', other: '{{count}} compras registradas' },
-    windowFootnote: 'Janela de {{count}} mês(es) para análise de compras.',
-  },
-});
-
-Object.assign(messages['pt-BR'].dashboard.empty, {
-  purchases: 'Sem compras registradas no período.',
 });
 
 Object.assign(messages['en-US'].dashboard.sections, {
   kpisOverview: 'Overall KPIs',
   kpisByEquipment: 'KPIs by UMR',
-  purchases: 'Purchases and blastbags',
-  purchaseTrends: 'Monthly purchase trend',
-  monthlyPurchases: 'Purchases by month',
-  monthlyBlastbagQuantity: 'Blastbags by month',
-  purchaseMix: 'Purchase mix',
-  purchaseComposition: 'Composition by type',
 });
 
 Object.assign(messages['en-US'].dashboard.labels, {
   total: 'Total',
-  purchases: { one: '{{count}} purchase', other: '{{count}} purchases' },
-});
-
-Object.assign(messages['en-US'].dashboard, {
-  purchases: {
-    totalPurchases: 'Purchases in window',
-    mixSubtitle: 'Distribution by purchase type',
-    blastbags: 'Blastbags',
-    otherPurchases: 'Other purchases',
-    blastbagDetail: { one: '{{count}} recorded purchase', other: '{{count}} recorded purchases' },
-    otherDetail: { one: '{{count}} recorded purchase', other: '{{count}} recorded purchases' },
-    windowFootnote: '{{count}}-month window for purchase analysis.',
-  },
-});
-
-Object.assign(messages['en-US'].dashboard.empty, {
-  purchases: 'No purchases recorded in the period.',
 });
 
 Object.assign(messages['zh-CN'].dashboard.sections, {
   kpisOverview: '总体 KPI',
   kpisByEquipment: '按 UMR 的 KPI',
-  purchases: '采购与 Blastbag',
-  purchaseTrends: '每月采购趋势',
-  monthlyPurchases: '按月采购',
-  monthlyBlastbagQuantity: '按月 Blastbag 数量',
-  purchaseMix: '采购占比',
-  purchaseComposition: '按类型构成',
 });
 
 Object.assign(messages['zh-CN'].dashboard.labels, {
   total: '总计',
-  purchases: { one: '{{count}} 次采购', other: '{{count}} 次采购' },
-});
-
-Object.assign(messages['zh-CN'].dashboard, {
-  purchases: {
-    totalPurchases: '期间采购总数',
-    mixSubtitle: '按采购类型分布',
-    blastbags: 'Blastbag',
-    otherPurchases: '其他采购',
-    blastbagDetail: { one: '{{count}} 条记录', other: '{{count}} 条记录' },
-    otherDetail: { one: '{{count}} 条记录', other: '{{count}} 条记录' },
-    windowFootnote: '采购分析窗口为 {{count}} 个月。',
-  },
-});
-
-Object.assign(messages['zh-CN'].dashboard.empty, {
-  purchases: '该期间没有采购记录。',
 });
 
 function resolvePath(source, key) {

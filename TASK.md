@@ -2,13 +2,13 @@
 
 ## Tarefa Atual
 
-Estruturar o projeto como sistema auditável e escalável, com frontend no GitHub Pages, Firestore/Auth direto, persistência permanente, documentação obrigatória, validação reproduzível e analytics de compras/blastbags no dashboard.
+Estruturar o projeto como sistema auditável e escalável, com frontend no GitHub Pages, Firestore/Auth direto, persistência permanente, documentação obrigatória e validação reproduzível para apontamentos de tempos e movimentos.
 
 ## Decisões Vigentes
 
 - Aplicação web PWA permanece como entrega principal.
 - `src/main.jsx` continua sendo o entrypoint web.
-- `config.json` concentra seeds e parâmetros operacionais, incluindo o catálogo de compras usado nos gráficos do dashboard.
+- `config.json` concentra seeds e parâmetros operacionais.
 - Persistência primária passa a ser Firestore direto no frontend.
 - `localStorage` e `IndexedDB` continuam como cache/espelho offline.
 - O shell visual do frontend segue padrao clean em branco/off-white, com geometria quadrada e marca OpenBlast discreta.

@@ -193,53 +193,6 @@ function BarList({ title, items, emptyMessage, locale, t, formatValue = null, fo
   );
 }
 
-function PurchaseAnalyticsSection({ summary, locale, t }) {
-  return (
-    <section className="card dashboard-block dashboard-block--wide">
-      <div className="card__head">
-        <div>
-          <p className="eyebrow">{t('dashboard.sections.purchases')}</p>
-          <h2>{t('dashboard.sections.purchaseTrends')}</h2>
-        </div>
-      </div>
-
-      {!summary.monthlyPurchaseCount.length ? <p className="empty-state">{t('dashboard.empty.purchases')}</p> : null}
-
-      <div className="dashboard-columns">
-        <BarList
-          title={t('dashboard.sections.monthlyPurchases')}
-          items={summary.monthlyPurchaseCount}
-          emptyMessage={t('dashboard.empty.purchases')}
-          locale={locale}
-          t={t}
-          formatValue={(_item, value) => t('dashboard.labels.purchases', { count: value })}
-        />
-
-        <BarList
-          title={t('dashboard.sections.monthlyBlastbagQuantity')}
-          items={summary.monthlyBlastbagQuantity}
-          emptyMessage={t('dashboard.empty.purchases')}
-          locale={locale}
-          t={t}
-          formatValue={(item, value) => `${Number(value || 0).toLocaleString(locale)} ${item.unit || 'UN'}`}
-          formatDetail={(item) => (item.count > 0 ? t('dashboard.purchases.blastbagDetail', { count: item.count }) : '')}
-        />
-      </div>
-
-      <PieChartCard
-        eyebrow={t('dashboard.sections.purchaseMix')}
-        title={t('dashboard.sections.purchaseComposition')}
-        subtitle={t('dashboard.purchases.mixSubtitle')}
-        centerValue={String(summary.purchaseCount)}
-        centerLabel={t('dashboard.purchases.totalPurchases')}
-        segments={summary.purchaseComposition}
-        emptyMessage={t('dashboard.empty.purchases')}
-        footnote={t('dashboard.purchases.windowFootnote', { count: summary.purchaseWindowMonths })}
-      />
-    </section>
-  );
-}
-
 function StackedBarList({ title, items, emptyMessage, locale, t }) {
   const max = Math.max(...items.map((item) => item.totalMinutes || 0), 0);
 
@@ -408,8 +361,6 @@ export function DashboardCards({ summary }) {
       </section>
 
       <EquipmentKpiTable summary={summary} t={t} />
-
-      <PurchaseAnalyticsSection summary={summary} locale={language} t={t} />
 
       <section className="card dashboard-block">
         <div className="card__head">

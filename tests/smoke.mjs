@@ -49,7 +49,6 @@ const config = readJson(resolve(root, 'config.json'));
 const backupTemplate = readJson(resolve(root, 'input/backup-template.json'));
 const seedUsers = Array.isArray(config?.seed?.users) ? config.seed.users : [];
 const seedActivityTypes = Array.isArray(config?.seed?.activityTypes) ? config.seed.activityTypes : [];
-const seedPurchases = Array.isArray(config?.seed?.purchases) ? config.seed.purchases : [];
 
 assert(config?.meta?.name, 'config.json sem meta.name');
 assert(config?.storage?.keys?.database, 'config.json sem storage.keys.database');
@@ -62,7 +61,8 @@ assert(config?.auth?.roles?.client === 'CLIENTE', 'config.json sem auth.roles.cl
 assert(config?.automation?.nightAutoClose?.enabled === true, 'config.json sem auto-encerramento noturno habilitado');
 assert(config?.automation?.nightAutoClose?.startTime === '19:00', 'config.json sem horário inicial do auto-encerramento noturno');
 assert(config?.automation?.nightAutoClose?.endTime === '03:00', 'config.json sem horário final do auto-encerramento noturno');
-assert(Number(config?.seed?.catalogVersion) >= 9, 'config.json sem seed.catalogVersion atualizado');
+assert(!config?.dashboard?.purchaseAnalytics, 'config.json não deve conter analytics de compras');
+assert(Number(config?.seed?.catalogVersion) >= 10, 'config.json sem seed.catalogVersion atualizado');
 assert(seedUsers.length === 6, 'config.json com quantidade incorreta de usuários iniciais');
 assert(seedUsers.filter((user) => user.role === 'OPERADOR').length === 4, 'config.json com quantidade incorreta de operadores');
 assert(seedUsers.filter((user) => user.role === 'CLIENTE').length === 1, 'config.json com quantidade incorreta de clientes');
@@ -87,10 +87,8 @@ assert(
   'config.json sem código 16 Em DDS',
 );
 assert(Array.isArray(config?.seed?.shifts) && config.seed.shifts.length === 1, 'config.json deve manter apenas um turno interno');
-assert(seedPurchases.length === 12, 'config.json com quantidade incorreta de compras iniciais');
-assert(seedPurchases.some((purchase) => String(purchase.category || '').toUpperCase() === 'BLASTBAG'), 'config.json sem compras blastbag');
-assert(seedPurchases.some((purchase) => String(purchase.itemName || '').toLowerCase().includes('blastbag')), 'config.json sem item blastbag nos seeds');
-assert(Array.isArray(backupTemplate?.purchases) && backupTemplate.purchases.length === 0, 'backup-template.json deve expor purchases vazias');
+assert(!Object.hasOwn(config.seed, 'purchases'), 'config.json não deve conter compras iniciais');
+assert(!Object.hasOwn(backupTemplate, 'purchases'), 'backup-template.json não deve expor purchases');
 assert(Number(backupTemplate?.settings?.catalogVersion) === Number(config?.seed?.catalogVersion), 'backup-template.json fora de sincronia com catalogVersion');
 
 console.log('SMOKE_OK');

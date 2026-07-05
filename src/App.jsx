@@ -64,10 +64,16 @@ function useHashRoute(session) {
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [session]);
+  }, [route, session]);
 
   useEffect(() => {
     const current = normalizeRoute(window.location.hash);
+    if (!session && current !== '/login') {
+      window.location.hash = '/login';
+      setRoute('/login');
+      return;
+    }
+
     if (!current) {
       window.location.hash = defaultRouteForSession(session) || '/login';
     }

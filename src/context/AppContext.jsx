@@ -176,7 +176,6 @@ export function useAppSelectors() {
     equipments: state.equipments,
     activityTypes: state.activityTypes,
     shifts: state.shifts,
-    purchases: state.purchases,
     records: state.movementRecords,
     session: state.session,
     settings: state.settings,

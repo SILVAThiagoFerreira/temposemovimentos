@@ -1,6 +1,5 @@
 import { initialActivityTypes } from '../data/initialActivityTypes';
 import { initialEquipments } from '../data/initialEquipments';
-import { initialPurchases } from '../data/initialPurchases';
 import { initialShifts } from '../data/initialShifts';
 import { initialUsers } from '../data/initialUsers';
 import { automationConfig, authConfig, seedConfig, storageConfig } from '../config/runtimeConfig';
@@ -569,33 +568,6 @@ function mergeSeedEquipments(equipments, movementRecords = []) {
   return next.filter((equipment) => seedEquipmentIds.has(equipment.id) || referencedEquipmentIds.has(equipment.id));
 }
 
-function mergeSeedPurchases(purchases = []) {
-  const next = cloneItems(purchases);
-  const indexById = new Map(next.map((item, index) => [item.id, index]));
-
-  for (const seedPurchase of initialPurchases) {
-    const index = indexById.get(seedPurchase.id);
-
-    if (index != null) {
-      const current = next[index] || {};
-      next[index] = {
-        ...current,
-        ...cloneItems([seedPurchase])[0],
-        createdAt: current.createdAt || seedPurchase.createdAt || nowIso(),
-        updatedAt: nowIso(),
-      };
-    } else {
-      next.push(cloneItems([seedPurchase])[0]);
-    }
-  }
-
-  return next.sort((left, right) => {
-    const rightStamp = new Date(right.purchaseDate || right.createdAt || 0).getTime();
-    const leftStamp = new Date(left.purchaseDate || left.createdAt || 0).getTime();
-    return rightStamp - leftStamp;
-  });
-}
-
 function createInitialDatabase() {
   return {
     version: DB_VERSION,
@@ -603,7 +575,6 @@ function createInitialDatabase() {
     equipments: cloneItems(initialEquipments),
     activityTypes: cloneItems(initialActivityTypes),
     shifts: cloneItems(initialShifts),
-    purchases: cloneItems(initialPurchases),
     movementRecords: [],
     settings: {
       storageMode: storageConfig.defaultMode,
@@ -729,24 +700,6 @@ function normalizeShift(shift = {}) {
   };
 }
 
-function normalizePurchase(purchase = {}) {
-  const purchaseDate = purchase.purchaseDate || purchase.createdAt || nowIso();
-
-  return {
-    id: purchase.id || createId('pur'),
-    purchaseDate,
-    supplierName: String(purchase.supplierName || '').trim(),
-    itemName: String(purchase.itemName || '').trim(),
-    category: String(purchase.category || '').trim().toUpperCase(),
-    quantity: Number.isFinite(Number(purchase.quantity)) ? Number(purchase.quantity) : 0,
-    unit: String(purchase.unit || '').trim().toUpperCase(),
-    invoiceNumber: String(purchase.invoiceNumber || '').trim(),
-    notes: String(purchase.notes || '').trim(),
-    createdAt: purchase.createdAt || purchaseDate,
-    updatedAt: purchase.updatedAt || purchase.createdAt || purchaseDate,
-  };
-}
-
 function normalizeSettings(settings = {}) {
   return {
     storageMode: String(settings.storageMode || storageConfig.defaultMode).toUpperCase(),
@@ -837,16 +790,13 @@ function normalizeDatabase(raw) {
   database.shifts = Array.isArray(raw.shifts)
     ? raw.shifts.map(normalizeShift)
     : cloneItems(initialShifts);
-  database.purchases = Array.isArray(raw.purchases)
-    ? raw.purchases.map(normalizePurchase)
-    : cloneItems(initialPurchases);
+  delete database.purchases;
 
   const currentCatalogVersion = Number(seedConfig.catalogVersion || 1);
   if (database.settings.catalogVersion < currentCatalogVersion) {
     database.operators = mergeSeedUsers(database.operators);
     database.equipments = mergeSeedEquipments(database.equipments, Array.isArray(raw.movementRecords) ? raw.movementRecords : []);
     database.activityTypes = mergeSeedActivityTypes(database.activityTypes);
-    database.purchases = mergeSeedPurchases(database.purchases);
     database.settings.catalogVersion = currentCatalogVersion;
     database.settings.updatedAt = nowIso();
     database.updatedAt = nowIso();
@@ -899,13 +849,19 @@ export async function bootstrapStorage() {
       const remoteSnapshot = await bootstrapBackendSnapshot(setDatabaseSettingsMode(resolvedDatabase || freshDatabase, 'ONLINE'));
 
       if (remoteSnapshot) {
+        const remoteNeedsNormalization =
+          Number(remoteSnapshot?.settings?.catalogVersion || 0) < Number(seedConfig.catalogVersion || 1) ||
+          Object.hasOwn(remoteSnapshot, 'purchases');
         const normalizedRemote = normalizeDatabase(remoteSnapshot);
         const chosenDatabase = hasLocalSnapshot
           ? chooseNewestSnapshot(resolvedDatabase, normalizedRemote, null, 'updatedAt')
           : normalizedRemote;
         resolvedDatabase = setDatabaseSettingsMode(chosenDatabase, 'ONLINE');
         storageMeta.backendAvailable = true;
-        if (hasLocalSnapshot && readTimeStamp(chosenDatabase, 'updatedAt') > readTimeStamp(normalizedRemote, 'updatedAt')) {
+        if (
+          remoteNeedsNormalization ||
+          (hasLocalSnapshot && readTimeStamp(chosenDatabase, 'updatedAt') > readTimeStamp(normalizedRemote, 'updatedAt'))
+        ) {
           await writeRemoteDatabase(resolvedDatabase);
         }
         await attachRemoteListener();
@@ -1534,7 +1490,6 @@ export function exportData() {
     equipments: cloneItems(database.equipments),
     activityTypes: cloneItems(database.activityTypes),
     shifts: cloneItems(database.shifts),
-    purchases: cloneItems(database.purchases),
     movementRecords: cloneItems(database.movementRecords),
     settings: { ...database.settings },
   };
@@ -1551,7 +1506,6 @@ export function importData(payload) {
   saveSection('equipments', imported.equipments);
   saveSection('activityTypes', imported.activityTypes);
   saveSection('shifts', imported.shifts);
-  saveSection('purchases', imported.purchases);
   saveSection('movementRecords', imported.movementRecords);
   saveSection('settings', imported.settings);
   emitChange({ reason: 'import', scope: 'database' });
@@ -1582,7 +1536,6 @@ export function isDatabaseEmpty() {
     !database.operators.length &&
     !database.equipments.length &&
     !database.activityTypes.length &&
-    !database.purchases.length &&
     !database.movementRecords.length
   );
 }

@@ -26,17 +26,7 @@
       "endTime": "03:00"
     }
   },
-  "dashboard": {
-    "purchaseAnalytics": {
-      "windowMonths": 6,
-      "blastbagKeywords": [
-        "blastbag",
-        "blastbags",
-        "bolsa de ar",
-        "air bag"
-      ]
-    }
-  },
+  "dashboard": {},
   "firebase": {
     "webConfig": {
       "apiKey": "AIzaSyD3phWlKAFuioxm7-0OVViqFRv7C25i7Bw",
@@ -62,7 +52,7 @@
     }
   },
   "seed": {
-    "catalogVersion": 9,
+    "catalogVersion": 10,
     "users": [
       {
         "id": "usr-paulo",
@@ -143,183 +133,151 @@
       }
     ],
     "activityTypes": [
-      { "id": "act-01", "code": "01", "name": "Checklist", "classification": "OPERAÇÃO", "defaultLocation": "CHASSI", "active": true },
-      { "id": "act-02", "code": "02", "name": "Deslocamento", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true },
-      { "id": "act-03", "code": "03", "name": "Carregamento", "classification": "OPERAÇÃO", "defaultLocation": "UNIDADE", "active": true },
-      { "id": "act-04", "code": "04", "name": "Reabastecimento de Emulsão", "classification": "OPERAÇÃO", "defaultLocation": "UNIDADE", "active": true },
-      { "id": "act-05", "code": "05", "name": "Refeição", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-06", "code": "06", "name": "Abastecimento de Diesel", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
-      { "id": "act-07", "code": "07", "name": "Aguardando Frente / Horas Ociosas", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-08", "code": "08", "name": "Aguardando Término da Perfuração", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-09", "code": "09", "name": "Aguardando Liberação de Acesso", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-10", "code": "10", "name": "Falta de Operador", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-11", "code": "11", "name": "Condições Climáticas Adversas", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-12", "code": "12", "name": "Manutenção", "classification": "MANUTENÇÃO", "defaultLocation": "CHASSI", "active": true },
-      { "id": "act-13", "code": "13", "name": "Outros", "classification": "OUTROS", "defaultLocation": null, "active": true },
-      { "id": "act-14", "code": "14", "name": "Retirada de Material no Paiol", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true },
-      { "id": "act-15", "code": "15", "name": "Aguardando Detonação", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-16", "code": "16", "name": "Em DDS (Diálogo Diário de Segurança)", "classification": "OCIOSIDADE", "defaultLocation": null, "active": true },
-      { "id": "act-17", "code": "17", "name": "Devolução de Material no Paiol", "classification": "OPERAÇÃO", "defaultLocation": null, "active": true }
+      {
+        "id": "act-01",
+        "code": "01",
+        "name": "Checklist",
+        "classification": "OPERAÇÃO",
+        "defaultLocation": "CHASSI",
+        "active": true
+      },
+      {
+        "id": "act-02",
+        "code": "02",
+        "name": "Deslocamento",
+        "classification": "OPERAÇÃO",
+        "defaultLocation": null,
+        "active": true
+      },
+      {
+        "id": "act-03",
+        "code": "03",
+        "name": "Carregamento",
+        "classification": "OPERAÇÃO",
+        "defaultLocation": "UNIDADE",
+        "active": true
+      },
+      {
+        "id": "act-04",
+        "code": "04",
+        "name": "Reabastecimento de Emulsão",
+        "classification": "OPERAÇÃO",
+        "defaultLocation": "UNIDADE",
+        "active": true
+      },
+      {
+        "id": "act-05",
+        "code": "05",
+        "name": "Refeição",
+        "classification": "OCIOSIDADE",
+        "defaultLocation": null,
+        "active": true
+      },
+      {
+        "id": "act-06",
+        "code": "06",
+        "name": "Abastecimento de Diesel",
+        "classification": "MANUTENÇÃO",
+        "defaultLocation": "CHASSI",
+        "active": true
+      },
+      {
+        "id": "act-07",
+        "code": "07",
+        "name": "Aguardando Frente / Horas Ociosas",
+        "classification": "OCIOSIDADE",
+        "defaultLocation": null,
+        "active": true
+      },
+      {
+        "id": "act-08",
+        "code": "08",
+        "name": "Aguardando Término da Perfuração",
+        "classification": "OCIOSIDADE",
+        "defaultLocation": null,
+        "active": true
+      },
+      {
+        "id": "act-09",
+        "code": "09",
+        "name": "Aguardando Liberação de Acesso",
+        "classification": "OCIOSIDADE",
+        "defaultLocation": null,
+        "active": true
+      },
+      {
+        "id": "act-10",
+        "code": "10",
+        "name": "Falta de Operador",
+        "classification": "OCIOSIDADE",
+        "defaultLocation": null,
+        "active": true
+      },
+      {
+        "id": "act-11",
+        "code": "11",
+        "name": "Condições Climáticas Adversas",
+        "classification": "OCIOSIDADE",
+        "defaultLocation": null,
+        "active": true
+      },
+      {
+        "id": "act-12",
+        "code": "12",
+        "name": "Manutenção",
+        "classification": "MANUTENÇÃO",
+        "defaultLocation": "CHASSI",
+        "active": true
+      },
+      {
+        "id": "act-13",
+        "code": "13",
+        "name": "Outros",
+        "classification": "OUTROS",
+        "defaultLocation": null,
+        "active": true
+      },
+      {
+        "id": "act-14",
+        "code": "14",
+        "name": "Retirada de Material no Paiol",
+        "classification": "OPERAÇÃO",
+        "defaultLocation": null,
+        "active": true
+      },
+      {
+        "id": "act-15",
+        "code": "15",
+        "name": "Aguardando Detonação",
+        "classification": "OCIOSIDADE",
+        "defaultLocation": null,
+        "active": true
+      },
+      {
+        "id": "act-16",
+        "code": "16",
+        "name": "Em DDS (Diálogo Diário de Segurança)",
+        "classification": "OCIOSIDADE",
+        "defaultLocation": null,
+        "active": true
+      },
+      {
+        "id": "act-17",
+        "code": "17",
+        "name": "Devolução de Material no Paiol",
+        "classification": "OPERAÇÃO",
+        "defaultLocation": null,
+        "active": true
+      }
     ],
     "shifts": [
-      { "id": "shift-1", "name": "Turno único", "startTime": "07:00", "endTime": "15:00", "availableMinutes": 480, "active": true }
-    ],
-    "purchases": [
       {
-        "id": "pur-2026-02-03-blastbag",
-        "purchaseDate": "2026-02-03T10:00:00Z",
-        "supplierName": "Enaex Supply",
-        "itemName": "Blastbag 90 mm",
-        "category": "BLASTBAG",
-        "quantity": 120,
-        "unit": "UN",
-        "invoiceNumber": "NF-2026-0203-01",
-        "notes": "Lote para campanha de fevereiro.",
-        "createdAt": "2026-02-03T10:00:00Z",
-        "updatedAt": "2026-02-03T10:00:00Z"
-      },
-      {
-        "id": "pur-2026-02-17-emulsion",
-        "purchaseDate": "2026-02-17T14:30:00Z",
-        "supplierName": "Nordeste Industrial",
-        "itemName": "Emulsão bombeável",
-        "category": "EMULSION",
-        "quantity": 24,
-        "unit": "T",
-        "invoiceNumber": "NF-2026-0217-02",
-        "notes": "Reposição de insumo operacional.",
-        "createdAt": "2026-02-17T14:30:00Z",
-        "updatedAt": "2026-02-17T14:30:00Z"
-      },
-      {
-        "id": "pur-2026-03-05-blastbag",
-        "purchaseDate": "2026-03-05T09:00:00Z",
-        "supplierName": "Enaex Supply",
-        "itemName": "Blastbag 90 mm",
-        "category": "BLASTBAG",
-        "quantity": 140,
-        "unit": "UN",
-        "invoiceNumber": "NF-2026-0305-01",
-        "notes": "Volume ajustado para frente de março.",
-        "createdAt": "2026-03-05T09:00:00Z",
-        "updatedAt": "2026-03-05T09:00:00Z"
-      },
-      {
-        "id": "pur-2026-03-21-acessorios",
-        "purchaseDate": "2026-03-21T16:10:00Z",
-        "supplierName": "Logística Mina Sul",
-        "itemName": "Acessórios de fixação",
-        "category": "ACESSORIO",
-        "quantity": 30,
-        "unit": "UN",
-        "invoiceNumber": "NF-2026-0321-03",
-        "notes": "Suporte para montagem de kits.",
-        "createdAt": "2026-03-21T16:10:00Z",
-        "updatedAt": "2026-03-21T16:10:00Z"
-      },
-      {
-        "id": "pur-2026-04-04-blastbag",
-        "purchaseDate": "2026-04-04T11:40:00Z",
-        "supplierName": "Enaex Supply",
-        "itemName": "Blastbag 120 mm",
-        "category": "BLASTBAG",
-        "quantity": 160,
-        "unit": "UN",
-        "invoiceNumber": "NF-2026-0404-01",
-        "notes": "Entrada de lote principal do mês.",
-        "createdAt": "2026-04-04T11:40:00Z",
-        "updatedAt": "2026-04-04T11:40:00Z"
-      },
-      {
-        "id": "pur-2026-04-25-lonas",
-        "purchaseDate": "2026-04-25T08:20:00Z",
-        "supplierName": "Fornecedora Vale Verde",
-        "itemName": "Lonas de proteção",
-        "category": "OUTROS",
-        "quantity": 18,
-        "unit": "UN",
-        "invoiceNumber": "NF-2026-0425-02",
-        "notes": "Complemento de estoque.",
-        "createdAt": "2026-04-25T08:20:00Z",
-        "updatedAt": "2026-04-25T08:20:00Z"
-      },
-      {
-        "id": "pur-2026-05-08-blastbag",
-        "purchaseDate": "2026-05-08T13:15:00Z",
-        "supplierName": "Enaex Supply",
-        "itemName": "Blastbag 120 mm",
-        "category": "BLASTBAG",
-        "quantity": 100,
-        "unit": "UN",
-        "invoiceNumber": "NF-2026-0508-01",
-        "notes": "Reposição por avanço de frente.",
-        "createdAt": "2026-05-08T13:15:00Z",
-        "updatedAt": "2026-05-08T13:15:00Z"
-      },
-      {
-        "id": "pur-2026-05-29-kit",
-        "purchaseDate": "2026-05-29T15:45:00Z",
-        "supplierName": "Nordeste Industrial",
-        "itemName": "Kit de conexão",
-        "category": "MATERIAL",
-        "quantity": 40,
-        "unit": "UN",
-        "invoiceNumber": "NF-2026-0529-02",
-        "notes": "Itens auxiliares para operação.",
-        "createdAt": "2026-05-29T15:45:00Z",
-        "updatedAt": "2026-05-29T15:45:00Z"
-      },
-      {
-        "id": "pur-2026-06-06-blastbag",
-        "purchaseDate": "2026-06-06T10:05:00Z",
-        "supplierName": "Enaex Supply",
-        "itemName": "Blastbag 120 mm",
-        "category": "BLASTBAG",
-        "quantity": 180,
-        "unit": "UN",
-        "invoiceNumber": "NF-2026-0606-01",
-        "notes": "Lote de junho para sequência operacional.",
-        "createdAt": "2026-06-06T10:05:00Z",
-        "updatedAt": "2026-06-06T10:05:00Z"
-      },
-      {
-        "id": "pur-2026-06-18-ignitor",
-        "purchaseDate": "2026-06-18T12:00:00Z",
-        "supplierName": "Logística Mina Sul",
-        "itemName": "Acionadores",
-        "category": "OUTROS",
-        "quantity": 20,
-        "unit": "UN",
-        "invoiceNumber": "NF-2026-0618-02",
-        "notes": "Suprimento complementar.",
-        "createdAt": "2026-06-18T12:00:00Z",
-        "updatedAt": "2026-06-18T12:00:00Z"
-      },
-      {
-        "id": "pur-2026-07-02-blastbag",
-        "purchaseDate": "2026-07-02T09:10:00Z",
-        "supplierName": "Enaex Supply",
-        "itemName": "Blastbag 90 mm",
-        "category": "BLASTBAG",
-        "quantity": 150,
-        "unit": "UN",
-        "invoiceNumber": "NF-2026-0702-01",
-        "notes": "Compra do mês corrente.",
-        "createdAt": "2026-07-02T09:10:00Z",
-        "updatedAt": "2026-07-02T09:10:00Z"
-      },
-      {
-        "id": "pur-2026-07-02-fitas",
-        "purchaseDate": "2026-07-02T09:45:00Z",
-        "supplierName": "Fornecedora Vale Verde",
-        "itemName": "Fitas de identificação",
-        "category": "MATERIAL",
-        "quantity": 35,
-        "unit": "UN",
-        "invoiceNumber": "NF-2026-0702-02",
-        "notes": "Itens auxiliares para organização do estoque.",
-        "createdAt": "2026-07-02T09:45:00Z",
-        "updatedAt": "2026-07-02T09:45:00Z"
+        "id": "shift-1",
+        "name": "Turno único",
+        "startTime": "07:00",
+        "endTime": "15:00",
+        "availableMinutes": 480,
+        "active": true
       }
     ]
   },

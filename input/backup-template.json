@@ -5,13 +5,12 @@
   "equipments": [],
   "activityTypes": [],
   "shifts": [],
-  "purchases": [],
   "movementRecords": [],
   "settings": {
     "storageMode": "LOCAL",
     "defaultShiftId": null,
     "userCatalogSeeded": true,
-    "catalogVersion": 9,
+    "catalogVersion": 10,
     "updatedAt": "YYYY-MM-DDTHH:mm:ss.sssZ"
   }
 }

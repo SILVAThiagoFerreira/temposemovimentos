@@ -31,7 +31,3 @@ export function getSeedActivityTypes() {
 export function getSeedShifts() {
   return clone(seedConfig.shifts || []);
 }
-
-export function getSeedPurchases() {
-  return clone(seedConfig.purchases || []);
-}
