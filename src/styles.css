@@ -97,13 +97,14 @@ h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--space-7);
-  height: 56px;
+  min-height: 60px;
   background: var(--enaex-gray);
   color: var(--white);
   position: sticky;
   top: 0;
   z-index: 100;
   border-bottom: 2px solid var(--enaex-red);
+  box-shadow: 0 4px 14px rgba(23, 31, 38, 0.08);
 }
 .brand-lockup { display: flex; align-items: center; }
 .brand-logo { height: 24px; width: auto; }
@@ -157,14 +158,14 @@ h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
 /* ── LAYOUT ────────────────────────────────────── */
 .app-frame {
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-6);
   width: 100%;
   max-width: var(--app-max-width);
   margin: 0 auto;
   padding: var(--space-5) var(--space-7) 72px;
 }
 .app-frame--operator { max-width: 1280px; }
-.app-body { display: grid; grid-template-columns: 196px minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.app-body { display: grid; grid-template-columns: 196px minmax(0, 1fr); gap: var(--space-7); align-items: start; }
 .app-body--client { grid-template-columns: 1fr; }
 .app-main { min-width: 0; }
 
@@ -173,9 +174,13 @@ h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
 .nav-top, .nav-brand-block, .nav-list { display: grid; gap: 2px; }
 
 .nav-brand-block {
-  padding: 8px 12px 14px;
-  border-bottom: 1px solid var(--border);
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--enaex-red);
+  border-radius: var(--radius-md);
+  background: var(--white);
   margin-bottom: var(--space-3);
+  box-shadow: var(--shadow-xs);
 }
 
 .nav-brand-block strong { font-size: 0.9rem; color: var(--gray-800); }
@@ -187,9 +192,9 @@ h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
   flex-direction: column;
   gap: 1px;
   width: 100%;
-  padding: 11px 14px;
+  padding: 12px 14px;
   text-align: left;
-  border: none;
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
   background: transparent;
   color: var(--gray-600);
@@ -198,7 +203,7 @@ h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
   transition: background 120ms ease, color 120ms ease;
 }
 
-.nav-item:hover { background: var(--gray-100); color: var(--gray-800); }
+.nav-item:hover { background: var(--white); border-color: var(--border); color: var(--gray-800); }
 
 .nav-item.is-active {
   background: var(--enaex-gray);
@@ -251,13 +256,15 @@ h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
   align-items: center;
   justify-content: space-between;
   gap: var(--space-5);
-  padding: var(--space-5) var(--space-6);
+  padding: var(--space-6) var(--space-7);
+  background: linear-gradient(135deg, var(--white) 0%, #fbfcfd 100%);
 }
 .page-banner h2, .operator-topbar h2 { font-size: 1.1rem; font-weight: 600; }
 .page-banner p:not(.eyebrow), .operator-topbar p:not(.eyebrow),
 .dashboard-map-card__copy, .login-copy { color: var(--gray-500); font-size: 0.85rem; }
 .operator-topbar__actions { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
-.card__head { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: var(--space-3); margin-bottom: var(--space-4); }
+.card__head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: var(--space-3); margin-bottom: var(--space-4); }
+.card__head > * { min-width: 0; }
 
 /* ── HERO ROW ──────────────────────────────────── */
 .hero-row, .stats-grid, .settings-grid, .registrations-grid,
@@ -368,7 +375,9 @@ h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
 .dashboard-filters__controls, .form-actions, .export-actions,
 .table-actions, .entity-actions, .header-actions,
 .fleet-map__summary, .fleet-map__legend { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.dashboard-filters__controls label { width: 170px; }
+.dashboard-filters__controls { align-items: end; }
+.dashboard-filters__controls label { flex: 1 1 180px; width: auto; max-width: 220px; }
+.dashboard-filters__controls .button { min-height: 38px; }
 
 .dashboard-filters__controls label, .filters-grid label,
 .form-grid label, .form-grid--two label,
@@ -549,7 +558,7 @@ input::placeholder, textarea::placeholder { color: var(--gray-400); }
 .dashboard-layout {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: var(--space-4);
+  gap: var(--space-5);
   align-items: start;
 }
 .dashboard-layout > .dashboard-block,
@@ -650,7 +659,7 @@ input::placeholder, textarea::placeholder { color: var(--gray-400); }
 .fleet-map__marker--info .fleet-map__marker-pin { background: var(--blue); }
 .fleet-map__marker--warning .fleet-map__marker-pin { background: var(--amber); }
 .fleet-map__empty { position: absolute; inset: auto 12px 12px; }
-.fleet-map__sidebar { align-content: start; }
+.fleet-map__sidebar { align-content: start; min-width: 0; }
 .fleet-map__legend { padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--gray-50); }
 .fleet-map__legend span { display: inline-flex; align-items: center; gap: 5px; color: var(--gray-500); font-size: 0.75rem; }
 .fleet-map__legend-swatch { width: 7px; height: 7px; border-radius: 50%; }
@@ -680,8 +689,8 @@ input::placeholder, textarea::placeholder { color: var(--gray-400); }
 .readonly-pill span, .form-note p, .equipment-status-item small,
 .stacked-list__value small, .target-list__label small, .bar-list__label small { color: var(--gray-500); }
 .user-list { margin-top: 0; }
-.table-section, .dashboard-recent { padding: var(--space-5) var(--space-6); }
-.dashboard-map-card { padding: var(--space-5) var(--space-6); }
+.table-section, .dashboard-recent { padding: var(--space-6) var(--space-7); }
+.dashboard-map-card { padding: var(--space-6) var(--space-7); }
 .dashboard-block--wide { grid-column: 1 / -1; }
 
 /* ── RESPONSIVE ────────────────────────────────── */
@@ -713,7 +722,7 @@ input::placeholder, textarea::placeholder { color: var(--gray-400); }
 
 @media (max-width: 820px) {
   .app-frame, .app-frame--operator, .login-view { width: 100%; padding: var(--space-4); }
-  .app-header { padding: 0 var(--space-4); }
+  .app-header { padding: 0 var(--space-4); min-height: 56px; }
   .app-header, .card, .login-hero, .login-form { border-radius: 0; }
   .login-hero { padding: 36px 24px; }
   .login-form { padding: 28px 24px; }
