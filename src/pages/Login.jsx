@@ -69,7 +69,7 @@ export function Login({ navigate }) {
           <LanguageSwitcher />
         </div>
         <div className="login-hero__brand">
-          <img className="login-logo" src={`${base}enaex-logo-full.png`} alt="Enaex Brasil" />
+          <img className="login-logo" src={`${base}openblast-logo.png`} alt="OpenBlast" />
         </div>
         <h1>{t('login.hero.title')}</h1>
         <p className="login-copy">{t('login.hero.copy')}</p>
