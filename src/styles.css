@@ -108,13 +108,15 @@ h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
 }
 
 /* OpenBlast shared header treatment */
-.app-header { border-top: 3px solid #ed1c24 !important; background: #fff !important; box-shadow: 0 1px 0 #e9ecef !important; }
-.brand-logo { height: 32px; width: auto; object-fit: contain; }
+.app-header { min-height: 54px; background: #263540 !important; border-top: 0 !important; border-bottom: 3px solid #ed1c24 !important; box-shadow: none !important; }
+.brand-logo { height: 32px; width: auto; object-fit: contain; filter: brightness(0) invert(1); }
 .login-logo { height: 44px; width: auto; object-fit: contain; }
 .brand-lockup { display: flex; align-items: center; }
-.brand-logo { height: 24px; width: auto; }
+.brand-logo { height: 30px; width: auto; }
+.header-wordmark { margin-left: 8px; color: #fff; font-size: 0.95rem; font-weight: 700; }
+.header-wordmark strong { color: #ff4b55; }
 .header-center { flex: 1; text-align: center; }
-.header-center h1 { font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.85); letter-spacing: 0.03em; }
+.header-center h1 { font-size: 1rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
 .header-actions { display: flex; align-items: center; gap: var(--space-3); }
 .header-session { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: rgba(255,255,255,0.6); }
 .header-role { padding: 1px 8px; border-radius: 3px; background: rgba(255,255,255,0.1); font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.5); }

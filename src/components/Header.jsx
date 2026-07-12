@@ -23,6 +23,7 @@ export function Header({
     <header className="app-header">
       <div className="brand-lockup">
         <img className="brand-logo" src={`${base}openblast-logo.png`} alt="OpenBlast" />
+        <span className="header-wordmark">Open<strong>Blast</strong></span>
       </div>
 
       <div className="header-center">
