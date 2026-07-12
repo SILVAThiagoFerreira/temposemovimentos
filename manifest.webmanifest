@@ -1,0 +1,18 @@
+{
+  "name": "Sistema de Tempos e Movimentos - UMB / Caminhões",
+  "short_name": "Tempos UMB",
+  "description": "Apontamento operacional offline para UMBs e caminhões.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#303943",
+  "theme_color": "#303943",
+  "icons": [
+    {
+      "src": "./openblast-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

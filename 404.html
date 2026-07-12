@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecionando...</title>
+    <script>
+      (function () {
+        var parts = window.location.pathname.split('/').filter(Boolean);
+        var route = parts.length > 1 ? '/' + parts[parts.length - 1] : '/login';
+        sessionStorage.setItem('tm-redirect', '#' + route);
+        window.location.replace('./');
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
