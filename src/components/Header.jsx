@@ -22,8 +22,7 @@ export function Header({
   return (
     <header className="app-header">
       <div className="brand-lockup">
-        <img className="brand-logo" src={`${base}openblast-logo.png`} alt="OpenBlast" />
-        <span className="header-wordmark">Open<strong>Blast</strong></span>
+        <img className="brand-logo" src={`${base}enaex-logo-white.png`} alt="Enaex Brasil" />
       </div>
 
       <div className="header-center">
@@ -31,6 +30,7 @@ export function Header({
       </div>
 
       <div className="header-actions">
+        <span className="header-unit">US VALE VERDE</span>
         <StatusChip tone={isOnline ? 'success' : 'neutral'}>{stateLabel}</StatusChip>
         {session ? (
           <div className="header-session">

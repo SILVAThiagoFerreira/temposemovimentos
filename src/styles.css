@@ -108,11 +108,12 @@ h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
 }
 
 /* OpenBlast shared header treatment */
-.app-header { min-height: 54px; background: #263540 !important; border-top: 0 !important; border-bottom: 3px solid #ed1c24 !important; box-shadow: none !important; }
+.app-header { min-height: 54px; background: #38424B !important; border-top: 0 !important; border-bottom: 4px solid #E20613 !important; box-shadow: none !important; }
+.header-unit { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.58); white-space: nowrap; margin-right: 8px; }
 .brand-logo { height: 32px; width: auto; object-fit: contain; filter: brightness(0) invert(1); }
 .login-logo { height: 44px; width: auto; object-fit: contain; }
 .brand-lockup { display: flex; align-items: center; }
-.brand-logo { height: 30px; width: auto; }
+.brand-logo { height: 28px; width: auto; }
 .header-wordmark { margin-left: 8px; color: #fff; font-size: 0.95rem; font-weight: 700; }
 .header-wordmark strong { color: #ff4b55; }
 .header-center { flex: 1; text-align: center; }
