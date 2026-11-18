@@ -32,11 +32,11 @@ Registrar atividades, paradas e duração por equipamento em campo, com acesso p
 
 ## Padrao visual
 
-- Interface clean com predominio de branco e off-white.
-- Fundo com grade quadrada sutil, sem efeitos escuros ou promocionais.
-- Cartoes com borda fina, sombra leve e cantos contidos.
-- Logo OpenBlast pequena e discreta nas areas de marca.
-- Contraste alto no texto e uso minimo de cores fora dos estados de status.
+- Identidade Enaex: cinza `#38424B`, vermelho `#E20613` como acento pontual e fundo branco/off-white.
+- Logo Enaex (`public/enaex-logo.png`) uma unica vez por tela, no cabecalho ou no login.
+- Interface guiada por icones (SVG de traco fino em `src/components/Icon.jsx`) e dados; textos de apoio, subtitulos e descricoes ficam ocultos. Rotulos de campos permanecem para leitores de tela.
+- Cartoes com borda fina, sombra leve e cantos de 6px; sem fundos escuros, gradientes ou efeitos.
+- Navegacao em barra superior de icones; no operador, a tela tem grade de equipamentos, cronometro, formulario compacto e historico.
 
 ## Validação
 

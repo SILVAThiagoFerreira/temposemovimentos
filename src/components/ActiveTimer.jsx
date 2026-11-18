@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { differenceMinutes, formatDateTime, formatDuration } from '../services/timeService';
+import { differenceMinutes, formatDuration } from '../services/timeService';
 import { useApp } from '../context/AppContext';
 
-export function ActiveTimer({ startDateTime, endDateTime, title = '', tone = 'success' }) {
-  const { language, t } = useApp();
+export function ActiveTimer({ startDateTime, endDateTime }) {
+  const { language } = useApp();
   const [tick, setTick] = useState(Date.now());
 
   useEffect(() => {
@@ -15,15 +15,10 @@ export function ActiveTimer({ startDateTime, endDateTime, title = '', tone = 'su
     () => differenceMinutes(startDateTime, endDateTime || new Date(tick)),
     [endDateTime, startDateTime, tick],
   );
-  const resolvedTitle = title || t('timer.title');
 
   return (
-    <div className={`timer-card timer-card--${tone}`}>
-      <p>{resolvedTitle}</p>
+    <div className="timer-card">
       <strong>{formatDuration(minutes, language)}</strong>
-      <small>
-        {endDateTime ? t('timer.ended', { value: formatDateTime(endDateTime, language) }) : t('timer.started', { value: formatDateTime(startDateTime, language) })}
-      </small>
     </div>
   );
 }

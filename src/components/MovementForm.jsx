@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildMovementDraftKey, clearMovementDraft, pickLatestMovementDraft, readIndexedMovementDraft, readLocalMovementDraft, saveMovementDraft } from '../services/draftStorage';
 import { formatDateTime, nowDateTimeInputValue, nowIso, toDateTimeInputValue } from '../services/timeService';
 import { StatusChip } from './StatusChip';
+import { Icon } from './Icon';
 import { validateDateRange, validateRecordPayload } from '../utils/validators';
 import { useApp } from '../context/AppContext';
 import { translateErrorMessage } from '../i18n/errorMessages.js';
@@ -78,6 +79,7 @@ function buildPayload(form, { operators, equipments, activityTypes, record, defa
 }
 
 export function MovementForm({
+  compact = false,
   title = '',
   submitLabel = '',
   cancelLabel = '',
@@ -329,22 +331,23 @@ export function MovementForm({
   }
 
   return (
-    <form className="card form-card" onSubmit={handleSubmit}>
-      <div className="card__head">
-        <div>
-          <p className="eyebrow">{t('movement.title')}</p>
-          <h2>{resolvedTitle}</h2>
-          {!record || draftState.status ? (
-            <p className="form-status-line">
-              <span>{draftMessage}</span>
-              {draftState.savedAt ? <strong>{new Date(draftState.savedAt).toLocaleString(language)}</strong> : <strong>{t('common.none')}</strong>}
-            </p>
-          ) : null}
+    <form className={`card form-card ${compact ? 'form-card--compact' : ''}`.trim()} onSubmit={handleSubmit}>
+      {compact ? null : (
+        <div className="card__head">
+          <div>
+            <h2>{resolvedTitle}</h2>
+            {!record || draftState.status ? (
+              <p className="form-status-line">
+                <span>{draftMessage}</span>
+                {draftState.savedAt ? <strong>{new Date(draftState.savedAt).toLocaleString(language)}</strong> : <strong>{t('common.none')}</strong>}
+              </p>
+            ) : null}
+          </div>
+          <StatusChip tone={form.manualEntry || record ? 'warning' : 'success'}>
+            {form.manualEntry || record ? t('movement.manual') : t('movement.automatic')}
+          </StatusChip>
         </div>
-        <StatusChip tone={form.manualEntry || record ? 'warning' : 'success'}>
-          {form.manualEntry || record ? t('movement.manual') : t('movement.automatic')}
-        </StatusChip>
-      </div>
+      )}
 
       {errors.form ? <div className="alert alert--danger">{errors.form}</div> : null}
 
@@ -361,7 +364,7 @@ export function MovementForm({
             </select>
             {errors.operatorId ? <small className="field-error">{errors.operatorId}</small> : null}
           </label>
-        ) : (
+        ) : compact ? null : (
           <div className="readonly-pill">
             <span>{t('movement.operator')}</span>
             <strong>{selectedOperator?.name || '-'}</strong>
@@ -380,7 +383,7 @@ export function MovementForm({
             </select>
             {errors.equipmentId ? <small className="field-error">{errors.equipmentId}</small> : null}
           </label>
-        ) : (
+        ) : compact ? null : (
           <div className="readonly-pill">
             <span>{t('movement.equipment')}</span>
             <strong>{selectedEquipment ? `${selectedEquipment.plate} • ${selectedEquipment.code}` : '-'}</strong>
@@ -402,11 +405,12 @@ export function MovementForm({
           {errors.activityTypeId ? <small className="field-error">{errors.activityTypeId}</small> : null}
         </label>
 
-        <label className="toggle-field">
+        <label className="toggle-field" title={t('movement.manual')}>
           <input
             type="checkbox"
             checked={form.manualEntry}
             onChange={(event) => updateField('manualEntry', event.target.checked)}
+            aria-label={t('movement.manual')}
           />
           <span>{t('movement.manual')}</span>
         </label>
@@ -444,7 +448,7 @@ export function MovementForm({
             {errors.endDateTime ? <small className="field-error">{errors.endDateTime}</small> : null}
           </label>
         </div>
-      ) : (
+      ) : compact ? null : (
         <div className="form-note">
           <StatusChip tone="info">{t('movement.autoNote')}</StatusChip>
           <p>{formatDateTime(form.startDateTime, language)}</p>
@@ -452,9 +456,15 @@ export function MovementForm({
       )}
 
       <div className="form-actions">
-        <button className="button button--primary" type="submit" disabled={isSaving}>
-          {isSaving ? t('movement.saving') : resolvedSubmitLabel}
-        </button>
+        {compact ? (
+          <button className="button button--primary button--full" type="submit" disabled={isSaving} aria-label={resolvedSubmitLabel} title={resolvedSubmitLabel}>
+            <Icon name="play" size={20} />
+          </button>
+        ) : (
+          <button className="button button--primary" type="submit" disabled={isSaving}>
+            {isSaving ? t('movement.saving') : resolvedSubmitLabel}
+          </button>
+        )}
         {onCancel ? (
           <button className="button button--ghost" type="button" onClick={onCancel}>
             {resolvedCancelLabel}

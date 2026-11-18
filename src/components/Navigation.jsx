@@ -1,31 +1,20 @@
-import { getRoleLabel } from '../utils/roles';
-import { useApp } from '../context/AppContext';
+import { Icon } from './Icon';
 
-export function Navigation({ items, currentPath, onNavigate, session }) {
-  const { language, t } = useApp();
-  const currentItem = items.find((item) => item.path === currentPath) || items[0] || null;
-  const currentTitle = currentItem?.label || t('navigation.title');
-
+export function Navigation({ items, currentPath, onNavigate }) {
   return (
     <nav className="side-nav">
-      <div className="nav-top">
-        <div className="nav-brand-block">
-          <strong>{currentTitle}</strong>
-        </div>
-      </div>
-
-      <div className="nav-divider" aria-hidden="true" />
-
-      <div className="nav-list" id="admin-navigation-list">
+      <div className="nav-list">
         {items.map((item) => (
           <button
             key={item.path}
             type="button"
             className={`nav-item ${currentPath === item.path ? 'is-active' : ''}`}
             onClick={() => onNavigate(item.path)}
+            aria-current={currentPath === item.path ? 'page' : undefined}
+            aria-label={item.label}
+            title={item.label}
           >
-            <span>{item.label}</span>
-            <small>{item.helper}</small>
+            <Icon name={item.icon} size={20} />
           </button>
         ))}
       </div>

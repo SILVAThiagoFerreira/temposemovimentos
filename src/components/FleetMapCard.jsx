@@ -22,15 +22,6 @@ export function FleetMapCard({ summary }) {
 
   return (
     <section className="card dashboard-block dashboard-map-card">
-      <div className="card__head">
-        <div>
-          <p className="eyebrow">{t('dashboard.map.eyebrow')}</p>
-          <h2>{t('dashboard.map.title')}</h2>
-          <p className="dashboard-map-card__copy">{t('dashboard.map.copy')}</p>
-        </div>
-        <StatusChip tone={trackedCount ? 'info' : 'neutral'}>{t('dashboard.map.activeCount', { count: activeCount })}</StatusChip>
-      </div>
-
       <div className="fleet-map">
         <div className="fleet-map__canvas" role="img" aria-label={t('dashboard.map.title')}>
           {projectedMap.mapUrl ? (
@@ -64,25 +55,9 @@ export function FleetMapCard({ summary }) {
         </div>
 
         <aside className="fleet-map__sidebar">
-          <div className="fleet-map__legend">
-            <span>
-              <i className="fleet-map__legend-swatch fleet-map__legend-swatch--live" />
-              {t('dashboard.map.legend.live')}
-            </span>
-            <span>
-              <i className="fleet-map__legend-swatch fleet-map__legend-swatch--closed" />
-              {t('dashboard.map.legend.lastPoint')}
-            </span>
-            <span>
-              <i className="fleet-map__legend-swatch fleet-map__legend-swatch--missing" />
-              {t('dashboard.map.legend.noGps')}
-            </span>
-          </div>
-
           <div className="fleet-map__summary">
-            <StatusChip tone="success">{t('dashboard.map.activeCount', { count: activeCount })}</StatusChip>
-            <StatusChip tone="info">{t('dashboard.map.visibleCount', { count: trackedCount })}</StatusChip>
-            <StatusChip tone="warning">{t('dashboard.map.missingGps', { count: missingCount })}</StatusChip>
+            <StatusChip tone="success">{activeCount}</StatusChip>
+            <StatusChip tone={missingCount ? 'warning' : 'info'}>{trackedCount}</StatusChip>
           </div>
 
           <div className="fleet-map__list">

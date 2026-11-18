@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { StatusChip } from '../components/StatusChip';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { getHomeRouteForRole, getRoleLabel, getRoleOrder } from '../utils/roles';
 import { translateErrorMessage } from '../i18n/errorMessages.js';
+import { Icon } from '../components/Icon';
 
 const base = import.meta.env.BASE_URL;
 
@@ -15,7 +14,7 @@ export function Login({ navigate }) {
 
   const activeUsers = useMemo(
     () =>
-        [...operators]
+      [...operators]
         .filter((user) => user.active !== false)
         .sort((left, right) => {
           return getRoleOrder(left.role) - getRoleOrder(right.role) || left.name.localeCompare(right.name, language);
@@ -64,49 +63,17 @@ export function Login({ navigate }) {
 
   return (
     <section className="login-view">
-      <div className="login-hero">
-        <div className="login-hero__toolbar">
-          <LanguageSwitcher />
-        </div>
-        <div className="login-hero__brand">
-          <img className="login-logo" src={`${base}openblast-logo.png`} alt="OpenBlast" />
-        </div>
-        <h1>{t('login.hero.title')}</h1>
-        <p className="login-copy">{t('login.hero.copy')}</p>
-
-        <div className="login-stats">
-          <article>
-            <strong>{activeUsers.filter((user) => user.role === 'OPERADOR').length}</strong>
-            <span>{t('login.hero.stats.operators')}</span>
-          </article>
-          <article>
-            <strong>{activeUsers.filter((user) => user.role === 'CLIENTE').length}</strong>
-            <span>{t('login.hero.stats.clients')}</span>
-          </article>
-          <article>
-            <strong>{activeUsers.filter((user) => user.role === 'GERENTE').length}</strong>
-            <span>{t('login.hero.stats.managers')}</span>
-          </article>
-          <article>
-            <strong>{activeUsers.length}</strong>
-            <span>{t('login.hero.stats.active')}</span>
-          </article>
-        </div>
-      </div>
-
       <form className="card login-form" onSubmit={handleSubmit}>
-        <div className="card__head">
-          <div>
-            <p className="eyebrow">{t('login.form.eyebrow')}</p>
-            <h2>{t('login.form.title')}</h2>
+        <img className="login-logo" src={`${base}enaex-logo.png`} alt="Enaex" />
+
+        {error ? (
+          <div className="alert alert--danger" role="alert">
+            {error}
           </div>
-          <StatusChip tone="neutral">{t('login.form.status')}</StatusChip>
-        </div>
+        ) : null}
 
-        {error ? <div className="alert alert--danger">{error}</div> : null}
-
-        <label className="login-user-select">
-          <span>{t('login.form.title')}</span>
+        <label>
+          <span className="sr-only">{t('login.form.title')}</span>
           {activeUsers.length ? (
             <select
               value={selectedUserId}
@@ -117,7 +84,7 @@ export function Login({ navigate }) {
             >
               {activeUsers.map((user) => (
                 <option key={user.id} value={user.id}>
-                  {user.name} - {getRoleLabel(user.role, language)}
+                  {user.name} · {getRoleLabel(user.role, language)}
                 </option>
               ))}
             </select>
@@ -127,7 +94,7 @@ export function Login({ navigate }) {
         </label>
 
         <label>
-          <span>{t('login.form.password')}</span>
+          <span className="sr-only">{t('login.form.password')}</span>
           <input
             type="password"
             value={password}
@@ -137,8 +104,8 @@ export function Login({ navigate }) {
           />
         </label>
 
-        <button className="button button--primary button--full" type="submit" disabled={!activeUsers.length}>
-          {t('login.form.submit')}
+        <button className="button button--primary button--full login-submit" type="submit" disabled={!activeUsers.length} aria-label={t('login.form.submit')}>
+          <Icon name="arrow" />
         </button>
       </form>
     </section>
