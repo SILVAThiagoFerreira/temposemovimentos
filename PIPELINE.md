@@ -37,3 +37,11 @@
 - Se ambos falharem, o sistema reidrata com seed inicial documentado.
 - Se a rede falhar durante atualização da PWA, o service worker mantém a versão em cache e tenta novamente no próximo ciclo.
 - Se a rede falhar no aplicativo Android após ao menos uma abertura online, o service worker do GitHub Pages usa os assets em cache e o WebView mantém o snapshot local em `localStorage`/`IndexedDB`; a sincronização remota é retomada nas próximas gravações com conexão.
+
+## Variante `sheets` (storage.backend = "sheets")
+
+1. Boot: não inicializa o Firebase; `readRemoteDatabase` chama `snapshot`.
+2. Snapshot `null` (planilha sem usuários): o app grava o cadastro inicial com `save`.
+3. Alterações locais entram na fila de sincronização e seguem para `save`.
+4. Polling: `version` a cada 30 s; se o `updatedAt` mudou, busca `snapshot` e aplica se for mais novo.
+5. Falhas seguem o mesmo backoff da variante Firestore.

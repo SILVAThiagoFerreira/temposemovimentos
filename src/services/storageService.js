@@ -5,7 +5,7 @@ import { initialUsers } from '../data/initialUsers';
 import { automationConfig, authConfig, seedConfig, storageConfig } from '../config/runtimeConfig';
 import { DEFAULT_LOCALE, normalizeLocale } from '../i18n/messages.js';
 import { normalizeGpsSnapshot } from './locationService.js';
-import { ensureFirebaseClient, isFirebaseConfigured, readRemoteDatabase, subscribeRemoteDatabase, writeRemoteDatabase } from './firebaseClient';
+import { ensureRemoteClient, isRemoteConfigured, readRemoteDatabase, subscribeRemoteDatabase, writeRemoteDatabase } from './remoteStore';
 import { getNightAutoCloseDeadline, normalizeNightAutoCloseWindow } from '../utils/nightAutoCloseWindow.js';
 import { createId } from '../utils/id';
 import { normalizeUserRole } from '../utils/roles';
@@ -310,7 +310,7 @@ function restoreFromBackups() {
 }
 
 function markBackendStatus({ available, error = null, syncedAt = null } = {}) {
-  storageMeta.backendConfigured = isFirebaseConfigured();
+  storageMeta.backendConfigured = isRemoteConfigured();
   if (typeof available === 'boolean') {
     storageMeta.backendAvailable = available;
     storageMeta.connectionState = available ? 'ONLINE' : 'OFFLINE';
@@ -387,7 +387,7 @@ async function syncBackendSnapshot(database) {
 }
 
 function queueBackendSync(database, reason = 'database-sync') {
-  if (!isFirebaseConfigured()) {
+  if (!isRemoteConfigured()) {
     return Promise.resolve(null);
   }
 
@@ -412,7 +412,7 @@ function queueBackendSync(database, reason = 'database-sync') {
 }
 
 function scheduleConnectivitySync(reason = 'connectivity-sync', delayMs = 0) {
-  if (!isFirebaseConfigured() || typeof window === 'undefined') {
+  if (!isRemoteConfigured() || typeof window === 'undefined') {
     return;
   }
 
@@ -464,7 +464,7 @@ function installConnectivitySyncHandlers() {
 }
 
 async function attachRemoteListener() {
-  if (!isFirebaseConfigured() || remoteListenerUnsubscribe) {
+  if (!isRemoteConfigured() || remoteListenerUnsubscribe) {
     return;
   }
 
@@ -813,7 +813,7 @@ function normalizeDatabase(raw) {
 
 export async function bootstrapStorage() {
   storageMeta.bootstrappedAt = nowIso();
-  storageMeta.backendConfigured = isFirebaseConfigured();
+  storageMeta.backendConfigured = isRemoteConfigured();
   storageMeta.backendAvailable = false;
   storageMeta.lastRemoteSyncError = null;
   storageMeta.syncPending = false;
@@ -845,7 +845,7 @@ export async function bootstrapStorage() {
     }
 
     if (storageMeta.backendConfigured) {
-      await ensureFirebaseClient();
+      await ensureRemoteClient();
       const remoteSnapshot = await bootstrapBackendSnapshot(setDatabaseSettingsMode(resolvedDatabase || freshDatabase, 'ONLINE'));
 
       if (remoteSnapshot) {

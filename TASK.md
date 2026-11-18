@@ -20,3 +20,11 @@ Estruturar o projeto como sistema auditável e escalável, com frontend no GitHu
 - Testes/validações executáveis.
 - Build do projeto funcional.
 - Publicação online automática via GitHub Pages.
+
+## Decisão 2026-11-18: base em Google Sheets (Apps Script)
+
+- Escolha do responsável: usar a planilha da pasta TEMPOS E MOVIMENTOS como base, por meio de Apps Script.
+- Exceção à restrição "Não criar dependência de backend para a Fase 1". O Apps Script é um backend mínimo.
+- Trade-offs: endpoint público (mesmo nível de exposição do Firestore atual), cotas de conta gratuita, polling em vez de tempo real, gravação de snapshot completo.
+- Produção continua no Firestore até a troca de `storage.backend` e a migração (ver `apps-script/README.md`).
+- Pendências: autenticação no servidor, senhas com hash, conta Workspace e acompanhamento das execuções.

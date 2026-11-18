@@ -71,3 +71,9 @@ O frontend é publicado no GitHub Pages e sincroniza direto com Firestore.
 
 - Nenhum segredo é necessário para o build do GitHub Pages.
 - Se mudar as regras do Firestore, publique `firestore.rules` com o Firebase CLI.
+
+## Backend de dados
+
+- Padrão: Firestore (`storage.backend = "firestore"`).
+- Alternativa: Google Sheets via Apps Script (`storage.backend = "sheets"`). Ver `apps-script/README.md`.
+- Testes: `tests/sheets-roundtrip.mjs` (Apps Script real em ambiente isolado) e `tests/sheets-client.mjs` (cliente com requisições simuladas).

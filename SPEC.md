@@ -67,3 +67,11 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 - Botão de recarga do sistema nas telas logadas.
 - Backups JSON e CSV.
 - Administração restrita de usuários.
+
+## Persistência remota configurável
+
+- `storage.backend`: `firestore` (padrão) ou `sheets`.
+- Com `sheets`, o app usa o web app do Apps Script sobre a planilha da pasta TEMPOS E MOVIMENTOS no Drive.
+- Leitura inicial, gravação do snapshot a cada alteração (pela mesma fila offline) e polling a cada `sheets.pollIntervalSeconds` (padrão 30 s). O polling consulta só a versão e busca o snapshot quando ela muda.
+- O servidor recusa gravação sem usuários.
+- IndexedDB, localStorage e o modo offline continuam como antes.

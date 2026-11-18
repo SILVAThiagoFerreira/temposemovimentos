@@ -17,7 +17,8 @@
       "version": 1
     },
     "defaultMode": "ONLINE",
-    "requestPersistentStorage": true
+    "requestPersistentStorage": true,
+    "backend": "firestore"
   },
   "automation": {
     "nightAutoClose": {
@@ -40,6 +41,12 @@
     "stateDocument": "current",
     "anonymousAuth": false,
     "enableIndexedDbPersistence": true
+  },
+  "sheets": {
+    "webAppUrl": "",
+    "pollIntervalSeconds": 30,
+    "requestTimeoutMs": 15000,
+    "note": "Preencher com a URL do web app do Apps Script (apps-script/README.md). Só é usada com storage.backend = \"sheets\"."
   },
   "auth": {
     "defaultPassword": "1234",

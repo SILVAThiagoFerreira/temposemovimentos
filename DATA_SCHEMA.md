@@ -255,3 +255,25 @@
   }
 }
 ```
+
+## Planilha (Google Sheets)
+
+Fonte única: `apps-script/schema.js`. Cada aba é uma coleção do snapshot:
+
+| Aba | Coleção do snapshot |
+| --- | --- |
+| `usuarios` | `operators` |
+| `equipamentos` | `equipments` |
+| `atividades` | `activityTypes` |
+| `turnos` | `shifts` |
+| `registros` | `movementRecords` |
+| `configuracoes` | `chave` / `valor` / `tipo`: versão, datas e `settings.*` |
+
+- Células são gravadas em formato de texto (`@`); código de atividade `01` continua texto.
+- Datas: texto ISO 8601 em UTC, sem conversão de fuso.
+- Booleanos: `SIM` / `NÃO`.
+- Vazio vira `null` nos campos anuláveis, `''` nos textos e `false` nos booleanos.
+- `gps` ocupa uma coluna por campo; todas ficam vazias quando `gps` é `null`.
+- Campos do app fora do esquema vão para `extras_json` (JSON), sem perda.
+- Campos legados mantidos para ida e volta: `turno_id`, `turno_nome`, `local`, `falha_descricao`, `acao_corretiva`, `local_padrao`.
+- `senha` guarda a senha do login em texto, como já ocorre no Firestore.
