@@ -73,7 +73,7 @@ export function Login({ navigate }) {
         ) : null}
 
         <label>
-          <span className="sr-only">{t('login.form.title')}</span>
+          <span>{t('login.form.title')}</span>
           {activeUsers.length ? (
             <select
               value={selectedUserId}
@@ -94,17 +94,17 @@ export function Login({ navigate }) {
         </label>
 
         <label>
-          <span className="sr-only">{t('login.form.password')}</span>
+          <span>{t('login.form.password')}</span>
           <input
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            placeholder={t('login.form.passwordPlaceholder')}
             autoComplete="current-password"
           />
         </label>
 
-        <button className="button button--primary button--full login-submit" type="submit" disabled={!activeUsers.length} aria-label={t('login.form.submit')}>
+        <button className="button button--primary button--full login-submit" type="submit" disabled={!activeUsers.length}>
+          {t('login.form.submit')}
           <Icon name="arrow" />
         </button>
       </form>

@@ -2,7 +2,6 @@ import { useMemo, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { MovementForm } from '../components/MovementForm';
 import { RecordsTable } from '../components/RecordsTable';
-import { StatusChip } from '../components/StatusChip';
 import { downloadCsv, downloadTextFile } from '../services/csvService';
 import { isSameDay, toDateInputValue } from '../services/timeService';
 import { translateErrorMessage } from '../i18n/errorMessages.js';
@@ -139,14 +138,10 @@ export function DataExport() {
 
   return (
     <div className="page-stack">
-      <section className="card page-banner">
-        <div>
-          <p className="eyebrow">{t('export.banner.eyebrow')}</p>
-          <h2>{t('export.banner.title')}</h2>
-          <p>{t('export.banner.copy')}</p>
-        </div>
-        <StatusChip tone="info">{t('export.filteredCount', { count: filteredRecords.length })}</StatusChip>
-      </section>
+      <header className="page-head">
+        <h2>{t('export.banner.title')}</h2>
+        <span className="count-pill">{t('export.filteredCount', { count: filteredRecords.length })}</span>
+      </header>
 
       {notice ? <div className="alert alert--info">{notice}</div> : null}
 

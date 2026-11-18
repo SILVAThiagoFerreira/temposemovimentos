@@ -103,17 +103,20 @@ export function OperatorPanel() {
   }
 
   return (
-    <div className="page-stack">
-      <section className="equipment-grid" aria-label={t('operator.hero.selectedEquipment')}>
-        {equipments.map((equipment) => (
-          <EquipmentCard
-            key={equipment.id}
-            equipment={equipment}
-            selected={equipment.id === selectedEquipmentId}
-            openRecord={records.find((record) => record.status === 'ABERTO' && record.equipmentId === equipment.id)}
-            onSelect={setSelectedEquipmentId}
-          />
-        ))}
+    <div className="page-stack operator">
+      <section className="operator-section">
+        <div className="section-label">{t('operator.hero.selectedEquipment')}</div>
+        <div className="equipment-grid">
+          {equipments.map((equipment) => (
+            <EquipmentCard
+              key={equipment.id}
+              equipment={equipment}
+              selected={equipment.id === selectedEquipmentId}
+              openRecord={records.find((record) => record.status === 'ABERTO' && record.equipmentId === equipment.id)}
+              onSelect={setSelectedEquipmentId}
+            />
+          ))}
+        </div>
       </section>
 
       {selectedEquipmentOpenRecord && selectedEquipmentOpenRecord.operatorId !== session.operatorId ? (
@@ -126,16 +129,23 @@ export function OperatorPanel() {
         <div className="stack">
           {operatorActiveRecord ? (
             <section className="card active-record-card">
-              <ActiveTimer startDateTime={operatorActiveRecord.startDateTime} />
-              <div className="record-summary-list">
-                <div>
-                  <strong>{operatorActiveRecord.plate}</strong>
-                </div>
-                <div>
-                  <strong>{operatorActiveRecord.activityCode || '-'}</strong>
-                  <span>{operatorActiveRecord.activityName}</span>
-                </div>
+              <div>
+                <div className="section-label">{t('timer.title')}</div>
+                <ActiveTimer startDateTime={operatorActiveRecord.startDateTime} />
               </div>
+              <dl className="record-summary-list">
+                <div>
+                  <dt>{t('movement.equipment')}</dt>
+                  <dd>{operatorActiveRecord.plate}</dd>
+                </div>
+                <div>
+                  <dt>{t('table.headers.activity')}</dt>
+                  <dd>
+                    {operatorActiveRecord.activityCode ? `${operatorActiveRecord.activityCode} · ` : ''}
+                    {operatorActiveRecord.activityName}
+                  </dd>
+                </div>
+              </dl>
             </section>
           ) : null}
 
@@ -153,7 +163,11 @@ export function OperatorPanel() {
           />
         </div>
 
-        <section className="card table-section">
+        <section className="history">
+          <header className="panel__head">
+            <h2>{t('operator.form.history')}</h2>
+            <span className="count-pill">{t('operator.form.count', { count: todayRecords.length })}</span>
+          </header>
           <RecordsTable records={todayRecords} emptyMessage={t('operator.form.empty')} />
         </section>
       </div>
@@ -161,13 +175,12 @@ export function OperatorPanel() {
       {operatorActiveRecord ? (
         <div className="operator-actions-footer">
           <button
-            className="button button--primary operator-finish-button"
+            className="button button--danger operator-finish-button"
             type="button"
             onClick={handleCloseActive}
-            aria-label={t('operator.form.finish')}
-            title={t('operator.form.finish')}
           >
-            <Icon name="stop" size={20} />
+            <Icon name="stop" size={18} />
+            {t('operator.form.finish')}
           </button>
         </div>
       ) : null}

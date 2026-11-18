@@ -422,7 +422,6 @@ export function MovementForm({
           rows="3"
           value={form.notes}
           onChange={(event) => updateField('notes', event.target.value)}
-          placeholder={t('movement.notesPlaceholder')}
         />
       </label>
 
@@ -457,8 +456,9 @@ export function MovementForm({
 
       <div className="form-actions">
         {compact ? (
-          <button className="button button--primary button--full" type="submit" disabled={isSaving} aria-label={resolvedSubmitLabel} title={resolvedSubmitLabel}>
-            <Icon name="play" size={20} />
+          <button className="button button--primary button--full" type="submit" disabled={isSaving}>
+            <Icon name="play" size={18} />
+            {isSaving ? t('movement.saving') : resolvedSubmitLabel}
           </button>
         ) : (
           <button className="button button--primary" type="submit" disabled={isSaving}>
