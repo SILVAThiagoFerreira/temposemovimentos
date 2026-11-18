@@ -151,6 +151,12 @@ function getDefaultClient() {
   return defaultClient;
 }
 
+export function ensureSheetsClient() {
+  if (isSheetsConfigured()) {
+    getDefaultClient();
+  }
+}
+
 export function isSheetsConfigured() {
   return Boolean(sheetsConfig.webAppUrl);
 }

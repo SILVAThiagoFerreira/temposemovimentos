@@ -5,9 +5,9 @@ import { getRoleLabel, getRoleOrder } from '../utils/roles';
 import { translateErrorMessage } from '../i18n/errorMessages.js';
 
 const integrationRoadmap = {
-  'pt-BR': ['Firebase Firestore', 'Supabase', 'API própria', 'Power BI', 'Google Sheets', 'Banco SQL'],
-  'en-US': ['Firebase Firestore', 'Supabase', 'Custom API', 'Power BI', 'Google Sheets', 'SQL database'],
-  'zh-CN': ['Firebase Firestore', 'Supabase', '自定义 API', 'Power BI', 'Google Sheets', 'SQL 数据库'],
+  'pt-BR': ['Supabase', 'API própria', 'Power BI', 'Google Sheets', 'Banco SQL'],
+  'en-US': ['Supabase', 'Custom API', 'Power BI', 'Google Sheets', 'SQL database'],
+  'zh-CN': ['Supabase', '自定义 API', 'Power BI', 'Google Sheets', 'SQL 数据库'],
 };
 
 function createEmptyUserForm() {

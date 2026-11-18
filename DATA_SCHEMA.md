@@ -23,7 +23,6 @@
     }
   },
   "dashboard": {},
-  "firebase": {},
   "auth": {
     "defaultPassword": "1234",
     "passwordSaltRounds": 10,
@@ -79,7 +78,7 @@
 - Os campos de turno deixaram de ser expostos no fluxo atual.
 - `syncPassword` é um campo opcional do seed usado para sobrescrever a senha existente quando o valor do seed deve prevalecer.
 - `storage.keys.uiLanguage` guarda a preferência de idioma da interface no armazenamento local.
-- O aplicativo Android não altera o formato dos dados; ele usa o mesmo snapshot, as mesmas chaves de armazenamento e o mesmo documento Firestore configurados em `config.json`, carregados pela origem do GitHub Pages.
+- O aplicativo Android não altera o formato dos dados; ele usa o mesmo snapshot, as mesmas chaves de armazenamento e o mesma planilha configurada em `config.json`, carregados pela origem do GitHub Pages.
 
 ## StorageMeta
 
@@ -234,7 +233,7 @@
 }
 ```
 
-- `connectionState`, `lastRemoteSyncAt` e `lastRemoteSyncError` refletem as tentativas automáticas de sincronização do snapshot local com o Firestore.
+- `connectionState`, `lastRemoteSyncAt` e `lastRemoteSyncError` refletem as tentativas automáticas de sincronização do snapshot local com a planilha.
 
 ## Snapshot
 
@@ -276,4 +275,4 @@ Fonte única: `apps-script/schema.js`. Cada aba é uma coleção do snapshot:
 - `gps` ocupa uma coluna por campo; todas ficam vazias quando `gps` é `null`.
 - Campos do app fora do esquema vão para `extras_json` (JSON), sem perda.
 - Campos legados mantidos para ida e volta: `turno_id`, `turno_nome`, `local`, `falha_descricao`, `acao_corretiva`, `local_padrao`.
-- `senha` guarda a senha do login em texto, como já ocorre no Firestore.
+- `senha` guarda a senha do login em texto (decisão registrada; hash é a próxima etapa).

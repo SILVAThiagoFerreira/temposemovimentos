@@ -17,8 +17,7 @@
       "version": 1
     },
     "defaultMode": "ONLINE",
-    "requestPersistentStorage": true,
-    "backend": "firestore"
+    "requestPersistentStorage": true
   },
   "automation": {
     "nightAutoClose": {
@@ -28,25 +27,11 @@
     }
   },
   "dashboard": {},
-  "firebase": {
-    "webConfig": {
-      "apiKey": "AIzaSyD3phWlKAFuioxm7-0OVViqFRv7C25i7Bw",
-      "authDomain": "tempos-e-movimentos-1b9b9.firebaseapp.com",
-      "projectId": "tempos-e-movimentos-1b9b9",
-      "storageBucket": "tempos-e-movimentos-1b9b9.firebasestorage.app",
-      "messagingSenderId": "790028516575",
-      "appId": "1:790028516575:web:bbc2c06281c3144c33fd6a"
-    },
-    "stateCollection": "appState",
-    "stateDocument": "current",
-    "anonymousAuth": false,
-    "enableIndexedDbPersistence": true
-  },
   "sheets": {
     "webAppUrl": "https://script.google.com/macros/s/AKfycbwj4vcx_beFII2uWDS-fC4vbesrT90G9-C4ffr7uO0C5CQYXqiE8_GAhwyaHH2xFF-L/exec",
     "pollIntervalSeconds": 30,
     "requestTimeoutMs": 15000,
-    "note": "Implantado pelo responsavel em 18/11/2026 (Qualquer pessoa, executar como o dono). Usado somente com storage.backend = \"sheets\"."
+    "note": "Implantado em 18/11/2026: executar como o dono, acesso sem login Google. Backend único do app."
   },
   "auth": {
     "defaultPassword": "1234",

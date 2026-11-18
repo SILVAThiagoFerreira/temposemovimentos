@@ -31,15 +31,15 @@ const requiredFiles = [
   'DATA_SCHEMA.md',
   'config.json',
   'src/main.jsx',
-  'src/services/firebaseClient.js',
+  'src/services/sheetsClient.js',
+  'apps-script/Code.gs',
+  'apps-script/schema.js',
+  'apps-script/appsscript.json',
   'input/README.md',
   'input/backup-template.json',
   'output/README.md',
   'logs/README.md',
   'tests/README.md',
-  'firebase.json',
-  '.firebaserc',
-  'firestore.rules',
   'src/services/draftStorage.js',
 ];
 
@@ -54,9 +54,8 @@ assert(config?.meta?.name, 'config.json sem meta.name');
 assert(config?.storage?.keys?.database, 'config.json sem storage.keys.database');
 assert(config?.storage?.keys?.session, 'config.json sem storage.keys.session');
 assert(config?.storage?.keys?.uiLanguage, 'config.json sem storage.keys.uiLanguage');
-assert(config?.firebase?.webConfig?.apiKey, 'config.json sem firebase.webConfig.apiKey');
-assert(config?.firebase?.stateCollection, 'config.json sem firebase.stateCollection');
-assert(config?.firebase?.stateDocument, 'config.json sem firebase.stateDocument');
+assert(/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(config?.sheets?.webAppUrl || ''), 'config.json sem sheets.webAppUrl valida');
+assert(config?.sheets?.pollIntervalSeconds > 0, 'config.json sem sheets.pollIntervalSeconds');
 assert(config?.auth?.roles?.client === 'CLIENTE', 'config.json sem auth.roles.client');
 assert(config?.automation?.nightAutoClose?.enabled === true, 'config.json sem auto-encerramento noturno habilitado');
 assert(config?.automation?.nightAutoClose?.startTime === '19:00', 'config.json sem horário inicial do auto-encerramento noturno');

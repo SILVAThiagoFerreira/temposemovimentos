@@ -2,7 +2,7 @@
 
 ## Escopo
 
-Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHub Pages, aplicativo Android empacotado localmente, Firestore direto e suporte offline com sincronização.
+Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHub Pages, aplicativo Android empacotado localmente, planilha do Google Drive e suporte offline com sincronização.
 
 ## Atores
 
@@ -38,25 +38,25 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 
 ## Persistência
 
-- Escritura primária: documento do Firestore.
-- Banco persistente: Firestore.
+- Escritura primária: planilha do Google Drive.
+- Banco persistente: planilha.
 - Espelho local: `localStorage` e `IndexedDB`, usados como cache, fila offline e rascunhos do formulário.
-- No boot, o sistema inicializa o Firebase e restaura o snapshot mais recente entre Firestore e cache local.
-- As alterações são sincronizadas no documento central do Firestore após cada gravação.
+- No boot, o sistema lê o snapshot da planilha e restaura o mais recente entre a planilha e o cache local.
+- As alterações são sincronizadas no planilha do Google Drive após cada gravação.
 - Backup, exportação e importação preservam cadastros, configurações e registros operacionais.
 - Se uma gravação falhar por falta de internet, o snapshot local permanece preservado e o app tenta reenviar automaticamente ao voltar a conexão, ao retornar para primeiro plano e em retentativas periódicas.
 - Os rascunhos do formulário operacional ficam preservados em `localStorage` e `IndexedDB`, com restauração automática no mesmo contexto do catálogo, para evitar perda ao recarregar a página.
 - O navegador é solicitado a manter o armazenamento como persistente.
 - A tela de configurações expõe telemetria local da sincronização, incluindo fila pendente, falhas e retentativa, para suportar rede oscilante em campo.
-- Apontamentos abertos permanecem salvos no Firestore e podem ser retomados após fechar a aba ou trocar de dispositivo.
-- A PWA verifica atualizações automaticamente em intervalos curtos e troca assets de tela pela versão mais nova sem remover `localStorage`, `IndexedDB` ou documentos do Firestore.
+- Apontamentos abertos permanecem salvos na planilha e podem ser retomados após fechar a aba ou trocar de dispositivo.
+- A PWA verifica atualizações automaticamente em intervalos curtos e troca assets de tela pela versão mais nova sem remover `localStorage`, `IndexedDB` ou documentos da planilha.
 - O aplicativo Android carrega a interface publicada no GitHub Pages para receber atualizações de tela/regras sem reinstalar APK; após o primeiro carregamento online, o cache da PWA mantém abertura offline e o WebView preserva `localStorage` e `IndexedDB`.
 
 ## Validações
 
 - Configuração deve existir e estar íntegra.
 - Seeds devem conter usuários, equipamentos, turnos e códigos válidos.
-- O sistema não pode iniciar sem restaurar um snapshot válido do Firestore ou do seed inicial.
+- O sistema não pode iniciar sem restaurar um snapshot válido da planilha ou do seed inicial.
 - O gerente continua sendo o único administrador de usuários.
 
 ## Saídas Esperadas
@@ -70,8 +70,7 @@ Sistema de apontamento operacional para UMBs e caminhões, com frontend no GitHu
 
 ## Persistência remota configurável
 
-- `storage.backend`: `firestore` (padrão) ou `sheets`.
-- Com `sheets`, o app usa o web app do Apps Script sobre a planilha da pasta TEMPOS E MOVIMENTOS no Drive.
+- O app usa o web app do Apps Script sobre a planilha da pasta TEMPOS E MOVIMENTOS no Drive, sem login Google.
 - Leitura inicial, gravação do snapshot a cada alteração (pela mesma fila offline) e polling a cada `sheets.pollIntervalSeconds` (padrão 30 s). O polling consulta só a versão e busca o snapshot quando ela muda.
 - O servidor recusa gravação sem usuários.
 - IndexedDB, localStorage e o modo offline continuam como antes.

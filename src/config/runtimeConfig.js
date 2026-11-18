@@ -10,7 +10,6 @@ export const metaConfig = runtimeConfig.meta;
 export const storageConfig = runtimeConfig.storage;
 export const automationConfig = runtimeConfig.automation;
 export const dashboardConfig = runtimeConfig.dashboard || {};
-export const firebaseConfig = runtimeConfig.firebase;
 export const sheetsConfig = runtimeConfig.sheets || {};
 export const authConfig = runtimeConfig.auth;
 export const seedConfig = runtimeConfig.seed;

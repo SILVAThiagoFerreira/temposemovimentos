@@ -1,6 +1,6 @@
 # Sistema de Tempos e Movimentos - UMB / Caminhões
 
-Sistema web PWA para apontamento operacional em tablets, com frontend no GitHub Pages, Firestore direto e cache local para operação offline.
+Sistema web PWA para apontamento operacional em tablets, com frontend no GitHub Pages, planilha do Google Drive e cache local para operação offline.
 
 ## Objetivo
 
@@ -16,8 +16,8 @@ Registrar atividades, paradas e duração por equipamento em campo, com acesso p
 ## Processamento
 
 - `src/main.jsx` inicia o bootstrap do armazenamento.
-- `src/services/storageService.js` restaura o snapshot local, sincroniza com o Firestore, encerra automaticamente o apontamento anterior quando uma nova atividade inicia e mantém o espelho em `localStorage` e `IndexedDB`.
-- `src/services/firebaseClient.js` inicializa o Firebase web SDK sem exigir sessão anônima.
+- `src/services/storageService.js` restaura o snapshot local, sincroniza com a planilha, encerra automaticamente o apontamento anterior quando uma nova atividade inicia e mantém o espelho em `localStorage` e `IndexedDB`.
+- `src/services/sheetsClient.js` conversa com o Apps Script (planilha do Google Drive) para ler, gravar e acompanhar mudanças.
 - `src/pages/Login.jsx` autentica por usuário e recupera a sessão, roteando clientes para o dashboard.
 - `src/pages/OperatorPanel.jsx` executa o fluxo operacional.
 - `src/pages/Settings.jsx` administra usuários somente para gerente.
@@ -52,7 +52,7 @@ Registrar atividades, paradas e duração por equipamento em campo, com acesso p
 4. `npm run build`
 5. `npm run validate`
 
-O Firebase web config já está em `config.json`.
+A URL do Apps Script fica em `config.json`, em `sheets.webAppUrl`.
 
 ## Estrutura principal
 
@@ -65,15 +65,14 @@ O Firebase web config já está em `config.json`.
 
 ## Publicação
 
-O frontend é publicado no GitHub Pages e sincroniza direto com Firestore.
+O frontend é publicado no GitHub Pages e sincroniza direto com planilha.
 
 ## Deploy
 
 - Nenhum segredo é necessário para o build do GitHub Pages.
-- Se mudar as regras do Firestore, publique `firestore.rules` com o Firebase CLI.
 
 ## Backend de dados
 
-- Padrão: Firestore (`storage.backend = "firestore"`).
-- Alternativa: Google Sheets via Apps Script (`storage.backend = "sheets"`). Ver `apps-script/README.md`.
+- Backend único: planilha do Google Drive via Apps Script (`apps-script/README.md`).
+- Backend único: planilha do Google Drive via Apps Script. Ver `apps-script/README.md`.
 - Testes: `tests/sheets-roundtrip.mjs` (Apps Script real em ambiente isolado) e `tests/sheets-client.mjs` (cliente com requisições simuladas).

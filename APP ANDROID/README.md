@@ -8,9 +8,9 @@ Aplicativo Android gerado com Capacitor a partir do mesmo frontend React usado n
 - Atualizacoes publicadas no GitHub Pages passam a entrar no app Android na proxima abertura com internet.
 - Depois do primeiro carregamento online, a PWA mantem assets em cache para abertura offline.
 - Os apontamentos continuam salvos primeiro no dispositivo com `localStorage` e `IndexedDB` da origem do GitHub Pages.
-- Quando houver internet, a mesma fila de sincronização do sistema web envia o snapshot para o Firestore configurado em `config.json`.
+- Quando houver internet, a mesma fila de sincronização do sistema web envia o snapshot para o planilha configurado em `config.json`.
 - Se a internet cair, o snapshot fica preservado no tablet e o app tenta reenviar no boot, quando a rede volta, quando a tela volta ao primeiro plano e em retentativas periodicas.
-- O painel web continua acompanhando os dados pelo documento central do Firestore.
+- O painel web continua acompanhando os dados pelo planilha do Google Drive.
 - O app solicita permissão de internet e localização para manter a sincronização e o GPS dos apontamentos.
 
 ## Atualizacao remota

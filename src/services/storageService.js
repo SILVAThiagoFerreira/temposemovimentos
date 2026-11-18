@@ -339,7 +339,7 @@ function markSyncFailure(error) {
   storageMeta.syncFailureCount += 1;
   storageMeta.syncPending = true;
   storageMeta.syncBackoffMs = Math.min(60_000, Math.max(2_000, 2_000 * 2 ** Math.min(storageMeta.syncFailureCount - 1, 5)));
-  storageMeta.lastRemoteSyncError = error?.message || 'Falha ao sincronizar Firebase';
+  storageMeta.lastRemoteSyncError = error?.message || 'Falha ao sincronizar a planilha';
 }
 
 function setDatabaseSettingsMode(database, mode) {
@@ -367,7 +367,7 @@ async function bootstrapBackendSnapshot(database) {
     markBackendStatus({ available: true, error: null, syncedAt: nowIso() });
     return database;
   } catch (error) {
-    markBackendStatus({ available: false, error: error?.message || 'Falha ao inicializar Firebase' });
+    markBackendStatus({ available: false, error: error?.message || 'Falha ao inicializar a planilha' });
     return null;
   }
 }
@@ -380,7 +380,7 @@ async function syncBackendSnapshot(database) {
     markSyncSuccess();
     return database;
   } catch (error) {
-    markBackendStatus({ available: false, error: error?.message || 'Falha ao sincronizar Firebase' });
+    markBackendStatus({ available: false, error: error?.message || 'Falha ao sincronizar a planilha' });
     markSyncFailure(error);
     return null;
   }
@@ -470,7 +470,7 @@ async function attachRemoteListener() {
 
   remoteListenerUnsubscribe = await subscribeRemoteDatabase((remoteDatabase, error) => {
     if (error) {
-      markBackendStatus({ available: false, error: error.message || 'Falha ao ouvir Firebase' });
+      markBackendStatus({ available: false, error: error.message || 'Falha ao ouvir a planilha' });
       return;
     }
 
@@ -489,7 +489,7 @@ async function attachRemoteListener() {
     safeWriteJson(DB_KEY, normalizedRemote);
     persistSnapshot(DB_KEY, normalizedRemote);
     markBackendStatus({ available: true, error: null, syncedAt: nowIso() });
-    emitChange({ reason: 'firebase-snapshot', scope: 'database' });
+    emitChange({ reason: 'sheets-snapshot', scope: 'database' });
   });
 }
 

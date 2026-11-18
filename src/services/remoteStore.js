@@ -1,43 +1,23 @@
-import { storageConfig } from '../config/runtimeConfig';
-import {
-  ensureFirebaseClient,
-  isFirebaseConfigured,
-  readRemoteDatabase as readFirestoreDatabase,
-  subscribeRemoteDatabase as subscribeFirestoreDatabase,
-  writeRemoteDatabase as writeFirestoreDatabase,
-} from './firebaseClient';
-import {
-  isSheetsConfigured,
-  readSheetsDatabase,
-  subscribeSheetsDatabase,
-  writeSheetsDatabase,
-} from './sheetsClient';
+import { ensureSheetsClient, isSheetsConfigured, readSheetsDatabase, subscribeSheetsDatabase, writeSheetsDatabase } from './sheetsClient';
 
-// Seleciona o backend de persistência remota conforme config.json (storage.backend).
-// "firestore" é o padrão; "sheets" usa o Apps Script sobre a planilha no Google Drive.
-
-export function getRemoteBackend() {
-  return storageConfig.backend === 'sheets' ? 'sheets' : 'firestore';
-}
+// Persistência remota única: planilha do Google Drive via Apps Script (ver apps-script/README.md).
 
 export function isRemoteConfigured() {
-  return getRemoteBackend() === 'sheets' ? isSheetsConfigured() : isFirebaseConfigured();
+  return isSheetsConfigured();
 }
 
 export async function ensureRemoteClient() {
-  if (getRemoteBackend() === 'firestore') {
-    await ensureFirebaseClient();
-  }
+  ensureSheetsClient();
 }
 
 export function readRemoteDatabase() {
-  return getRemoteBackend() === 'sheets' ? readSheetsDatabase() : readFirestoreDatabase();
+  return readSheetsDatabase();
 }
 
 export function writeRemoteDatabase(database) {
-  return getRemoteBackend() === 'sheets' ? writeSheetsDatabase(database) : writeFirestoreDatabase(database);
+  return writeSheetsDatabase(database);
 }
 
 export function subscribeRemoteDatabase(onChange) {
-  return getRemoteBackend() === 'sheets' ? subscribeSheetsDatabase(onChange) : subscribeFirestoreDatabase(onChange);
+  return subscribeSheetsDatabase(onChange);
 }

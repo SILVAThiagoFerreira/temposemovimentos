@@ -18,10 +18,10 @@ const ERROR_KEYS = new Map([
   ['Arquivo JSON inválido', 'errors.importJson'],
   ['Falha ao salvar usuário.', 'errors.saveUser'],
   ['Falha ao salvar configurações.', 'errors.saveSettings'],
-  ['Firebase não configurado', 'errors.generic'],
-  ['Falha ao inicializar Firebase', 'errors.generic'],
-  ['Falha ao sincronizar Firebase', 'errors.generic'],
-  ['Falha ao ouvir Firebase', 'errors.generic'],
+  ['URL do Apps Script não configurada', 'errors.generic'],
+  ['Falha ao inicializar a planilha', 'errors.generic'],
+  ['Falha ao sincronizar a planilha', 'errors.generic'],
+  ['Falha ao ouvir a planilha', 'errors.generic'],
   ['Hora final deve ser maior que a inicial', 'movement.errors.endAfterStart'],
 ]);
 
