@@ -43,10 +43,10 @@
     "enableIndexedDbPersistence": true
   },
   "sheets": {
-    "webAppUrl": "",
+    "webAppUrl": "https://script.google.com/macros/s/AKfycbwj4vcx_beFII2uWDS-fC4vbesrT90G9-C4ffr7uO0C5CQYXqiE8_GAhwyaHH2xFF-L/exec",
     "pollIntervalSeconds": 30,
     "requestTimeoutMs": 15000,
-    "note": "Preencher com a URL do web app do Apps Script (apps-script/README.md). Só é usada com storage.backend = \"sheets\"."
+    "note": "Implantado pelo responsavel em 18/11/2026 (Qualquer pessoa, executar como o dono). Usado somente com storage.backend = \"sheets\"."
   },
   "auth": {
     "defaultPassword": "1234",
