@@ -846,7 +846,8 @@ export async function bootstrapStorage() {
 
     if (storageMeta.backendConfigured) {
       await ensureRemoteClient();
-      const remoteSnapshot = await bootstrapBackendSnapshot(setDatabaseSettingsMode(resolvedDatabase || freshDatabase, 'ONLINE'));
+      // Sem carimbar updatedAt aqui: a comparação com a planilha usa a data real dos dados.
+      const remoteSnapshot = await bootstrapBackendSnapshot(resolvedDatabase || freshDatabase);
 
       if (remoteSnapshot) {
         const remoteNeedsNormalization =
